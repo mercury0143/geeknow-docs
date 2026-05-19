@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "API 文档",
+  "name": "geeknow api",
   "colors": {
     "primary": "#1f6feb",
     "light": "#ffffff",
