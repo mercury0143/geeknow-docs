@@ -1,18 +1,30 @@
 ---
-title: API 文档
-description: 面向 OpenAI、Claude、Gemini 与多模态模型的统一 API 文档入口。
+title: new-api API 文档
+description: 基于 `router/` 实际路由整理的 Mintlify 文档入口，覆盖文本、图像、视频、音频、上传、任务和账户接口。
 ---
 
-# API 文档
+# new-api API 文档
 
-这套文档根据 `router/` 下的实际路由整理，优先覆盖文字系列接口，并使用 Mintlify 的 API 页面结构编写，方便后续直接扩展为完整文档站。
+这套文档直接对应仓库里的真实路由，优先以 `router/`、`controller/`、`dto/` 为准，不按外部平台文档猜测接口行为。
 
 <CardGroup cols={2}>
   <Card title="文字系列" icon="message-square" href="/api-reference/texts/overview">
-    Chat Completions、Claude Messages、Gemini 原生格式、OpenAI Responses、Embeddings、Rerank 等。
+    `/v1/chat/completions`、`/v1/responses`、`/v1/messages`、`/v1beta/models/*` 等文本与多模态接口。
   </Card>
-  <Card title="统一鉴权" icon="key-round" href="/api-reference/texts/overview#认证方式">
-    Relay 接口默认使用 `Authorization: Bearer YOUR_API_KEY`，部分兼容路由支持原生认证头。
+  <Card title="图像系列" icon="image" href="/api-reference/images/overview">
+    `/v1/images/*`、`/mj/*` 和 Gemini 原生图像能力的路由总览。
+  </Card>
+  <Card title="视频系列" icon="clapperboard" href="/api-reference/videos/overview">
+    `/v1/video/generations`、`/v1/videos`、`/kling/v1/*`、`/jimeng`、`/sora/v1/*`。
+  </Card>
+  <Card title="音频系列" icon="mic" href="/api-reference/audio/overview">
+    `/v1/audio/transcriptions`、`/v1/audio/translations`、`/v1/audio/speech`、`/suno/*`。
+  </Card>
+  <Card title="上传管理" icon="upload" href="/api-reference/uploads/overview">
+    `/api/upload/presign` 的预签名上传能力，用于图片、视频和媒体资源预上传。
+  </Card>
+  <Card title="账户管理" icon="key-round" href="/api-reference/account/overview">
+    Bearer Token、原生兼容认证头、OAuth 状态码和余额查询接口。
   </Card>
 </CardGroup>
 
@@ -25,20 +37,33 @@ curl -X POST https://api.example.com/v1/chat/completions \
   -d '{
     "model": "gpt-4o",
     "messages": [
-      { "role": "user", "content": "用一句话介绍这个 API" }
+      { "role": "user", "content": "用三句话介绍 new-api 这套网关。" }
     ]
   }'
 ```
 
+## 文档约定
+
+- Relay 路由主要位于 `/v1`、`/v1beta`、`/mj`、`/suno`、`/kling/v1`，大多返回 OpenAI 兼容结构或上游原生结构，并使用真实 HTTP 状态码。
+- Dashboard 与账户类接口主要位于 `/api/*`，很多接口使用统一包装：`success`、`message`、`data`。这类接口即使业务失败，也可能仍返回 HTTP `200`。
+- 异步任务接口提交后通常返回公开 `task_id` 或 OpenAI 兼容 `video id`。查询时再映射回真实上游任务。
+
+<Info>
+如果你在文档里同时看到 `/v1/videos/{task_id}` 和 `/v1/video/generations/{task_id}`，前者是 OpenAI 视频兼容查询接口，后者是平台统一任务查询接口，它们对应同一批视频任务但返回结构不同。
+</Info>
+
 ## 路由来源
 
-本文档的文字系列接口来自以下路由文件：
-
-| 文件 | 覆盖内容 |
+| 文件 | 主要覆盖内容 |
 | --- | --- |
-| `router/relay-router.go` | `/v1`、`/v1beta`、`/pg`、`/mj`、`/suno` 等 relay 路由 |
-| `router/api-router.go` | `/api/models`、用户、渠道、日志、任务等后台 API |
+| `router/relay-router.go` | `/v1`、`/v1beta`、`/pg`、`/mj`、`/suno` 等文本、图像、音频和任务路由 |
+| `router/video-router.go` | `/v1/video/generations`、`/v1/videos`、`/kling/v1`、`/jimeng`、`/sora/v1` |
+| `router/api-router.go` | `/api/upload/presign`、`/api/oauth/*`、`/api/usage/token`、用户和后台接口 |
+| `router/dashboard.go` | `/dashboard/billing/*` 与 `/v1/dashboard/billing/*` 兼容余额接口 |
 
-<Tip>
-当前目录先整理文字系列。图像、视频、音频、上传管理、任务管理和账户管理可以沿用相同页面结构继续补齐。
-</Tip>
+## 推荐阅读顺序
+
+1. [文字系列概览](/api-reference/texts/overview)
+2. [视频系列概览](/api-reference/videos/overview)
+3. [任务管理概览](/api-reference/tasks/overview)
+4. [账户管理概览](/api-reference/account/overview)

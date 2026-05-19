@@ -1,0 +1,149 @@
+---
+title: 通用对话接口（默认非流式）
+description: 使用 OpenAI Chat Completions 兼容格式发起对话，并一次性返回完整结果。
+api: "POST /v1/chat/completions"
+---
+
+# 通用对话接口（默认非流式）
+
+适用于后台任务、结构化输出、短问答和不需要实时展示生成过程的场景。省略 `stream` 或传入 `false` 时，接口一次性返回完整 `chat.completion` 对象。
+
+## 请求体
+
+<ParamField body="model" type="string" required>
+模型名称。可通过 [模型列表](./models) 查询。
+</ParamField>
+
+<ParamField body="messages" type="array<object>" required>
+对话消息数组。每条消息至少包含 `role` 与 `content`。
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+省略或传 `false` 时为非流式响应。
+</ParamField>
+
+<ParamField body="response_format" type="object">
+指定输出格式。常用于 JSON 输出或 JSON Schema 结构化输出。
+</ParamField>
+
+<ParamField body="tools" type="array<object>">
+函数调用工具列表。
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+控制工具调用策略。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+采样温度。默认值由上游模型决定。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+核采样参数。
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+最大生成 token 数。
+</ParamField>
+
+<ParamField body="seed" type="number">
+随机种子。上游支持时可提升复现性。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "system", "content": "你是一个 API 文档助手。" },
+      { "role": "user", "content": "生成一个接口说明摘要。" }
+    ],
+    "stream": false
+  }'
+```
+
+</RequestExample>
+
+### 结构化输出
+
+```bash
+curl -X POST https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "user", "content": "提取这句话的主题和语气：这个版本发布节奏很稳。" }
+    ],
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "analysis",
+        "schema": {
+          "type": "object",
+          "properties": {
+            "topic": { "type": "string" },
+            "tone": { "type": "string" }
+          },
+          "required": ["topic", "tone"]
+        }
+      }
+    }
+  }'
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "chatcmpl_abc123",
+  "object": "chat.completion",
+  "created": 1735689600,
+  "model": "gpt-4o",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "该接口接收统一对话消息，并根据模型生成一次性完整回复。"
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 31,
+    "completion_tokens": 24,
+    "total_tokens": 55
+  }
+}
+```
+
+</ResponseExample>
+
+## 响应字段
+
+<ResponseField name="choices[].message.content" type="string | null">
+模型生成的文本内容。发生工具调用时可能为 `null`。
+</ResponseField>
+
+<ResponseField name="choices[].message.tool_calls" type="array<object>">
+模型请求调用的函数工具。
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+本次请求的 token 用量。
+</ResponseField>
+
+## 相关接口
+
+- [通用对话接口（默认流式）](./chat-completions-stream)
+- [OpenAI 多模态响应接口](./openai-responses)
+- [文本补全接口](./completions)

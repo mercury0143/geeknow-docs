@@ -1,0 +1,103 @@
+---
+title: 向量接口
+description: 使用 OpenAI Embeddings 兼容格式生成文本向量。
+api: "POST /v1/embeddings"
+---
+
+# 向量接口
+
+将文本输入转换为向量，常用于语义搜索、相似度计算、RAG 检索和聚类。
+
+## 路径
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `POST` | `/v1/embeddings` | OpenAI Embeddings 兼容路径 |
+| `POST` | `/v1/engines/{model}/embeddings` | Legacy engine 兼容路径，模型名来自路径参数 |
+
+## 请求体
+
+<ParamField body="model" type="string" required>
+Embedding 模型名称。
+</ParamField>
+
+<ParamField body="input" type="string | array<string>" required>
+待向量化的文本。可传单条字符串或字符串数组。
+</ParamField>
+
+<ParamField body="encoding_format" type="string">
+向量编码格式。常见值为 `float`。
+</ParamField>
+
+<ParamField body="dimensions" type="integer">
+指定输出向量维度。仅部分模型支持。
+</ParamField>
+
+<ParamField body="user" type="string">
+终端用户标识。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://api.example.com/v1/embeddings \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "text-embedding-3-small",
+    "input": [
+      "API 网关统一认证、计费和渠道分发。",
+      "Embedding 可用于语义搜索和相似度计算。"
+    ],
+    "encoding_format": "float"
+  }'
+```
+
+</RequestExample>
+
+### Legacy engine 路径
+
+```bash
+curl -X POST https://api.example.com/v1/engines/text-embedding-3-small/embeddings \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "把这段文本转换成向量。"
+  }'
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "object": "embedding",
+      "index": 0,
+      "embedding": [0.0123, -0.0456, 0.0789]
+    },
+    {
+      "object": "embedding",
+      "index": 1,
+      "embedding": [0.0221, -0.0314, 0.0655]
+    }
+  ],
+  "model": "text-embedding-3-small",
+  "usage": {
+    "prompt_tokens": 28,
+    "total_tokens": 28
+  }
+}
+```
+
+</ResponseExample>
+
+## 相关接口
+
+- [Gemini 原生格式](./gemini-native)
+- [模型列表](./models)

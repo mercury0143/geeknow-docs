@@ -1,0 +1,56 @@
+---
+title: 图像系列概览
+description: 汇总 OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原生图像能力入口。
+---
+
+# 图像系列
+
+图像能力目前主要分成三类：OpenAI Images 兼容接口、Midjourney 专用任务接口，以及通过 Gemini 原生协议暴露的图像生成能力。
+
+<CardGroup cols={2}>
+  <Card title="OpenAI Images 兼容" icon="image-plus">
+    `POST /v1/images/generations`、`POST /v1/images/edits`、`POST /v1/edits`。
+  </Card>
+  <Card title="Midjourney" icon="wand-sparkles" href="/api-reference/tasks/midjourney-task">
+    `/mj/submit/*`、`/mj/task/*`、`/mj/image/{id}`，适合 imagine、blend、describe、upscale 和变体操作。
+  </Card>
+  <Card title="Gemini 图像能力" icon="image" href="/api-reference/texts/gemini-native">
+    通过 `POST /v1beta/models/{model}:{action}` 调用 Gemini 原生图像相关动作。
+  </Card>
+  <Card title="上传与结果查询" icon="upload" href="/api-reference/uploads/image-upload">
+    先用 `/api/upload/presign` 上传素材，再把公网 URL 传入生图、图编和视频接口。
+  </Card>
+</CardGroup>
+
+## 路由清单
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `POST` | `/v1/images/generations` | OpenAI Images 兼容生图入口 |
+| `POST` | `/v1/images/edits` | OpenAI Images 兼容编辑入口 |
+| `POST` | `/v1/edits` | 旧版编辑别名 |
+| `POST` | `/v1/images/variations` | 路由已保留，当前未实现 |
+| `POST` | `/mj/submit/imagine` | Midjourney imagine |
+| `POST` | `/mj/submit/blend` | Midjourney blend |
+| `POST` | `/mj/submit/describe` | Midjourney describe |
+| `POST` | `/mj/submit/edits` | Midjourney 编辑相关动作 |
+| `POST` | `/mj/submit/video` | Midjourney 视频相关动作 |
+| `GET` | `/mj/task/{id}/fetch` | Midjourney 任务查询 |
+| `GET` | `/mj/image/{id}` | Midjourney 图片代理 |
+| `POST` | `/v1beta/models/{model}:{action}` | Gemini 原生图像相关动作 |
+
+<Warning>
+`/v1/images/variations`、`/v1/files*` 和 `fine-tunes*` 这类 OpenAI 兼容路径虽然在路由中占位，但当前会返回未实现错误，不能直接用于生产。
+</Warning>
+
+## 推荐阅读顺序
+
+1. [Gemini 原生格式](/api-reference/texts/gemini-native)
+2. [上传图片](/api-reference/uploads/image-upload)
+3. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
+
+## 相关页面
+
+- [视频系列概览](/api-reference/videos/overview)
+- [任务管理概览](/api-reference/tasks/overview)
+- [账户管理概览](/api-reference/account/overview)

@@ -1,0 +1,82 @@
+---
+title: 模型列表
+description: 查询当前 API Key 可用模型，兼容 OpenAI、Claude 与 Gemini 风格。
+api: "GET /v1/models"
+---
+
+# 模型列表
+
+查询可用模型列表。路由会根据请求头判断兼容格式：默认返回 OpenAI 风格；带 `x-api-key` 和 `anthropic-version` 时走 Claude 风格；带 `x-goog-api-key` 或 `key` 查询参数时走 Gemini 风格。
+
+## 路径
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `GET` | `/v1/models` | OpenAI/Claude/Gemini 兼容模型列表 |
+| `GET` | `/v1/models/{model}` | 查询单个模型 |
+| `GET` | `/v1beta/models` | Gemini 原生模型列表 |
+| `GET` | `/v1beta/openai/models` | Gemini 下的 OpenAI 兼容模型列表 |
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl https://api.example.com/v1/models \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+</RequestExample>
+
+### Claude 风格
+
+```bash
+curl https://api.example.com/v1/models \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01"
+```
+
+### Gemini 风格
+
+```bash
+curl https://api.example.com/v1beta/models \
+  -H "x-goog-api-key: YOUR_API_KEY"
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "gpt-4o",
+      "object": "model",
+      "created": 1735689600,
+      "owned_by": "openai"
+    },
+    {
+      "id": "claude-sonnet-4-20250514",
+      "object": "model",
+      "created": 1735689600,
+      "owned_by": "anthropic"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+### 查询单个模型
+
+```bash
+curl https://api.example.com/v1/models/gpt-4o \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+## 相关接口
+
+- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [Gemini 原生格式](./gemini-native)

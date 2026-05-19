@@ -1,0 +1,42 @@
+---
+title: 任务管理概览
+description: 汇总视频任务、Suno 任务和 Midjourney 任务的查询路由。
+---
+
+# 任务管理
+
+任务管理页面只关注“提交之后怎么查结果”。当前主要覆盖视频任务、Suno 音乐任务和 Midjourney 任务。
+
+<CardGroup cols={2}>
+  <Card title="统一视频任务查询" icon="hourglass" href="/api-reference/tasks/task-status">
+    `GET /v1/video/generations/{task_id}`，返回平台统一任务包装。
+  </Card>
+  <Card title="OpenAI 视频查询" icon="video" href="/api-reference/videos/openai-videos">
+    `GET /v1/videos/{task_id}` 与 `GET /v1/videos/{task_id}/content`。
+  </Card>
+  <Card title="Suno 任务" icon="music" href="/api-reference/audio/suno">
+    `GET /suno/fetch/{id}` 与 `POST /suno/fetch`。
+  </Card>
+  <Card title="Midjourney 任务" icon="wand-sparkles" href="/api-reference/tasks/midjourney-task">
+    `GET /mj/task/{id}/fetch`、`GET /mj/image/{id}`、`GET /mj/task/{id}/image-seed`。
+  </Card>
+</CardGroup>
+
+## 路由清单
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `GET` | `/v1/video/generations/{task_id}` | 统一视频任务查询 |
+| `GET` | `/v1/videos/{task_id}` | OpenAI 视频兼容查询 |
+| `GET` | `/v1/videos/{task_id}/content` | 视频内容代理 |
+| `GET` | `/suno/fetch/{id}` | Suno 单任务查询 |
+| `POST` | `/suno/fetch` | Suno 批量查询 |
+| `GET` | `/mj/task/{id}/fetch` | Midjourney 单任务查询 |
+| `POST` | `/mj/task/list-by-condition` | Midjourney 条件批量查询 |
+| `GET` | `/mj/task/{id}/image-seed` | Midjourney 图片种子查询 |
+
+## 推荐阅读顺序
+
+1. [获取任务状态](./task-status)
+2. [OpenAI 视频兼容接口](../videos/openai-videos)
+3. [Midjourney 任务查询](./midjourney-task)

@@ -1,0 +1,33 @@
+---
+title: 音频系列概览
+description: 汇总 OpenAI Audio 兼容接口与 Suno 异步音乐任务接口。
+---
+
+# 音频系列
+
+音频相关能力分成两部分：一部分是 `/v1/audio/*` 下的 OpenAI Audio 兼容接口，另一部分是 `/suno/*` 下的异步音乐任务接口。
+
+<CardGroup cols={2}>
+  <Card title="OpenAI Audio 兼容" icon="mic" href="/api-reference/audio/audio">
+    转录、翻译和文字转语音，共享 `/v1/audio/*` 路由前缀。
+  </Card>
+  <Card title="Suno 音乐生成" icon="music" href="/api-reference/audio/suno">
+    `/suno/submit/{action}`、`/suno/fetch`、`/suno/fetch/{id}`。
+  </Card>
+</CardGroup>
+
+## 路由清单
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `POST` | `/v1/audio/transcriptions` | 语音转文字 |
+| `POST` | `/v1/audio/translations` | 语音翻译为英文 |
+| `POST` | `/v1/audio/speech` | 文字转语音 |
+| `POST` | `/suno/submit/{action}` | Suno 提交任务 |
+| `POST` | `/suno/fetch` | Suno 批量查询 |
+| `GET` | `/suno/fetch/{id}` | Suno 单任务查询 |
+
+## 推荐阅读顺序
+
+1. [OpenAI 音频兼容接口](./audio)
+2. [Suno 音乐生成](./suno)

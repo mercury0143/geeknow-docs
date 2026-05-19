@@ -1,0 +1,196 @@
+---
+title: Gemini 原生格式
+description: 使用 Google Gemini 原生路径与请求体调用 generateContent、streamGenerateContent 和 Embedding。
+api: "POST /v1beta/models/{model}:{action}"
+---
+
+# Gemini 原生格式
+
+Gemini 原生格式保留 Google Gemini API 的路径和请求体。适合已有 Gemini SDK、`contents`/`parts` 结构或安全设置配置的业务接入。
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+也支持 Google API Key 风格：
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+或查询参数：
+
+```text
+/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_API_KEY
+```
+
+## 路径
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `GET` | `/v1beta/models` | Gemini 模型列表 |
+| `POST` | `/v1beta/models/{model}:generateContent` | 非流式内容生成 |
+| `POST` | `/v1beta/models/{model}:streamGenerateContent` | 流式内容生成 |
+| `POST` | `/v1beta/models/{model}:embedContent` | 单条向量 |
+| `POST` | `/v1beta/models/{model}:batchEmbedContents` | 批量向量 |
+
+## 请求体
+
+<ParamField body="contents" type="array<object>" required>
+对话内容列表。每个内容项包含 `role` 和 `parts`。
+</ParamField>
+
+<ParamField body="contents[].parts" type="array<object>" required>
+内容片段。支持 `text`、`inlineData`、`fileData`、`functionCall`、`functionResponse` 等。
+</ParamField>
+
+<ParamField body="systemInstruction" type="object">
+系统指令。代码同时兼容 `system_instruction` 写法。
+</ParamField>
+
+<ParamField body="generationConfig" type="object">
+生成配置，包含 `temperature`、`topP`、`topK`、`maxOutputTokens`、`stopSequences`、`responseMimeType`、`responseSchema`、`thinkingConfig` 等字段。
+</ParamField>
+
+<ParamField body="safetySettings" type="array<object>">
+安全设置。每项包含 `category` 和 `threshold`。
+</ParamField>
+
+<ParamField body="tools" type="array<object> | object">
+工具声明。支持 `functionDeclarations`、`googleSearch`、`codeExecution`、`urlContext` 等 Gemini 工具。
+</ParamField>
+
+<ParamField body="toolConfig" type="object">
+工具调用配置，例如 `functionCallingConfig`。
+</ParamField>
+
+<ParamField body="cachedContent" type="string">
+Gemini cached content 标识。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://api.example.com/v1beta/models/gemini-2.0-flash:generateContent \
+  -H "x-goog-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          { "text": "用三句话介绍 Gemini 原生接口。" }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "temperature": 0.7,
+      "maxOutputTokens": 300
+    }
+  }'
+```
+
+</RequestExample>
+
+### 多模态输入
+
+```bash
+curl -X POST https://api.example.com/v1beta/models/gemini-2.0-flash:generateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          { "text": "识别这张图片里的核心信息。" },
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "BASE64_IMAGE_DATA"
+            }
+          }
+        ]
+      }
+    ]
+  }'
+```
+
+### 流式生成
+
+```bash
+curl -N -X POST https://api.example.com/v1beta/models/gemini-2.0-flash:streamGenerateContent \
+  -H "x-goog-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          { "text": "写一个 5 行以内的发布公告。" }
+        ]
+      }
+    ]
+  }'
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "Gemini 原生接口使用 contents 和 parts 表达输入内容。它支持文本、图片、文件和函数调用等能力。通过统一网关可以继续使用相同 API Key 与计费体系。"
+          }
+        ]
+      },
+      "finishReason": "STOP",
+      "safetyRatings": [
+        {
+          "category": "HARM_CATEGORY_HARASSMENT",
+          "probability": "NEGLIGIBLE"
+        }
+      ]
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 18,
+    "candidatesTokenCount": 58,
+    "totalTokenCount": 76
+  }
+}
+```
+
+</ResponseExample>
+
+## 常见安全设置
+
+| category | 说明 |
+| --- | --- |
+| `HARM_CATEGORY_HARASSMENT` | 骚扰内容 |
+| `HARM_CATEGORY_HATE_SPEECH` | 仇恨言论 |
+| `HARM_CATEGORY_SEXUALLY_EXPLICIT` | 色情内容 |
+| `HARM_CATEGORY_DANGEROUS_CONTENT` | 危险内容 |
+
+| threshold | 说明 |
+| --- | --- |
+| `BLOCK_NONE` | 不屏蔽 |
+| `BLOCK_ONLY_HIGH` | 仅屏蔽高风险 |
+| `BLOCK_MEDIUM_AND_ABOVE` | 屏蔽中等及以上风险 |
+| `BLOCK_LOW_AND_ABOVE` | 屏蔽低等及以上风险 |
+
+## 相关接口
+
+- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [向量接口](./embeddings)
+- [模型列表](./models)

@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "API 文档",
+  "name": "new-api API 文档",
   "colors": {
     "primary": "#1f6feb",
     "light": "#ffffff",
@@ -38,6 +38,51 @@
           "api-reference/texts/web-tools",
           "api-reference/texts/realtime"
         ]
+      },
+      {
+        "group": "图像系列",
+        "pages": [
+          "api-reference/images/overview"
+        ]
+      },
+      {
+        "group": "视频系列",
+        "pages": [
+          "api-reference/videos/overview",
+          "api-reference/videos/video-generations",
+          "api-reference/videos/openai-videos"
+        ]
+      },
+      {
+        "group": "音频系列",
+        "pages": [
+          "api-reference/audio/overview",
+          "api-reference/audio/audio",
+          "api-reference/audio/suno"
+        ]
+      },
+      {
+        "group": "上传管理",
+        "pages": [
+          "api-reference/uploads/overview",
+          "api-reference/uploads/image-upload"
+        ]
+      },
+      {
+        "group": "任务管理",
+        "pages": [
+          "api-reference/tasks/overview",
+          "api-reference/tasks/task-status",
+          "api-reference/tasks/midjourney-task"
+        ]
+      },
+      {
+        "group": "账户管理",
+        "pages": [
+          "api-reference/account/overview",
+          "api-reference/account/authentication",
+          "api-reference/account/billing"
+        ]
       }
     ]
   },
@@ -46,6 +91,18 @@
       {
         "label": "文字系列",
         "href": "/api-reference/texts/overview"
+      },
+      {
+        "label": "视频系列",
+        "href": "/api-reference/videos/overview"
+      },
+      {
+        "label": "任务管理",
+        "href": "/api-reference/tasks/overview"
+      },
+      {
+        "label": "账户管理",
+        "href": "/api-reference/account/overview"
       }
     ]
   },
