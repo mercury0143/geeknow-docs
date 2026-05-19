@@ -1,0 +1,68 @@
+---
+title: 文字系列概览
+description: 文字生成、对话、多模态响应、原生 Claude/Gemini 格式与文本工具接口总览。
+---
+
+# 文字系列
+
+文字系列聚合 OpenAI 兼容格式、Claude 原生格式、Gemini 原生格式，以及模型列表、Embedding、Rerank、审核、网页读取与搜索等文本相关能力。
+
+## 认证方式
+
+大多数文字接口使用 Bearer Token：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+Claude 原生格式也兼容 Anthropic 风格请求头：
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+Gemini 原生格式也兼容 Google API Key 风格：
+
+```http
+x-goog-api-key: YOUR_API_KEY
+```
+
+## 接口列表
+
+| Method | Path | 页面 | 说明 |
+| --- | --- | --- | --- |
+| `POST` | `/v1/chat/completions` | [通用对话接口（默认流式）](./chat-completions-stream) | OpenAI Chat Completions 兼容格式，示例固定开启 `stream` |
+| `POST` | `/v1/chat/completions` | [通用对话接口（默认非流式）](./chat-completions-non-stream) | OpenAI Chat Completions 兼容格式，省略 `stream` 或传 `false` |
+| `POST` | `/v1/messages` | [Claude 消息接口](./claude-messages) | Anthropic Messages 原生格式 |
+| `POST` | `/v1beta/models/{model}:{action}` | [Gemini 原生格式](./gemini-native) | Gemini `generateContent`、`streamGenerateContent`、Embedding 等原生路径 |
+| `GET` | `/v1beta/models` | [Gemini 原生格式](./gemini-native) | Gemini 原生模型列表 |
+| `GET` | `/v1beta/openai/models` | [模型列表](./models) | Gemini 兼容 OpenAI 风格模型列表 |
+| `POST` | `/v1/responses` | [OpenAI 多模态响应接口](./openai-responses) | Responses API，支持多模态输入、工具调用、流式输出和上下文续接 |
+| `POST` | `/v1/responses/compact` | [OpenAI 多模态响应接口](./openai-responses#上下文压缩) | 上下文压缩 |
+| `GET` | `/v1/models` | [模型列表](./models) | OpenAI/Claude/Gemini 兼容模型列表 |
+| `GET` | `/v1/models/{model}` | [模型列表](./models) | 查询单个模型 |
+| `POST` | `/v1/completions` | [文本补全接口](./completions) | Legacy Completions 兼容格式 |
+| `POST` | `/v1/embeddings` | [向量接口](./embeddings) | OpenAI Embeddings 兼容格式 |
+| `POST` | `/v1/engines/{model}/embeddings` | [向量接口](./embeddings) | Legacy engine embedding 兼容路径 |
+| `POST` | `/v1/rerank` | [重排序接口](./rerank) | 文档相关性重排序 |
+| `POST` | `/v1/moderations` | [内容审核接口](./moderations) | OpenAI Moderations 兼容格式 |
+| `POST` | `/v1/web-reader/read` | [网页工具接口](./web-tools) | 网页读取 |
+| `POST` | `/v1/web-search/search` | [网页工具接口](./web-tools) | 网页搜索 |
+| `GET` | `/v1/realtime` | [Realtime 接口](./realtime) | OpenAI Realtime 兼容 WebSocket |
+| `POST` | `/pg/chat/completions` | [通用对话接口（默认非流式）](./chat-completions-non-stream) | Playground 调试路由，使用用户态登录认证 |
+
+## 通用错误码
+
+| 状态码 | 说明 |
+| --- | --- |
+| `400` | 请求参数错误，例如模型名称、消息结构或工具定义不合法 |
+| `401` | API Key 缺失、无效或已过期 |
+| `402` | 账户额度不足 |
+| `429` | 请求频率超限 |
+| `500` | 服务端内部错误 |
+| `503` | 上游服务不可用或暂时过载 |
+
+<Note>
+文字 relay 路由会经过 TokenAuth、模型限流和渠道分发。模型实际可用参数取决于上游渠道能力，文档中标注为“可选”的字段不代表所有模型都会接受。
+</Note>

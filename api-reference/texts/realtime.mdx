@@ -1,0 +1,62 @@
+---
+title: Realtime 接口
+description: 使用 OpenAI Realtime 兼容 WebSocket 路由进行实时交互。
+api: "GET /v1/realtime"
+---
+
+# Realtime 接口
+
+Realtime 路由使用 WebSocket 连接，适合低延迟语音对话、实时事件流和双向交互场景。该路由会经过 TokenAuth、模型限流和渠道分发。
+
+## 连接地址
+
+```text
+wss://api.example.com/v1/realtime
+```
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+若客户端不方便设置 WebSocket 请求头，可按自身网关配置使用支持的临时 token 或代理层注入认证头。
+
+## 连接示例
+
+```js
+const ws = new WebSocket("wss://api.example.com/v1/realtime", [], {
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+ws.onopen = () => {
+  ws.send(JSON.stringify({
+    type: "session.update",
+    session: {
+      modalities: ["text"],
+      instructions: "你是一个实时语音助手。"
+    }
+  }));
+};
+
+ws.onmessage = (event) => {
+  console.log(JSON.parse(event.data));
+};
+```
+
+## 常见事件
+
+| event | 说明 |
+| --- | --- |
+| `session.update` | 更新会话配置 |
+| `conversation.item.create` | 创建对话项 |
+| `response.create` | 触发模型响应 |
+| `response.text.delta` | 文本增量 |
+| `response.done` | 响应完成 |
+
+## 相关接口
+
+- [通用对话接口（默认流式）](./chat-completions-stream)
+- [OpenAI 多模态响应接口](./openai-responses)

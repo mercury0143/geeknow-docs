@@ -1,0 +1,44 @@
+---
+title: API 文档
+description: 面向 OpenAI、Claude、Gemini 与多模态模型的统一 API 文档入口。
+---
+
+# API 文档
+
+这套文档根据 `router/` 下的实际路由整理，优先覆盖文字系列接口，并使用 Mintlify 的 API 页面结构编写，方便后续直接扩展为完整文档站。
+
+<CardGroup cols={2}>
+  <Card title="文字系列" icon="message-square" href="/api-reference/texts/overview">
+    Chat Completions、Claude Messages、Gemini 原生格式、OpenAI Responses、Embeddings、Rerank 等。
+  </Card>
+  <Card title="统一鉴权" icon="key-round" href="/api-reference/texts/overview#认证方式">
+    Relay 接口默认使用 `Authorization: Bearer YOUR_API_KEY`，部分兼容路由支持原生认证头。
+  </Card>
+</CardGroup>
+
+## 快速开始
+
+```bash
+curl -X POST https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "user", "content": "用一句话介绍这个 API" }
+    ]
+  }'
+```
+
+## 路由来源
+
+本文档的文字系列接口来自以下路由文件：
+
+| 文件 | 覆盖内容 |
+| --- | --- |
+| `router/relay-router.go` | `/v1`、`/v1beta`、`/pg`、`/mj`、`/suno` 等 relay 路由 |
+| `router/api-router.go` | `/api/models`、用户、渠道、日志、任务等后台 API |
+
+<Tip>
+当前目录先整理文字系列。图像、视频、音频、上传管理、任务管理和账户管理可以沿用相同页面结构继续补齐。
+</Tip>

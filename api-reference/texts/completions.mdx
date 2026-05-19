@@ -1,0 +1,89 @@
+---
+title: 文本补全接口
+description: 使用 OpenAI Legacy Completions 兼容格式生成文本。
+api: "POST /v1/completions"
+---
+
+# 文本补全接口
+
+Legacy Completions 接口使用 `prompt` 作为输入，适合仍在使用旧 OpenAI SDK 或简单补全文本的业务。新对话场景建议使用 [通用对话接口](./chat-completions-non-stream)。
+
+## 请求体
+
+<ParamField body="model" type="string" required>
+模型名称。
+</ParamField>
+
+<ParamField body="prompt" type="string | array<string>" required>
+输入提示词。
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+是否启用流式输出。
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+最大生成 token 数。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+采样温度。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+核采样参数。
+</ParamField>
+
+<ParamField body="stop" type="string | array<string>">
+停止序列。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://api.example.com/v1/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-3.5-turbo-instruct",
+    "prompt": "把下面一句话改写得更正式：这个接口挺好用。",
+    "max_tokens": 120,
+    "temperature": 0.3
+  }'
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "cmpl_abc123",
+  "object": "text_completion",
+  "created": 1735689600,
+  "model": "gpt-3.5-turbo-instruct",
+  "choices": [
+    {
+      "index": 0,
+      "text": "该接口具备良好的易用性。",
+      "finish_reason": "stop"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 22,
+    "completion_tokens": 10,
+    "total_tokens": 32
+  }
+}
+```
+
+</ResponseExample>
+
+## 相关接口
+
+- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [模型列表](./models)

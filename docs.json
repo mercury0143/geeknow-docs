@@ -1,0 +1,55 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "API 文档",
+  "colors": {
+    "primary": "#1f6feb",
+    "light": "#ffffff",
+    "dark": "#0d1117"
+  },
+  "api": {
+    "baseUrl": "https://api.example.com",
+    "auth": {
+      "method": "bearer"
+    }
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "概览",
+        "pages": [
+          "index"
+        ]
+      },
+      {
+        "group": "文字系列",
+        "pages": [
+          "api-reference/texts/overview",
+          "api-reference/texts/chat-completions-stream",
+          "api-reference/texts/chat-completions-non-stream",
+          "api-reference/texts/claude-messages",
+          "api-reference/texts/gemini-native",
+          "api-reference/texts/openai-responses",
+          "api-reference/texts/models",
+          "api-reference/texts/completions",
+          "api-reference/texts/embeddings",
+          "api-reference/texts/rerank",
+          "api-reference/texts/moderations",
+          "api-reference/texts/web-tools",
+          "api-reference/texts/realtime"
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "文字系列",
+        "href": "/api-reference/texts/overview"
+      }
+    ]
+  },
+  "footer": {
+    "socials": {}
+  }
+}

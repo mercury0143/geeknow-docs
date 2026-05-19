@@ -1,0 +1,155 @@
+---
+title: 通用对话接口（默认流式）
+description: 使用 OpenAI Chat Completions 兼容格式发起对话，并以 SSE 流式返回模型输出。
+api: "POST /v1/chat/completions"
+---
+
+# 通用对话接口（默认流式）
+
+使用统一对话格式调用 OpenAI、Claude、Gemini、DeepSeek、Qwen 等上游模型。本文档以流式输出为默认写法，适合需要边生成边展示的聊天、Agent 和长文本生成场景。
+
+<Info>
+本项目路由中 `stream` 未传时按非流式处理。若希望固定获得流式响应，请显式传入 `"stream": true`。
+</Info>
+
+## 请求体
+
+<ParamField body="model" type="string" required>
+模型名称。可通过 [模型列表](./models) 查询当前 API Key 可用模型。
+</ParamField>
+
+<ParamField body="messages" type="array<object>" required>
+按时间顺序排列的对话消息。常见角色为 `system`、`user`、`assistant`、`tool`。
+</ParamField>
+
+<ParamField body="messages[].content" type="string | array" required>
+消息内容。字符串表示纯文本；数组表示多模态内容，支持 `text`、`image_url`、`input_audio`、`file`、`video_url`。
+</ParamField>
+
+<ParamField body="stream" type="boolean" required>
+设为 `true` 后响应为 `text/event-stream`，每个片段以 `data:` 推送，结束时返回 `data: [DONE]`。
+</ParamField>
+
+<ParamField body="stream_options.include_usage" type="boolean">
+在流式最后一条消息中携带 token 用量统计。仅部分上游模型支持。
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+限制最大生成 token 数。部分推理模型建议改用 `max_completion_tokens`。
+</ParamField>
+
+<ParamField body="max_completion_tokens" type="integer">
+限制最大补全 token 数，包含推理 token。适合支持 reasoning 的模型。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+采样温度，常用范围 `0` 到 `2`。较低值更稳定，较高值更多样。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+核采样参数，常用范围 `0` 到 `1`。通常不建议同时大幅调整 `temperature` 和 `top_p`。
+</ParamField>
+
+<ParamField body="tools" type="array<object>">
+函数调用工具列表，格式兼容 OpenAI `tools`。
+</ParamField>
+
+<ParamField body="tool_choice" type="string | object">
+控制模型是否调用工具。常见值为 `auto`、`none`、`required`，也可指定某个函数。
+</ParamField>
+
+<ParamField body="response_format" type="object">
+指定输出格式，例如 `{ "type": "json_object" }` 或 `json_schema`。
+</ParamField>
+
+<ParamField body="reasoning_effort" type="string">
+推理强度。常见值为 `low`、`medium`、`high`，是否生效取决于模型。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -N -X POST https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      { "role": "system", "content": "你是一个简洁的技术助手。" },
+      { "role": "user", "content": "用三点说明 API 网关的作用。" }
+    ],
+    "stream": true,
+    "stream_options": {
+      "include_usage": true
+    }
+  }'
+```
+
+</RequestExample>
+
+### 多模态流式
+
+```bash
+curl -N -X POST https://api.example.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4o",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "概括这张图表的主要结论。" },
+          { "type": "image_url", "image_url": { "url": "https://example.com/chart.png", "detail": "high" } }
+        ]
+      }
+    ],
+    "stream": true
+  }'
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```text
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"role":"assistant","content":"API"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":" 网关"},"finish_reason":null}]}
+
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":26,"completion_tokens":38,"total_tokens":64}}
+
+data: [DONE]
+```
+
+</ResponseExample>
+
+## 响应字段
+
+<ResponseField name="id" type="string">
+本次生成的响应 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+流式响应固定为 `chat.completion.chunk`。
+</ResponseField>
+
+<ResponseField name="choices[].delta" type="object">
+增量内容。可能包含 `role`、`content`、`reasoning_content` 或 `tool_calls`。
+</ResponseField>
+
+<ResponseField name="choices[].finish_reason" type="string">
+结束原因，常见值为 `stop`、`length`、`tool_calls`。
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+用量统计。只有上游返回用量且启用 `stream_options.include_usage` 时才一定出现。
+</ResponseField>
+
+## 相关接口
+
+- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [OpenAI 多模态响应接口](./openai-responses)
+- [模型列表](./models)

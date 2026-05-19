@@ -1,0 +1,203 @@
+---
+title: Claude 消息接口
+description: 使用 Anthropic Messages 原生格式调用 Claude 模型。
+api: "POST /v1/messages"
+---
+
+# Claude 消息接口
+
+Claude Messages 接口保留 Anthropic 原生请求结构，适合已有 Claude SDK 或原生提示词结构的业务迁移。路由会进入 Claude relay 格式，并根据渠道分发到对应上游。
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+也可以使用 Claude 原生请求头：
+
+```http
+x-api-key: YOUR_API_KEY
+anthropic-version: 2023-06-01
+```
+
+## 请求体
+
+<ParamField body="model" type="string" required>
+Claude 模型名称。
+</ParamField>
+
+<ParamField body="messages" type="array<object>" required>
+对话消息数组。Claude 原生格式中消息角色通常为 `user` 或 `assistant`。
+</ParamField>
+
+<ParamField body="system" type="string | array<object>">
+系统提示词。Claude 不使用 `system` 角色消息，而是通过该字段传递系统指令。
+</ParamField>
+
+<ParamField body="max_tokens" type="integer">
+最大输出 token 数。多数 Claude 请求都应显式传入。
+</ParamField>
+
+<ParamField body="stream" type="boolean">
+是否启用 SSE 流式输出。
+</ParamField>
+
+<ParamField body="temperature" type="number">
+采样温度。
+</ParamField>
+
+<ParamField body="top_p" type="number">
+核采样参数。
+</ParamField>
+
+<ParamField body="top_k" type="integer">
+Top-K 采样参数。
+</ParamField>
+
+<ParamField body="stop_sequences" type="array<string>">
+停止序列。
+</ParamField>
+
+<ParamField body="tools" type="array<object>">
+Claude 工具列表，通常包含 `name`、`description` 与 `input_schema`。
+</ParamField>
+
+<ParamField body="tool_choice" type="object">
+控制工具选择策略，例如 `{ "type": "tool", "name": "get_weather" }`。
+</ParamField>
+
+<ParamField body="thinking" type="object">
+扩展思考配置，例如 `{ "type": "enabled", "budget_tokens": 10000 }`。
+</ParamField>
+
+<ParamField body="metadata" type="object">
+业务侧元数据，例如 `user_id`。
+</ParamField>
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://api.example.com/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "system": "你是一个严谨的技术顾问。",
+    "messages": [
+      {
+        "role": "user",
+        "content": "解释一下 API 网关为什么需要限流。"
+      }
+    ]
+  }'
+```
+
+</RequestExample>
+
+### 多模态输入
+
+```bash
+curl -X POST https://api.example.com/v1/messages \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "anthropic-version: 2023-06-01" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "url",
+              "url": "https://example.com/architecture.png"
+            }
+          },
+          { "type": "text", "text": "这张架构图里有哪些风险点？" }
+        ]
+      }
+    ]
+  }'
+```
+
+### 工具调用
+
+```bash
+curl -X POST https://api.example.com/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 1024,
+    "messages": [
+      { "role": "user", "content": "上海今天适合骑行吗？" }
+    ],
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "查询城市天气",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" }
+          },
+          "required": ["city"]
+        }
+      }
+    ]
+  }'
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "msg_abc123",
+  "type": "message",
+  "role": "assistant",
+  "model": "claude-sonnet-4-20250514",
+  "content": [
+    {
+      "type": "text",
+      "text": "API 网关限流可以保护上游服务，避免突发流量耗尽资源，并为不同用户提供稳定的服务质量。"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 32,
+    "output_tokens": 45
+  }
+}
+```
+
+</ResponseExample>
+
+### 流式响应
+
+```text
+event: message_start
+data: {"type":"message_start","message":{"id":"msg_abc123","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514"}}
+
+event: content_block_delta
+data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"API"}}
+
+event: message_delta
+data: {"type":"message_delta","delta":{"stop_reason":"end_turn"},"usage":{"output_tokens":45}}
+
+event: message_stop
+data: {"type":"message_stop"}
+```
+
+## 相关接口
+
+- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [通用对话接口（默认流式）](./chat-completions-stream)
+- [模型列表](./models)
