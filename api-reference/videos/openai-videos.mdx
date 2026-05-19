@@ -27,7 +27,7 @@ api: "POST /v1/videos"
 <CodeGroup>
 
 ```bash
-curl -X POST https://api.example.com/v1/videos \
+curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -42,7 +42,7 @@ curl -X POST https://api.example.com/v1/videos \
 import requests
 
 resp = requests.post(
-    "https://api.example.com/v1/videos",
+    "https://www.geeknow.top/v1/videos",
     headers={
         "Authorization": "Bearer YOUR_API_KEY",
         "Content-Type": "application/json",
@@ -59,7 +59,7 @@ print(resp.json())
 ```
 
 ```javascript
-const response = await fetch("https://api.example.com/v1/videos", {
+const response = await fetch("https://www.geeknow.top/v1/videos", {
   method: "POST",
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
@@ -108,7 +108,7 @@ console.log(await response.json());
   "progress": 100,
   "created_at": 1735689600,
   "completed_at": 1735689900,
-  "video_url": "https://api.example.com/v1/videos/video_abc123/content",
+  "video_url": "https://www.geeknow.top/v1/videos/video_abc123/content",
   "seconds": "5",
   "size": "1280x720"
 }
@@ -217,14 +217,14 @@ Remix 的源视频 ID。服务端会先用它回查原任务和原渠道。
 ### 查询任务
 
 ```bash
-curl https://api.example.com/v1/videos/video_abc123 \
+curl https://www.geeknow.top/v1/videos/video_abc123 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ### Remix
 
 ```bash
-curl -X POST https://api.example.com/v1/videos/video_abc123/remix \
+curl -X POST https://www.geeknow.top/v1/videos/video_abc123/remix \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -236,7 +236,7 @@ curl -X POST https://api.example.com/v1/videos/video_abc123/remix \
 ### 代理下载
 
 ```bash
-curl -L https://api.example.com/v1/videos/video_abc123/content \
+curl -L https://www.geeknow.top/v1/videos/video_abc123/content \
   -H "Authorization: Bearer YOUR_API_KEY" \
   --output output.mp4
 ```

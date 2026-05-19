@@ -8,7 +8,7 @@
     "dark": "#0d1117"
   },
   "api": {
-    "baseUrl": "https://api.example.com",
+    "baseUrl": "https://www.geeknow.top",
     "auth": {
       "method": "bearer"
     }
@@ -42,7 +42,10 @@
       {
         "group": "图像系列",
         "pages": [
-          "api-reference/images/overview"
+          "api-reference/images/overview",
+          "api-reference/images/gpt-image-1/overview",
+          "api-reference/images/gpt-image-1/generation",
+          "api-reference/images/gpt-image-1/edit"
         ]
       },
       {

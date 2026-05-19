@@ -71,7 +71,7 @@ Responses API 是面向多模态、工具调用和上下文续接的统一响应
 <RequestExample>
 
 ```bash
-curl -X POST https://api.example.com/v1/responses \
+curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -86,7 +86,7 @@ curl -X POST https://api.example.com/v1/responses \
 ### 多模态输入
 
 ```bash
-curl -X POST https://api.example.com/v1/responses \
+curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -106,7 +106,7 @@ curl -X POST https://api.example.com/v1/responses \
 ### 工具调用
 
 ```bash
-curl -X POST https://api.example.com/v1/responses \
+curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -133,7 +133,7 @@ curl -X POST https://api.example.com/v1/responses \
 ### 流式输出
 
 ```bash
-curl -N -X POST https://api.example.com/v1/responses \
+curl -N -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -205,7 +205,7 @@ POST /v1/responses/compact
 用于把较长上下文压缩成适合后续继续对话的摘要。请求结构与 `/v1/responses` 接近，常用字段为 `model`、`input`、`instructions`、`previous_response_id`。
 
 ```bash
-curl -X POST https://api.example.com/v1/responses/compact \
+curl -X POST https://www.geeknow.top/v1/responses/compact \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

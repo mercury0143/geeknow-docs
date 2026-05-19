@@ -1,0 +1,73 @@
+---
+title: GPT-Image 家族概览
+description: 以模型家族方式整理 `gpt-image-1`、`dall-e-3`、`dall-e-2` 等统一图像生成与编辑入口。
+---
+
+# GPT-Image 家族
+
+这个模型家族使用统一图像入口路由，对外兼容 OpenAI Images 风格；实际模型由 `model` 字段决定。
+
+## 支持模型
+
+| 模型名 | 说明 | 生成 | 编辑 | 默认质量 | 默认尺寸 |
+| --- | --- | --- | --- | --- | --- |
+| `gpt-image-1` | 当前统一图像入口里显式处理的主模型 | 支持 | 支持 | `auto` | 由上游决定 |
+| `dall-e-3` | DALL·E 3 兼容模型 | 支持 | 依渠道决定 | `standard` | `1024x1024` |
+| `dall-e-2` | DALL·E 2 兼容模型 | 支持 | 依渠道决定 | 无强制默认值 | `1024x1024` |
+| `dall-e` | DALL·E 旧别名 | 支持 | 依渠道决定 | 无强制默认值 | `1024x1024` |
+
+## 支持能力
+
+| 能力 | 入口 | 说明 |
+| --- | --- | --- |
+| 文生图 | `/v1/images/generations` | 标准生成入口 |
+| 图像编辑 | `/v1/images/edits` | 编辑入口 |
+| 图像编辑别名 | `/v1/edits` | 旧版别名 |
+| 图像变体 | `/v1/images/variations` | 路由保留，当前未实现 |
+
+## 支持模式
+
+| 模式 | 判断条件 | 入口 |
+| --- | --- | --- |
+| 文生图 | 只传 `prompt`，不传编辑素材 | `/v1/images/generations` |
+| 图像编辑 | 传 `image` 或多图参考，再配合 `prompt` | `/v1/images/edits` 或 `/v1/edits` |
+| 局部重绘 | 在编辑请求中额外传 `mask` | `/v1/images/edits` 或 `/v1/edits` |
+
+## 输出限制
+
+| 字段 | 约束 |
+| --- | --- |
+| `response_format` | 常见值为 `url`、`b64_json` |
+| `n` | 不传或显式传 `0` 时，统一层回退为 `1` |
+| `size` | `dall-e-2` 仅允许 `256x256`、`512x512`、`1024x1024` |
+| `size` | `dall-e-3` 仅允许 `1024x1024`、`1024x1792`、`1792x1024` |
+
+## 统一入口说明
+
+- 统一层会先按 OpenAI Images 风格解析请求，再分发到具体图像渠道。
+- `model` 是强制字段；统一层会先校验它是否存在。
+- `watermark` 使用指针字段承载，显式传 `false` 与不传语义不同。
+- 请求 `b64_json` 或 `base64` 时，返回中会改用 Base64 图像数据。
+
+## 子接口页面
+
+<CardGroup cols={2}>
+  <Card title="图像生成" icon="image" href="/api-reference/images/gpt-image-1/generation">
+    `POST /v1/images/generations`
+  </Card>
+  <Card title="图像编辑" icon="wand-sparkles" href="/api-reference/images/gpt-image-1/edit">
+    `POST /v1/images/edits` 和 `POST /v1/edits`
+  </Card>
+</CardGroup>
+
+## 推荐阅读顺序
+
+1. [图像生成](./generation)
+2. [图像编辑](./edit)
+3. [上传图片](/api-reference/uploads/image-upload)
+
+## 相关页面
+
+- [图像系列概览](/api-reference/images/overview)
+- [Gemini 原生格式](/api-reference/texts/gemini-native)
+- [Midjourney 任务查询](/api-reference/tasks/midjourney-task)

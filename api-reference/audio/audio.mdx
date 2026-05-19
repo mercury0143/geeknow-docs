@@ -37,7 +37,7 @@ Content-Type: multipart/form-data
 </ParamField>
 
 ```bash
-curl -X POST https://api.example.com/v1/audio/transcriptions \
+curl -X POST https://www.geeknow.top/v1/audio/transcriptions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F file="@meeting.mp3" \
   -F model="whisper-1" \
@@ -62,7 +62,7 @@ Content-Type: multipart/form-data
 这个接口和转录接口使用相同的文件上传方式，但输出目标是英文文本。
 
 ```bash
-curl -X POST https://api.example.com/v1/audio/translations \
+curl -X POST https://www.geeknow.top/v1/audio/translations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -F file="@chinese_audio.mp3" \
   -F model="whisper-1"
@@ -104,7 +104,7 @@ TTS 模型，例如 `tts-1`、`tts-1-hd`。
 </ParamField>
 
 ```bash
-curl -X POST https://api.example.com/v1/audio/speech \
+curl -X POST https://www.geeknow.top/v1/audio/speech \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
