@@ -1,0 +1,115 @@
+---
+title: 图像模型支持矩阵
+description: 汇总当前图像相关接口支持的模型家族、入口路由、图生图能力、尺寸与比例约束。
+---
+
+# 图像模型支持矩阵
+
+当前对外图像能力并不只有 `gpt-image-1`。从现有脚本和网关适配逻辑看，图像侧实际覆盖了 Gemini、豆包 Seedream、Grok Image、GPT Image 等多条模型线，但它们对入口、参考图、尺寸和返回格式的要求并不完全一致。
+
+<Info>
+如果你只想找“该用哪个接口”，优先看“推荐入口”这一列；如果你只想找“这个模型能不能图生图”，优先看“参考图输入”这一列。
+</Info>
+
+## 模型总表
+
+| 模型家族 | 代表模型 | 推荐入口 | 参考图输入 | 典型返回 |
+| --- | --- | --- | --- | --- |
+| Gemini 原生图像 | `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` | `/v1beta/models/{model}:generateContent` | `inlineData` 多 part | `inlineData` 或 URL |
+| GPT Image | `gpt-image-2`、`gpt-image-2-pro` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
+| 豆包 Seedream | `doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128` | `/v1/images/generations` | JSON `image`，通常为 Base64 数组 | `url` 或 `b64_json` |
+| Grok Image | `grok-4-2-image` | `/v1/images/generations` | JSON `image`，通常为 Base64 数组 | 主要是 `url` |
+| OpenAI Images 兼容 | `gpt-image-1`、`dall-e-3`、`dall-e-2` | `/v1/images/generations`、`/v1/images/edits` | `image` / `mask` | `url` 或 `b64_json` |
+
+## 分家族说明
+
+### Gemini 原生图像
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1beta/models/{model}:generateContent` |
+| 模型示例 | `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` |
+| 请求风格 | Gemini 原生 `contents[].parts[]` |
+| 参考图 | 通过 `inlineData` 传图片二进制内容 |
+| 比例参数 | `generationConfig.imageConfig.aspectRatio` |
+| 尺寸参数 | `generationConfig.imageConfig.imageSize` |
+| 注意事项 | 只有 `gemini-3-pro-image-preview` 明确支持脚本里暴露的 `2K`；其它预览模型会回退到 `1K` |
+
+### GPT Image
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1/images/generations` |
+| 模型示例 | `gpt-image-2`、`gpt-image-2-pro` |
+| 请求风格 | OpenAI Images 兼容 JSON |
+| 参考图 | `image: ["<base64>", ...]` |
+| 返回格式 | `response_format = url` 或 `b64_json` |
+| 尺寸特点 | 脚本会先把比例映射到尺寸，再根据模型是否支持该尺寸做回退 |
+| 注意事项 | 非官方尺寸会通过 prompt 附加比例提示，而不是保证上游严格按该尺寸输出 |
+
+### 豆包 Seedream
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1/images/generations` |
+| 模型示例 | `doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128` |
+| 请求风格 | OpenAI Images 兼容 JSON |
+| 参考图 | `image: ["<base64>", ...]` |
+| 比例到尺寸映射 | `16:9 -> 2560x1440`、`9:16 -> 1440x2560`、`1:1 -> 2048x2048` 等 |
+| 返回格式 | 优先 `b64_json`，也可能只给 `url` |
+
+### Grok Image
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1/images/generations` |
+| 模型示例 | `grok-4-2-image` |
+| 请求风格 | OpenAI Images 兼容 JSON |
+| 参考图 | `image: ["<base64>", ...]` |
+| 比例到尺寸映射 | `16:9 -> 2560x1440`、`9:16 -> 1440x2560`、`1:1 -> 2048x2048` 等 |
+| 返回格式 | 主要返回 `url`，不应依赖 `b64_json` |
+
+### OpenAI Images 兼容
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1/images/generations`、`POST /v1/images/edits` |
+| 模型示例 | `gpt-image-1`、`dall-e-3`、`dall-e-2` |
+| 请求风格 | OpenAI Images 原生字段 |
+| 参考图 | `image`、`mask` |
+| 返回格式 | `url` 或 `b64_json` |
+| 注意事项 | 这组模型的公共语义已经在现有 `gpt-image-1` 家族文档里说明，适合做兼容接入 |
+
+## 比例与尺寸
+
+### 常见比例
+
+| 比例 | 常见家族 |
+| --- | --- |
+| `1:1` | Gemini、GPT Image、Seedream、Grok |
+| `16:9` | Gemini、GPT Image、Seedream、Grok |
+| `9:16` | Gemini、GPT Image、Seedream、Grok |
+| `4:3` / `3:4` | GPT Image、Seedream、Grok |
+| `3:2` / `2:3` | GPT Image、Seedream、Grok |
+| `21:9` | Seedream、Grok |
+
+### GPT Image 额外尺寸档位
+
+`gpt-image-2-pro` 的对外脚本里额外暴露了 `2K` / `4K` 预设，例如：
+
+| 预设 | 实际目标尺寸 |
+| --- | --- |
+| `16:9(2K)` | `2048x1152` |
+| `9:16(2K)` | `1152x2048` |
+| `16:9(4K)` | `3840x2160` |
+| `9:16(4K)` | `2160x3840` |
+
+但要注意，这不代表所有上游都原生接受这些尺寸。脚本会在必要时自动回退到更接近的官方尺寸，并把目标比例写进 prompt。
+
+## 推荐阅读
+
+1. [图像系列概览](/api-reference/images/overview)
+2. [GPT-Image 家族概览](/api-reference/images/gpt-image-1/overview)
+3. [GPT-Image 图像生成](/api-reference/images/gpt-image-1/generation)
+4. [GPT-Image 图像编辑](/api-reference/images/gpt-image-1/edit)
+5. [Gemini 原生格式](/api-reference/texts/gemini-native)

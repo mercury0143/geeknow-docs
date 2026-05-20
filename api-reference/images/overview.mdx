@@ -8,6 +8,9 @@ description: 汇总 OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原
 图像能力目前主要分成三类：统一图像生成/编辑入口、Midjourney 专用任务接口，以及通过 Gemini 原生协议暴露的图像生成能力。
 
 <CardGroup cols={2}>
+  <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
+    按模型家族查看图像接口支持范围、参考图输入方式、比例和尺寸约束。
+  </Card>
   <Card title="GPT-Image 家族" icon="image-plus" href="/api-reference/images/gpt-image-1/overview">
     基于 `POST /v1/images/generations`、`POST /v1/images/edits`、`POST /v1/edits` 组织的模型家族页。
   </Card>
@@ -45,12 +48,13 @@ description: 汇总 OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原
 
 ## 推荐阅读顺序
 
-1. [GPT-Image 家族概览](/api-reference/images/gpt-image-1/overview)
-2. [GPT-Image 图像生成](/api-reference/images/gpt-image-1/generation)
-3. [GPT-Image 图像编辑](/api-reference/images/gpt-image-1/edit)
-4. [Gemini 原生格式](/api-reference/texts/gemini-native)
-5. [上传图片](/api-reference/uploads/image-upload)
-6. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
+1. [图像模型支持矩阵](/api-reference/images/model-matrix)
+2. [GPT-Image 家族概览](/api-reference/images/gpt-image-1/overview)
+3. [GPT-Image 图像生成](/api-reference/images/gpt-image-1/generation)
+4. [GPT-Image 图像编辑](/api-reference/images/gpt-image-1/edit)
+5. [Gemini 原生格式](/api-reference/texts/gemini-native)
+6. [上传图片](/api-reference/uploads/image-upload)
+7. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
 
 ## 相关页面
 

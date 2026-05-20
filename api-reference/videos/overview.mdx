@@ -8,6 +8,9 @@ description: 汇总统一视频任务入口、OpenAI Videos 兼容路由、Kling
 视频能力主要分为平台统一任务格式和 OpenAI Videos 兼容格式两套入口；两者最终都会落到异步任务体系中，再通过任务查询或内容代理获取结果。
 
 <CardGroup cols={2}>
+  <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/videos/model-matrix">
+    按模型家族查看视频接口支持范围、生成模式、固定时长和参考图传递方式。
+  </Card>
   <Card title="统一任务入口" icon="film" href="/api-reference/videos/video-generations">
     `POST /v1/video/generations`，适合统一接入多家视频供应商。
   </Card>
@@ -51,6 +54,7 @@ description: 汇总统一视频任务入口、OpenAI Videos 兼容路由、Kling
 
 ## 推荐阅读顺序
 
-1. [统一视频生成接口](./video-generations)
-2. [OpenAI 视频兼容接口](./openai-videos)
-3. [获取任务状态](../tasks/task-status)
+1. [视频模型支持矩阵](./model-matrix)
+2. [统一视频生成接口](./video-generations)
+3. [OpenAI 视频兼容接口](./openai-videos)
+4. [获取任务状态](../tasks/task-status)

@@ -25,7 +25,7 @@
         ]
       },
       {
-        "group": "文字系列",
+        "group": "文本系列",
         "pages": [
           "api-reference/texts/overview",
           "api-reference/texts/chat-completions-stream",
@@ -43,9 +43,10 @@
         ]
       },
       {
-        "group": "图像系列",
+        "group": "图片系列",
         "pages": [
           "api-reference/images/overview",
+          "api-reference/images/model-matrix",
           "api-reference/images/gpt-image-1/overview",
           "api-reference/images/gpt-image-1/generation",
           "api-reference/images/gpt-image-1/edit"
@@ -55,6 +56,7 @@
         "group": "视频系列",
         "pages": [
           "api-reference/videos/overview",
+          "api-reference/videos/model-matrix",
           "api-reference/videos/video-generations",
           "api-reference/videos/openai-videos"
         ]
@@ -87,8 +89,12 @@
   "navbar": {
     "links": [
       {
-        "label": "文字系列",
+        "label": "文本系列",
         "href": "/api-reference/texts/overview"
+      },
+      {
+        "label": "图片系列",
+        "href": "/api-reference/images/overview"
       },
       {
         "label": "视频系列",
