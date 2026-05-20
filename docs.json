@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "new-api API 文档",
+  "name": "Geeknow API 文档",
   "colors": {
     "primary": "#1f6feb",
     "light": "#ffffff",
@@ -54,14 +54,6 @@
           "api-reference/videos/overview",
           "api-reference/videos/video-generations",
           "api-reference/videos/openai-videos"
-        ]
-      },
-      {
-        "group": "音频系列",
-        "pages": [
-          "api-reference/audio/overview",
-          "api-reference/audio/audio",
-          "api-reference/audio/suno"
         ]
       },
       {
