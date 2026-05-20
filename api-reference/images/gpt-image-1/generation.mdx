@@ -191,6 +191,10 @@ Authorization: Bearer YOUR_API_KEY
 输出尺寸。`dall-e-2` 只接受 `256x256`、`512x512`、`1024x1024`；`dall-e-3` 只接受 `1024x1024`、`1024x1792`、`1792x1024`。
 </ParamField>
 
+<Info>
+如果你实际使用的是 `gpt-image-2-pro`，插件侧还额外暴露了 `1:1(2K)`、`4:3(2K)`、`3:2(2K)`、`2:3(2K)`、`16:9(2K)`、`9:16(2K)`、`1:1(4K)`、`4:3(4K)`、`3:2(4K)`、`2:3(4K)`、`16:9(4K)`、`9:16(4K)` 这类高分档位。完整映射见 [图像模型支持矩阵](/api-reference/images/model-matrix)。
+</Info>
+
 <ParamField body="quality" type="string">
 图像质量。`dall-e-3` 默认补成 `standard`；`gpt-image-1` 默认补成 `auto`。
 </ParamField>

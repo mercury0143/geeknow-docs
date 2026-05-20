@@ -8,6 +8,21 @@ api: "GET /v1/models"
 
 查询可用模型列表。路由会根据请求头判断兼容格式：默认返回 OpenAI 风格；带 `x-api-key` 和 `anthropic-version` 时走 Claude 风格；带 `x-goog-api-key` 或 `key` 查询参数时走 Gemini 风格。
 
+<Info>
+如果你只是想先知道“系统里大概有哪些文本模型名字”，不想立刻发接口请求，可以先看 [文本模型支持矩阵](/api-reference/texts/model-matrix) 里的“常见模型名称示例”。但真正对你当前 key 可用的模型，仍以本页接口返回为准。
+</Info>
+
+## 常见模型名称示例
+
+| 家族 | 常见模型名 |
+| --- | --- |
+| GPT / OpenAI | `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-4.1-mini`、`gpt-4.1-nano`、`o1`、`o3` |
+| Claude | `claude-sonnet-4-20250514`、`claude-sonnet-4-6`、`claude-opus-4-6`、`claude-opus-4-7`、`claude-haiku-4-5-20251001` |
+| Gemini | `gemini-2.0-flash`、`gemini-2.5-flash`、`gemini-2.5-pro`、`gemini-3.1-pro-preview` |
+| DeepSeek | `deepseek-chat`、`deepseek-reasoner`、`deepseek-v4-flash`、`deepseek-v4-pro`、`deepseek-r1` |
+| Qwen | `qwen-max`、`qwen3-max`、`qwen3-omni-flash` |
+| Embeddings / Rerank | `text-embedding-3-small`、`text-embedding-3-large`、`bge-reranker-large` |
+
 ## 路径
 
 | Method | Path | 说明 |

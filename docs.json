@@ -28,6 +28,7 @@
         "group": "文本系列",
         "pages": [
           "api-reference/texts/overview",
+          "api-reference/texts/model-matrix",
           "api-reference/texts/chat-completions-stream",
           "api-reference/texts/chat-completions-non-stream",
           "api-reference/texts/claude-messages",
