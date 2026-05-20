@@ -8,9 +8,12 @@
     "dark": "#0d1117"
   },
   "api": {
-    "baseUrl": "https://www.geeknow.top",
-    "auth": {
-      "method": "bearer"
+    "url": "full",
+    "mdx": {
+      "server": "https://www.geeknow.top",
+      "auth": {
+        "method": "bearer"
+      }
     }
   },
   "navigation": {
