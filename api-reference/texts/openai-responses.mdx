@@ -150,7 +150,7 @@ curl -N -X POST https://www.geeknow.top/v1/responses \
 
 <ResponseExample>
 
-```json
+```json 200 - 非流式
 {
   "id": "resp_abc123",
   "object": "response",
@@ -180,11 +180,7 @@ curl -N -X POST https://www.geeknow.top/v1/responses \
 }
 ```
 
-</ResponseExample>
-
-### 流式响应
-
-```text
+```text 200 - 流式
 data: {"type":"response.created","response":{"id":"resp_abc123","object":"response","status":"in_progress","model":"gpt-4o"}}
 
 data: {"type":"response.output_text.delta","delta":"Responses"}
@@ -195,6 +191,63 @@ data: {"type":"response.completed","response":{"id":"resp_abc123","status":"comp
 
 data: [DONE]
 ```
+
+```json 400
+{
+  "error": {
+    "message": "model is required",
+    "type": "invalid_request_error",
+    "param": "",
+    "code": "invalid_request"
+  }
+}
+```
+
+```json 401
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "invalid_request_error",
+    "param": "",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 402
+{
+  "error": {
+    "message": "用户额度不足",
+    "type": "new_api_error",
+    "param": "",
+    "code": "insufficient_user_quota"
+  }
+}
+```
+
+```json 429
+{
+  "error": {
+    "message": "当前请求频率过高，请稍后再试",
+    "type": "new_api_error",
+    "param": "",
+    "code": "too_many_requests"
+  }
+}
+```
+
+```json 500
+{
+  "error": {
+    "message": "bad response body",
+    "type": "new_api_error",
+    "param": "",
+    "code": "bad_response_body"
+  }
+}
+```
+
+</ResponseExample>
 
 ## 上下文压缩
 

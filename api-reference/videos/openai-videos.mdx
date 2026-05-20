@@ -80,9 +80,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 创建成功
+<ResponseExample>
 
-```json
+```json 200 - 创建成功
 {
   "id": "video_abc123",
   "task_id": "video_abc123",
@@ -96,9 +96,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 查询成功
-
-```json
+```json 200 - 查询成功
 {
   "id": "video_abc123",
   "task_id": "video_abc123",
@@ -114,9 +112,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 查询失败任务
-
-```json
+```json 200 - 查询失败任务
 {
   "id": "video_abc123",
   "task_id": "video_abc123",
@@ -132,9 +128,7 @@ console.log(await response.json());
 }
 ```
 
-### 404 - 原任务不存在
-
-```json
+```json 404
 {
   "error": {
     "message": "task_origin_not_exist",
@@ -144,6 +138,8 @@ console.log(await response.json());
   }
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

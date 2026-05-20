@@ -54,9 +54,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 查询成功（排队中）
+<ResponseExample>
 
-```json
+```json 200 - 排队中
 {
   "code": "success",
   "message": "",
@@ -71,9 +71,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 查询成功（已完成）
-
-```json
+```json 200 - 已完成
 {
   "code": "success",
   "message": "",
@@ -93,9 +91,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 查询成功（任务失败）
-
-```json
+```json 200 - 任务失败
 {
   "code": "success",
   "message": "",
@@ -113,9 +109,7 @@ console.log(await response.json());
 }
 ```
 
-### 400 - 无效任务 ID
-
-```json
+```json 400
 {
   "code": "task_not_exist",
   "message": "task_not_exist",
@@ -123,15 +117,15 @@ console.log(await response.json());
 }
 ```
 
-### 401 - 认证失败
-
-```json
+```json 401
 {
   "code": "invalid_api_key",
   "message": "无效的令牌",
   "data": null
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

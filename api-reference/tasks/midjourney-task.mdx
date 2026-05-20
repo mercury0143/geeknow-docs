@@ -51,9 +51,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 生成中
+<ResponseExample>
 
-```json
+```json 200 - 生成中
 {
   "id": "task-mj-abc123",
   "action": "IMAGINE",
@@ -65,9 +65,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 生成成功
-
-```json
+```json 200 - 生成成功
 {
   "id": "task-mj-abc123",
   "action": "IMAGINE",
@@ -85,9 +83,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 生成失败
-
-```json
+```json 200 - 生成失败
 {
   "id": "task-mj-abc123",
   "action": "IMAGINE",
@@ -97,6 +93,8 @@ console.log(await response.json());
   "failReason": "Banned prompt detected"
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

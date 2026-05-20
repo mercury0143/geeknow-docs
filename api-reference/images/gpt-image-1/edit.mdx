@@ -77,9 +77,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 编辑成功
+<ResponseExample>
 
-```json
+```json 200
 {
   "created": 1735689600,
   "data": [
@@ -91,9 +91,7 @@ console.log(await response.json());
 }
 ```
 
-### 400 - 请求参数错误
-
-```json
+```json 400
 {
   "error": {
     "message": "failed to parse image edit form request",
@@ -104,9 +102,7 @@ console.log(await response.json());
 }
 ```
 
-### 401 - 认证失败
-
-```json
+```json 401
 {
   "error": {
     "message": "Invalid API key provided",
@@ -117,9 +113,7 @@ console.log(await response.json());
 }
 ```
 
-### 402 - 额度不足
-
-```json
+```json 402
 {
   "error": {
     "message": "用户额度不足",
@@ -130,9 +124,7 @@ console.log(await response.json());
 }
 ```
 
-### 429 - 限流
-
-```json
+```json 429
 {
   "error": {
     "message": "当前请求频率过高，请稍后再试",
@@ -143,9 +135,7 @@ console.log(await response.json());
 }
 ```
 
-### 500 - 服务端错误
-
-```json
+```json 500
 {
   "error": {
     "message": "bad response body",
@@ -155,6 +145,8 @@ console.log(await response.json());
   }
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

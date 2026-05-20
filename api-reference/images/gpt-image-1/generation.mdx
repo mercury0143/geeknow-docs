@@ -84,9 +84,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 生成成功（URL）
+<ResponseExample>
 
-```json
+```json 200 - URL
 {
   "created": 1735689600,
   "data": [
@@ -98,9 +98,7 @@ console.log(await response.json());
 }
 ```
 
-### 200 - 生成成功（Base64）
-
-```json
+```json 200 - Base64
 {
   "created": 1735689600,
   "data": [
@@ -112,9 +110,7 @@ console.log(await response.json());
 }
 ```
 
-### 400 - 请求参数错误
-
-```json
+```json 400
 {
   "error": {
     "message": "size must be one of 1024x1024, 1024x1792 or 1792x1024 for dall-e-3",
@@ -125,9 +121,7 @@ console.log(await response.json());
 }
 ```
 
-### 401 - 认证失败
-
-```json
+```json 401
 {
   "error": {
     "message": "Invalid API key provided",
@@ -138,9 +132,7 @@ console.log(await response.json());
 }
 ```
 
-### 402 - 额度不足
-
-```json
+```json 402
 {
   "error": {
     "message": "用户额度不足",
@@ -151,9 +143,7 @@ console.log(await response.json());
 }
 ```
 
-### 429 - 限流
-
-```json
+```json 429
 {
   "error": {
     "message": "当前请求频率过高，请稍后再试",
@@ -164,9 +154,7 @@ console.log(await response.json());
 }
 ```
 
-### 500 - 服务端错误
-
-```json
+```json 500
 {
   "error": {
     "message": "bad response body",
@@ -176,6 +164,8 @@ console.log(await response.json());
   }
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

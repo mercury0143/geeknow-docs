@@ -71,9 +71,9 @@ curl -X POST https://www.geeknow.top/suno/submit/music \
 
 ## 响应示例
 
-### 200 - 提交成功
+<ResponseExample>
 
-```json
+```json 200 - 提交成功
 {
   "code": "success",
   "message": "",
@@ -81,9 +81,7 @@ curl -X POST https://www.geeknow.top/suno/submit/music \
 }
 ```
 
-### 200 - 查询成功
-
-```json
+```json 200 - 查询成功
 {
   "code": "success",
   "message": "",
@@ -96,15 +94,15 @@ curl -X POST https://www.geeknow.top/suno/submit/music \
 }
 ```
 
-### 400 - 无效任务
-
-```json
+```json 400
 {
   "code": "task_not_exist",
   "message": "task_not_exist",
   "data": null
 }
 ```
+
+</ResponseExample>
 
 ## 使用场景
 

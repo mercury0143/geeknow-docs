@@ -82,9 +82,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 任务已提交
+<ResponseExample>
 
-```json
+```json 200
 {
   "id": "video_task_abc123",
   "task_id": "video_task_abc123",
@@ -96,9 +96,7 @@ console.log(await response.json());
 }
 ```
 
-### 400 - 请求参数错误
-
-```json
+```json 400
 {
   "error": {
     "message": "prompt is required",
@@ -109,9 +107,7 @@ console.log(await response.json());
 }
 ```
 
-### 401 - 认证失败
-
-```json
+```json 401
 {
   "error": {
     "message": "无效的令牌",
@@ -122,9 +118,7 @@ console.log(await response.json());
 }
 ```
 
-### 402 - 额度不足
-
-```json
+```json 402
 {
   "error": {
     "message": "用户额度不足",
@@ -135,9 +129,7 @@ console.log(await response.json());
 }
 ```
 
-### 429 - 限流
-
-```json
+```json 429
 {
   "code": "too_many_requests",
   "message": "当前分组上游负载已饱和，请稍后再试",
@@ -145,9 +137,7 @@ console.log(await response.json());
 }
 ```
 
-### 500 - 服务端错误
-
-```json
+```json 500
 {
   "error": {
     "message": "copy_response_body_failed",
@@ -157,6 +147,8 @@ console.log(await response.json());
   }
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 

@@ -114,7 +114,7 @@ curl -N -X POST https://www.geeknow.top/v1/chat/completions \
 
 <ResponseExample>
 
-```text
+```text 200
 data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"role":"assistant","content":"API"},"finish_reason":null}]}
 
 data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":" 网关"},"finish_reason":null}]}
@@ -122,6 +122,61 @@ data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689
 data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":26,"completion_tokens":38,"total_tokens":64}}
 
 data: [DONE]
+```
+
+```json 400
+{
+  "error": {
+    "message": "field model is required",
+    "type": "invalid_request_error",
+    "param": "",
+    "code": "invalid_request"
+  }
+}
+```
+
+```json 401
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "invalid_request_error",
+    "param": "",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 402
+{
+  "error": {
+    "message": "用户额度不足",
+    "type": "new_api_error",
+    "param": "",
+    "code": "insufficient_user_quota"
+  }
+}
+```
+
+```json 429
+{
+  "error": {
+    "message": "当前请求频率过高，请稍后再试",
+    "type": "new_api_error",
+    "param": "",
+    "code": "too_many_requests"
+  }
+}
+```
+
+```json 500
+{
+  "error": {
+    "message": "bad response body",
+    "type": "new_api_error",
+    "param": "",
+    "code": "bad_response_body"
+  }
+}
 ```
 
 </ResponseExample>

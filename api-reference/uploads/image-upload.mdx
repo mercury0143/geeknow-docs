@@ -74,9 +74,9 @@ console.log(await response.json());
 
 ## 响应示例
 
-### 200 - 预签名地址已创建
+<ResponseExample>
 
-```json
+```json 200 - 预签名地址已创建
 {
   "success": true,
   "message": "",
@@ -91,23 +91,21 @@ console.log(await response.json());
 }
 ```
 
-### 200 - OSS 未配置
-
-```json
+```json 200 - OSS 未配置
 {
   "success": false,
   "message": "oss storage is not configured"
 }
 ```
 
-### 401 - 认证失败
-
-```json
+```json 401
 {
   "success": false,
   "message": "无效的令牌"
 }
 ```
+
+</ResponseExample>
 
 ## 认证
 
