@@ -5,11 +5,20 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
 
 # 图像系列
 
-图像能力目前主要分成四类：按模型分组的 GPT Image 生成入口、OpenAI Images 兼容生成/编辑入口、Midjourney 专用任务接口，以及通过 Gemini 原生协议暴露的图像生成能力。
+图像能力目前主要分成四类：按模型分组的 Gemini 官方生图入口、按模型分组的 GPT Image 生成入口、OpenAI Images 兼容生成/编辑入口，以及 Midjourney 专用任务接口。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
     按模型家族查看图像接口支持范围、参考图输入方式、比例和尺寸约束。
+  </Card>
+  <Card title="gemini-3-pro-image-preview" icon="image" href="/api-reference/images/gemini-3-pro-image-preview/generation">
+    `POST /v1beta/models/gemini-3-pro-image-preview:generateContent`，支持插件里暴露的 `2K` 生图。
+  </Card>
+  <Card title="gemini-2.5-flash-image-preview" icon="image" href="/api-reference/images/gemini-2.5-flash-image-preview/generation">
+    `POST /v1beta/models/gemini-2.5-flash-image-preview:generateContent`，按 Gemini 官方格式生图。
+  </Card>
+  <Card title="gemini-3.1-flash-image-preview" icon="image" href="/api-reference/images/gemini-3.1-flash-image-preview/generation">
+    `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`，按 Gemini 官方格式生图。
   </Card>
   <Card title="gpt-image-2" icon="image-plus" href="/api-reference/images/gpt-image-2/generation">
     `POST /v1/images/generations`，按基础比例和尺寸档位调用 `gpt-image-2`。
@@ -22,9 +31,6 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
   </Card>
   <Card title="Midjourney" icon="wand-sparkles" href="/api-reference/tasks/midjourney-task">
     `/mj/submit/*`、`/mj/task/*`、`/mj/image/{id}`，适合 imagine、blend、describe、upscale 和变体操作。
-  </Card>
-  <Card title="Gemini 图像能力" icon="image" href="/api-reference/texts/gemini-native">
-    通过 `POST /v1beta/models/{model}:{action}` 调用 Gemini 原生图像相关动作。
   </Card>
   <Card title="上传与结果查询" icon="upload" href="/api-reference/uploads/image-upload">
     先用 `/api/upload/presign` 上传素材，再把公网 URL 传入生图、图编和视频接口。
@@ -46,7 +52,7 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
 | `POST` | `/mj/submit/video` | Midjourney 视频相关动作 |
 | `GET` | `/mj/task/{id}/fetch` | Midjourney 任务查询 |
 | `GET` | `/mj/image/{id}` | Midjourney 图片代理 |
-| `POST` | `/v1beta/models/{model}:{action}` | Gemini 原生图像相关动作 |
+| `POST` | `/v1beta/models/{model}:generateContent` | Gemini 官方格式生图入口 |
 
 <Warning>
 `/v1/images/variations`、`/v1/files*` 和 `fine-tunes*` 这类 OpenAI 兼容路径虽然在路由中占位，但当前会返回未实现错误，不能直接用于生产。
@@ -55,13 +61,15 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
 ## 推荐阅读顺序
 
 1. [图像模型支持矩阵](/api-reference/images/model-matrix)
-2. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
-3. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
-4. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-5. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-6. [Gemini 原生格式](/api-reference/texts/gemini-native)
-7. [上传图片](/api-reference/uploads/image-upload)
-8. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
+2. [gemini-3-pro-image-preview 生图 API](/api-reference/images/gemini-3-pro-image-preview/generation)
+3. [gemini-2.5-flash-image-preview 生图 API](/api-reference/images/gemini-2.5-flash-image-preview/generation)
+4. [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)
+5. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+6. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+7. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+8. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
+9. [上传图片](/api-reference/uploads/image-upload)
+10. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
 
 ## 相关页面
 

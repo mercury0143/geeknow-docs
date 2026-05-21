@@ -1,0 +1,248 @@
+---
+title: gemini-3-pro-image-preview 生图 API
+description: 使用 `POST /v1beta/models/gemini-3-pro-image-preview:generateContent` 调用 Gemini 官方格式生图接口。
+api: "POST /v1beta/models/{model}:generateContent"
+---
+
+# gemini-3-pro-image-preview 生图 API
+
+这个模型使用 Gemini 官方 `generateContent` 格式生图，适合直接复用 `contents` / `parts` 结构，并且支持插件里暴露的 `2K` 尺寸档位。
+
+- 路径为 `POST /v1beta/models/{model}:generateContent`。
+- `model` 固定传 `gemini-3-pro-image-preview`。
+- 文生图和图生图都走同一套 `contents[].parts[]` 结构。
+- 插件里 `responseModalities` 默认同时请求 `IMAGE` 和 `TEXT`。
+- 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
+
+## 方法与路径
+
+```http
+POST /v1beta/models/gemini-3-pro-image-preview:generateContent
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1beta/models/gemini-3-pro-image-preview:generateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          { "text": "一张未来感 AI 工作台场景，冷色氛围，电影级布光" }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"],
+      "temperature": 1.0,
+      "topP": 0.95,
+      "maxOutputTokens": 8192,
+      "imageConfig": {
+        "aspectRatio": "16:9",
+        "imageSize": "2K"
+      }
+    }
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1beta/models/gemini-3-pro-image-preview:generateContent",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    },
+    json={
+        "contents": [
+            {
+                "role": "user",
+                "parts": [
+                    {"text": "一张未来感 AI 工作台场景，冷色氛围，电影级布光"}
+                ],
+            }
+        ],
+        "generationConfig": {
+            "responseModalities": ["TEXT", "IMAGE"],
+            "temperature": 1.0,
+            "topP": 0.95,
+            "maxOutputTokens": 8192,
+            "imageConfig": {
+                "aspectRatio": "16:9",
+                "imageSize": "2K",
+            },
+        },
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+## 图生图示例
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "融合参考图风格，输出一张高清横版海报" },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE_1"
+          }
+        },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE_2"
+          }
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageConfig": {
+      "aspectRatio": "16:9",
+      "imageSize": "2K"
+    }
+  }
+}
+```
+
+## Body
+
+<ParamField body="contents" type="array<object>" required>
+输入内容列表。每项通常包含 `role` 和 `parts`。
+</ParamField>
+
+<ParamField body="contents[].role" type="string">
+角色字段。插件固定使用 `user`。
+</ParamField>
+
+<ParamField body="contents[].parts" type="array<object>" required>
+内容片段数组。提示词和参考图都在这里构造。
+</ParamField>
+
+<ParamField body="contents[].parts[].text" type="string">
+文本提示词。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData" type="object">
+参考图输入。包含 `mimeType` 和 `data` 两个字段。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.mimeType" type="string">
+图片 MIME 类型，常见值为 `image/jpeg`、`image/png`、`image/webp`。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.data" type="string">
+Base64 编码的图片内容。
+</ParamField>
+
+<ParamField body="generationConfig" type="object" required>
+生成配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.responseModalities" type="array<string>">
+返回模态列表。插件默认使用 `["IMAGE", "TEXT"]`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig" type="object" required>
+图像配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.aspectRatio" type="string">
+图片比例。插件支持 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.imageSize" type="string">
+图片清晰度。这个模型支持插件里暴露的 `1K` 和 `2K`。
+</ParamField>
+
+<ParamField body="safetySettings" type="array<object>">
+安全设置。可不传。
+</ParamField>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "BASE64_OR_URL"
+            }
+          }
+        ]
+      },
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 123,
+    "candidatesTokenCount": 456,
+    "totalTokenCount": 579,
+    "trafficType": "ON_DEMAND",
+    "promptTokensDetails": [
+      {
+        "modality": "TEXT",
+        "tokenCount": 23
+      }
+    ],
+    "candidatesTokensDetails": [
+      {
+        "modality": "IMAGE",
+        "tokenCount": 456
+      }
+    ]
+  },
+  "modelVersion": "gemini-3-pro-image-preview",
+  "createTime": "2026-05-21T00:00:00Z"
+}
+```
+
+</ResponseExample>
+
+## Response
+
+<ResponseField name="candidates[].content.parts[].inlineData.mimeType" type="string">
+返回图片 MIME 类型。
+</ResponseField>
+
+<ResponseField name="candidates[].content.parts[].inlineData.data" type="string">
+图片数据。可能是 Base64，也可能直接是图片 URL。
+</ResponseField>
+
+<ResponseField name="usageMetadata" type="object">
+Token 统计信息。
+</ResponseField>
+
+<Info>
+根据你的插件实现，`gemini-3-pro-image-preview` 会按请求里的 `imageSize` 真实下发，`2K` 会保留，不会被强制回落到 `1K`。
+</Info>
+
+## 相关接口
+
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [gemini-2.5-flash-image-preview 生图 API](/api-reference/images/gemini-2.5-flash-image-preview/generation)
+- [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)

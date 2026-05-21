@@ -45,6 +45,27 @@
           "api-reference/images/overview",
           "api-reference/images/model-matrix",
           {
+            "group": "gemini-3-pro-image-preview",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gemini-3-pro-image-preview/generation"
+            ]
+          },
+          {
+            "group": "gemini-2.5-flash-image-preview",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gemini-2.5-flash-image-preview/generation"
+            ]
+          },
+          {
+            "group": "gemini-3.1-flash-image-preview",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gemini-3.1-flash-image-preview/generation"
+            ]
+          },
+          {
             "group": "gpt-image-2",
             "expanded": true,
             "pages": [
