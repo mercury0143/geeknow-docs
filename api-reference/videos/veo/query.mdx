@@ -1,0 +1,146 @@
+---
+title: Veo 任务查询
+description: 使用 `GET /v1/videos/{task_id}` 查询 Veo 视频任务状态与结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Veo 任务查询
+
+Veo 系列提交后同样通过 `GET /v1/videos/{task_id}` 查询。对外返回仍然是 OpenAI 风格 `video` 对象。
+
+- 查询路径是 `GET /v1/videos/{task_id}`。
+- 任务完成后通常可从 `video_url` 或代理内容地址读取结果。
+- 路由层仍由 `controller.RelayTaskFetch` 统一处理。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl https://www.geeknow.top/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python
+import requests
+
+resp = requests.get(
+    "https://www.geeknow.top/v1/videos/video_abc123",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/videos/video_abc123", {
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "veo_3_1-fast",
+  "status": "processing",
+  "progress": 50,
+  "created_at": 1735689600,
+  "completed_at": 0,
+  "expires_at": 1735776000,
+  "seconds": "8",
+  "size": "720x1280",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": ""
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "veo_3_1-fast",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689900,
+  "expires_at": 1735776000,
+  "seconds": "8",
+  "size": "720x1280",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": "https://example.com/video.mp4"
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField body="task_id" type="string" required>
+视频任务 ID。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值包括 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+进度百分比。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+输出时长。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出尺寸。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+视频结果地址。
+</ResponseField>
+
+## 相关接口
+
+- [Veo 视频概览](./overview)
+- [Veo 视频生成](./generation)

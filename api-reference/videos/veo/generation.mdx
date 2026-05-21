@@ -1,0 +1,174 @@
+---
+title: Veo 视频生成
+description: 使用 `POST /v1/videos` 调用 Veo 模型提交异步视频任务，当前以 `main.py` 的 JSON 提交流程为准。
+api: "POST /v1/videos"
+---
+
+# Veo 视频生成
+
+Veo 系列当前通过 `POST /v1/videos` 提交。和旧文档里的 multipart 说法不同，现有插件脚本里 `veo*` 已经走 JSON 提交。
+
+- 路由入口是 `POST /v1/videos`。
+- 当前模型只有 `veo_3_1`、`veo_3_1-fast`。
+- `main.py` 会把 `size` 转换成 `metadata.output_config.resolution` 与 `aspect_ratio` 一并提交。
+- 参考图仍由 `input_reference` 表达，但 JSON 请求里通常表现为 URL、base64 或 Data URL。
+
+## 当前模型
+
+- `veo_3_1`
+- `veo_3_1-fast`
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "veo_3_1-fast",
+    "prompt": "在广场中央跳舞",
+    "size": "720x1280",
+    "seconds": "8",
+    "input_reference": "data:image/png;base64,BASE64_IMAGE",
+    "metadata": {
+      "output_config": {
+        "aspect_ratio": "9:16",
+        "audio_generation": "Disabled",
+        "resolution": "720P"
+      }
+    }
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "veo_3_1-fast",
+        "prompt": "在广场中央跳舞",
+        "size": "720x1280",
+        "seconds": "8",
+        "input_reference": "data:image/png;base64,BASE64_IMAGE",
+        "metadata": {
+            "output_config": {
+                "aspect_ratio": "9:16",
+                "audio_generation": "Disabled",
+                "resolution": "720P",
+            }
+        },
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "veo_3_1-fast",
+    prompt: "在广场中央跳舞",
+    size: "720x1280",
+    seconds: "8",
+    input_reference: "data:image/png;base64,BASE64_IMAGE",
+    metadata: {
+      output_config: {
+        aspect_ratio: "9:16",
+        audio_generation: "Disabled",
+        resolution: "720P",
+      },
+    },
+  }),
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "veo_3_1-fast",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "seconds": "8",
+  "size": "720x1280"
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+模型名称。当前只整理 `veo_3_1` 与 `veo_3_1-fast`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+提示词。
+</ParamField>
+
+<ParamField body="size" type="string">
+尺寸字符串。脚本常见会传 `720x1280` 或 `1280x720`，并据此推导 Veo 的分辨率和宽高比。
+</ParamField>
+
+<ParamField body="seconds" type="string | integer">
+目标时长。当前脚本会统一塞进 `seconds`；网关也会兼容 `duration` 与 `metadata.durationSeconds`。
+</ParamField>
+
+<ParamField body="input_reference" type="string | array<string>">
+参考图输入。当前脚本会把文件转成 Data URL 注入 JSON；Veo 适配层也兼容 multipart 文件、URL 与 Data URL。
+</ParamField>
+
+<ParamField body="metadata" type="object">
+扩展配置。Veo 链路会继续解析 `metadata` 到 Veo 上游的 `DurationSeconds`、`AspectRatio`、`Resolution` 等字段。
+</ParamField>
+
+<ParamField body="enable_upsample" type="boolean">
+这是你给的 Apifox 字段参考，但从当前仓库主链路看，它不是 Veo 通用 DTO 的显式顶层字段。若要表达清晰度或分辨率，当前更建议使用 `size` 与 `metadata`。
+</ParamField>
+
+## 当前规则
+
+| 项目 | 规则 |
+| --- | --- |
+| 请求格式 | JSON |
+| 参考图格式 | 支持 URL、base64、data URI，也兼容 multipart 文件 |
+| 参考生视频模式 | `main.py` 会把宽高比强制收敛到 `16:9` |
+| 参数映射 | `size` 会进一步映射到 Veo 所需的 `resolution`、`aspectRatio` |
+
+## 相关接口
+
+- [Veo 视频概览](./overview)
+- [Veo 任务查询](./query)

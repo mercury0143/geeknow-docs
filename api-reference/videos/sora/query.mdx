@@ -1,0 +1,146 @@
+---
+title: Sora 任务查询
+description: 使用 `GET /v1/videos/{task_id}` 查询 Sora 视频任务状态与结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Sora 任务查询
+
+Sora 系列任务提交后，通过 `GET /v1/videos/{task_id}` 查询。路由层对应 `router/video-router.go` 里的 `videoV1Router.GET("/videos/:task_id", controller.RelayTaskFetch)`。
+
+- 查询路径是 `GET /v1/videos/{task_id}`。
+- 成功返回的是 OpenAI 风格 `video` 对象。
+- 任务完成后通常可从 `video_url` 读取结果；如果缺失，服务端还可能补出 `/v1/videos/{task_id}/content` 代理地址。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl https://www.geeknow.top/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python
+import requests
+
+resp = requests.get(
+    "https://www.geeknow.top/v1/videos/video_abc123",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/videos/video_abc123", {
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 排队中
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "sora-2",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "completed_at": 0,
+  "expires_at": 1735776000,
+  "seconds": "10",
+  "size": "720x1280",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": ""
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "sora-2",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689900,
+  "expires_at": 1735776000,
+  "seconds": "10",
+  "size": "720x1280",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": "https://example.com/video.mp4"
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField body="task_id" type="string" required>
+视频任务 ID。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值包括 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+进度百分比。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+输出时长。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出尺寸。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+视频结果地址。
+</ResponseField>
+
+## 相关接口
+
+- [Sora 视频概览](./overview)
+- [Sora 视频生成](./generation)

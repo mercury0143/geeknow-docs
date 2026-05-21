@@ -1,0 +1,61 @@
+---
+title: Sora 视频概览
+description: 按模型系列整理 Sora 视频生成与任务查询接口，当前以 `main.py` 里的最新 JSON 提交流程为准。
+---
+
+# Sora 视频
+
+Sora 系列当前也统一走 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，但和 Grok 不同，现有插件脚本里已经改成 JSON 提交。
+
+- 入口路由仍然是 `POST /v1/videos`。
+- `main.py` 里 `sora*` 模型会走 JSON 提交，而不是文档里旧的 multipart 主流程。
+- 参考图会先整理进 `input_reference`，再在网关或下游适配层继续转换。
+- 当前主文档优先覆盖视频生成与查询；角色创建相关字段单独属于 `/sora/v1/characters` 这条路由。
+
+<CardGroup cols={2}>
+  <Card title="视频生成" icon="clapperboard" href="/api-reference/videos/sora/generation">
+    `POST /v1/videos`，提交 Sora 视频任务。
+  </Card>
+  <Card title="任务查询" icon="hourglass" href="/api-reference/videos/sora/query">
+    `GET /v1/videos/{task_id}`，查询任务状态和结果。
+  </Card>
+</CardGroup>
+
+## 当前相关模型
+
+| 模型 | 来源 | 说明 |
+| --- | --- | --- |
+| `sora-2` | `main.py` + 网关路由 | 当前主入口模型 |
+| `sora2-pro-landscape-25s` | `main.py` | 插件里已存在的 Sora2 Pro 变体 |
+| `sora2-pro-landscape-hd-10s` | `main.py` | 插件里已存在的固定时长变体 |
+| `sora2-pro-landscape-hd-15s` | `main.py` | 插件里已存在的固定时长变体 |
+| `sora2-pro-portrait-25s` | `main.py` | 插件里已存在的固定时长变体 |
+| `sora2-pro-portrait-hd-10s` | `main.py` | 插件里已存在的固定时长变体 |
+| `sora2-pro-portrait-hd-15s` | `main.py` | 插件里已存在的固定时长变体 |
+| `sora-2-oai` | `main.py` + 网关校验 | OpenAI 风格上游限制为 `4/8/12s` |
+
+## 当前主链路行为
+
+| 项目 | 当前行为 |
+| --- | --- |
+| 请求格式 | JSON |
+| 参考图字段 | `input_reference` |
+| 默认尺寸 | 未显式传时脚本按横竖屏推导为 `1280x720` 或 `720x1280` |
+| 常见宽高比 | `16:9`、`9:16` |
+| 查询接口 | `GET /v1/videos/{task_id}` |
+
+## 角色相关字段说明
+
+你给的 Apifox 里有 `character_url` 和 `character_timestamps`。从仓库代码看，这组字段属于 Sora 角色创建链路，最终对应单独路由：
+
+```http
+POST /sora/v1/characters
+```
+
+所以这次 Sora 视频主页面不会把它们当作 `POST /v1/videos` 的主字段来写死，只会在生成页里说明“字段在 DTO 中存在，但主视频链路当前不以它为标准入口”。
+
+## 相关页面
+
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)
+- [Sora 视频生成](./generation)
+- [Sora 任务查询](./query)

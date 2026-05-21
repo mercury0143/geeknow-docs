@@ -98,6 +98,24 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "Sora 视频",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/sora/overview",
+              "api-reference/videos/sora/generation",
+              "api-reference/videos/sora/query"
+            ]
+          },
+          {
+            "group": "Veo 视频",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/veo/overview",
+              "api-reference/videos/veo/generation",
+              "api-reference/videos/veo/query"
+            ]
+          },
+          {
             "group": "Grok 视频",
             "expanded": true,
             "pages": [
