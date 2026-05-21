@@ -1,0 +1,227 @@
+---
+title: Doubao Seedream 生成图像 API
+description: 使用 `POST /v1/images/generations` 调用 Doubao Seedream 系列图像生成接口。
+api: "POST /v1/images/generations"
+---
+
+# Doubao Seedream 生成图像 API
+
+Doubao Seedream 系列通过统一图像生成入口发起请求，适合文生图，也支持通过 `image` 数组传参考图做图生图。
+
+- 统一入口为 `POST /v1/images/generations`。
+- `model` 传具体 Seedream 型号即可。
+- `size` 直接传像素尺寸字符串，例如 `2048x2048`、`2560x1440`。
+- `image` 支持图片 URL 或 Base64 数组，适合图生图和多参考图场景。
+- 返回通常兼容 OpenAI Images 风格，常见为 `url` 或 `b64_json`。
+
+## 当前可用模型
+
+- `doubao-seedream-4-0-250828`
+- `seedream-4-0-250828`
+- `doubao-seedream-4-5-251128`
+- `doubao-seedream-5-0-260128`
+
+## 方法与路径
+
+```http
+POST /v1/images/generations
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doubao-seedream-4-0-250828",
+    "prompt": "一只可爱的小海獭，阳光下漂浮在海面，电影感，高清细节",
+    "n": 1,
+    "size": "2048x2048"
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "doubao-seedream-4-0-250828",
+        "prompt": "一只可爱的小海獭，阳光下漂浮在海面，电影感，高清细节",
+        "n": 1,
+        "size": "2048x2048",
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/images/generations", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "doubao-seedream-4-0-250828",
+    prompt: "一只可爱的小海獭，阳光下漂浮在海面，电影感，高清细节",
+    n: 1,
+    size: "2048x2048",
+  }),
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 图生图示例
+
+```json
+{
+  "model": "doubao-seedream-4-5-251128",
+  "prompt": "保留参考图主体和氛围，重绘成更高级的广告海报",
+  "n": 1,
+  "size": "2560x1440",
+  "image": [
+    "BASE64_IMAGE_1",
+    "https://example.com/reference-2.png"
+  ]
+}
+```
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - URL
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "url": "https://.../images/doubao-img-abc123.png",
+      "revised_prompt": "一只可爱的小海獭，阳光下漂浮在海面，电影感，高清细节"
+    }
+  ]
+}
+```
+
+```json 200 - Base64
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "revised_prompt": "一只可爱的小海獭，阳光下漂浮在海面，电影感，高清细节"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+生成提示词。文生图和图生图都建议显式传入。
+</ParamField>
+
+<ParamField body="n" type="integer">
+生成数量。你给的 Apifox 将其作为必填；从现有统一图像 DTO 看，这个字段在网关里是可选指针类型。若要和当前插件行为保持一致，建议传 `1`。
+</ParamField>
+
+<ParamField body="size" type="string">
+输出尺寸，直接传宽高像素值。Doubao 这组模型通常按固定比例映射到固定像素尺寸。
+</ParamField>
+
+<ParamField body="image" type="array<string> | string">
+可选参考图输入。你给的 Apifox 定义为“图片链接或者 BASE64 数组”，当前插件也是把参考图编码成 Base64 数组后放进这个字段。
+</ParamField>
+
+<ParamField body="response_format" type="string">
+可选返回格式。常见值为 `url`、`b64_json`。若不传，最终返回格式取决于上游和网关兼容层。
+</ParamField>
+
+<ParamField body="quality" type="string">
+质量字段。统一图像 DTO 支持接收，但 Doubao 是否实际消费该字段取决于最终上游。
+</ParamField>
+
+<ParamField body="style" type="string | object">
+风格字段。统一图像 DTO 支持接收，是否生效取决于具体 Doubao 渠道。
+</ParamField>
+
+<ParamField body="background" type="string | object">
+背景控制字段。统一图像 DTO 支持接收，是否生效取决于具体 Doubao 渠道。
+</ParamField>
+
+<ParamField body="watermark" type="boolean">
+显式水印开关。当前统一图像 DTO 中该字段使用指针类型，`false` 与不传语义不同。
+</ParamField>
+
+## 尺寸映射
+
+你给的 Apifox 和插件里的 `DOUBAO_SIZE_MAP` 一致，可按下表使用：
+
+| 宽高比 | `size` 值 |
+| --- | --- |
+| `1:1` | `2048x2048` |
+| `4:3` | `2304x1728` |
+| `3:4` | `1728x2304` |
+| `16:9` | `2560x1440` |
+| `9:16` | `1440x2560` |
+| `3:2` | `2496x1664` |
+| `2:3` | `1664x2496` |
+| `21:9` | `3024x1296` |
+
+<Info>
+和 Gemini 不同，Doubao 这组接口在你现有插件里不是传“比例枚举”，而是先把比例映射成具体像素尺寸，再把该尺寸写入 `size`。
+</Info>
+
+## 文生图 vs 图生图
+
+| 场景 | 关键字段 | 说明 |
+| --- | --- | --- |
+| 文生图 | `prompt` + `size` | 最基础写法 |
+| 图生图 | `prompt` + `size` + `image` | `image` 可放一张或多张参考图 |
+
+## Response
+
+<ResponseField name="created" type="integer">
+生成时间戳。
+</ResponseField>
+
+<ResponseField name="data[].url" type="string">
+返回图片 URL。当前插件遇到该字段时会再下载到本地。
+</ResponseField>
+
+<ResponseField name="data[].b64_json" type="string">
+返回图片 Base64 数据。当前插件会优先使用这个字段。
+</ResponseField>
+
+<ResponseField name="data[].revised_prompt" type="string">
+部分上游会返回调整后的提示词。
+</ResponseField>
+
+## 相关接口
+
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [图像系列概览](/api-reference/images/overview)
+- [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)

@@ -80,6 +80,13 @@
             ]
           },
           {
+            "group": "Doubao Seedream",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/doubao-seedream/generation"
+            ]
+          },
+          {
             "group": "OpenAI Images 兼容",
             "expanded": true,
             "pages": [

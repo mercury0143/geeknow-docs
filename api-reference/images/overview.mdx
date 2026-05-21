@@ -1,11 +1,11 @@
 ---
 title: 图像系列概览
-description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原生图像能力入口。
+description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原生图像能力入口。
 ---
 
 # 图像系列
 
-图像能力目前主要分成四类：按模型分组的 Gemini 官方生图入口、按模型分组的 GPT Image 生成入口、OpenAI Images 兼容生成/编辑入口，以及 Midjourney 专用任务接口。
+图像能力目前主要分成五类：按模型分组的 Gemini 官方生图入口、按模型分组的 GPT Image 生成入口、Doubao Seedream 统一生图入口、OpenAI Images 兼容生成/编辑入口，以及 Midjourney 专用任务接口。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
@@ -25,6 +25,9 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
   </Card>
   <Card title="gpt-image-2-pro" icon="sparkles" href="/api-reference/images/gpt-image-2-pro/generation">
     `POST /v1/images/generations`，补充 `2K`、`4K` 高分辨率档位。
+  </Card>
+  <Card title="Doubao Seedream" icon="image-upscale" href="/api-reference/images/doubao-seedream/generation">
+    `POST /v1/images/generations`，支持 Seedream 文生图与 `image` 数组图生图。
   </Card>
   <Card title="OpenAI Images 兼容" icon="wand-sparkles" href="/api-reference/images/gpt-image-1/overview">
     基于 `POST /v1/images/generations`、`POST /v1/images/edits`、`POST /v1/edits` 的兼容入口说明。
@@ -66,10 +69,11 @@ description: 汇总按模型分组的 GPT Image 文档、OpenAI Images 兼容路
 4. [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)
 5. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 6. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
-7. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-8. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-9. [上传图片](/api-reference/uploads/image-upload)
-10. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
+7. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+8. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+9. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
+10. [上传图片](/api-reference/uploads/image-upload)
+11. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
 
 ## 相关页面
 
