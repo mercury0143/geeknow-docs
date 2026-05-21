@@ -1,14 +1,14 @@
 ---
 title: Veo 视频概览
-description: 按模型系列整理 Veo 视频生成与任务查询接口，当前以 `main.py` 的最新 JSON 提交流程为准。
+description: 按模型系列整理 Veo 视频生成与任务查询接口。
 ---
 
 # Veo 视频
 
-Veo 系列当前也走 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`。在 `main.py` 里，`veo*` 同样属于 JSON 提交模型。
+Veo 系列当前也走 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，并以 JSON 请求为主。
 
 - 入口路由仍然是 `POST /v1/videos`。
-- `main.py` 里 `veo_3_1`、`veo_3_1-fast` 已归入 JSON 提交模型。
+- 当前以 JSON 提交为主。
 - 参考图会先放进 `input_reference`，后续由网关映射到 Gemini/Vertex Veo 请求结构。
 - 当前只整理两个模型：`veo_3_1`、`veo_3_1-fast`。
 
@@ -33,7 +33,7 @@ Veo 系列当前也走 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`。在 `m
 | 请求格式 | JSON |
 | 常见输入字段 | `model`、`prompt`、`size`、`seconds`、`input_reference`、`metadata` |
 | 参考图字段 | `input_reference` |
-| 参考生视频约束 | `main.py` 里会把参考生视频模式强制约束到 `16:9` |
+| 参考生视频约束 | 当前参考生视频模式会强制约束到 `16:9` |
 | 查询接口 | `GET /v1/videos/{task_id}` |
 
 ## 相关页面

@@ -1,16 +1,16 @@
 ---
 title: Veo 视频生成
-description: 使用 `POST /v1/videos` 调用 Veo 模型提交异步视频任务，当前以 `main.py` 的 JSON 提交流程为准。
+description: 使用 `POST /v1/videos` 调用 Veo 模型提交异步视频任务。
 api: "POST /v1/videos"
 ---
 
 # Veo 视频生成
 
-Veo 系列当前通过 `POST /v1/videos` 提交。和旧文档里的 multipart 说法不同，现有插件脚本里 `veo*` 已经走 JSON 提交。
+Veo 系列当前通过 `POST /v1/videos` 提交，并以 JSON 提交为主。
 
 - 路由入口是 `POST /v1/videos`。
 - 当前模型只有 `veo_3_1`、`veo_3_1-fast`。
-- `main.py` 会把 `size` 转换成 `metadata.output_config.resolution` 与 `aspect_ratio` 一并提交。
+- 当前会把 `size` 转换成 `metadata.output_config.resolution` 与 `aspect_ratio` 一并提交。
 - 参考图仍由 `input_reference` 表达，但 JSON 请求里通常表现为 URL、base64 或 Data URL。
 
 ## 当前模型
@@ -140,15 +140,15 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="size" type="string">
-尺寸字符串。脚本常见会传 `720x1280` 或 `1280x720`，并据此推导 Veo 的分辨率和宽高比。
+尺寸字符串。当前常见会传 `720x1280` 或 `1280x720`，并据此推导 Veo 的分辨率和宽高比。
 </ParamField>
 
 <ParamField body="seconds" type="string | integer">
-目标时长。当前脚本会统一塞进 `seconds`；网关也会兼容 `duration` 与 `metadata.durationSeconds`。
+目标时长。当前通过 `seconds` 提交；网关也会兼容 `duration` 与 `metadata.durationSeconds`。
 </ParamField>
 
 <ParamField body="input_reference" type="string | array<string>">
-参考图输入。当前脚本会把文件转成 Data URL 注入 JSON；Veo 适配层也兼容 multipart 文件、URL 与 Data URL。
+参考图输入。当前 JSON 请求可使用 URL、base64、data URI；Veo 适配层也兼容 multipart 文件上传。
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -165,7 +165,7 @@ Authorization: Bearer YOUR_API_KEY
 | --- | --- |
 | 请求格式 | JSON |
 | 参考图格式 | 支持 URL、base64、data URI，也兼容 multipart 文件 |
-| 参考生视频模式 | `main.py` 会把宽高比强制收敛到 `16:9` |
+| 参考生视频模式 | 会把宽高比强制收敛到 `16:9` |
 | 参数映射 | `size` 会进一步映射到 Veo 所需的 `resolution`、`aspectRatio` |
 
 ## 相关接口
