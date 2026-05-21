@@ -14,6 +14,45 @@ api: "POST /v1beta/models/{model}:generateContent"
 - 插件里虽然允许选择 `2K`，但这个模型会实际回落为 `1K`。
 - 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
 
+## 先看懂图生图
+
+Gemini 这里没有单独的“编辑接口”。图生图就是把参考图直接作为输入拼进 `contents[].parts[]`。
+
+最简单的理解是：
+
+- 文生图：`parts[]` 里只有文字
+- 图生图：`parts[]` 里有文字，也有图片
+
+也就是说，提示词和参考图是一起发给模型的。
+
+## 图生图最小示例
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "参考这张图的构图，生成更适合宣传页的横版图片" },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE"
+          }
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageConfig": {
+      "aspectRatio": "16:9",
+      "imageSize": "1K"
+    }
+  }
+}
+```
+
 ## 方法与路径
 
 ```http
@@ -55,6 +94,27 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-2.5-flash-image-previe
 | `generationConfig.responseModalities` | 插件默认 `["IMAGE", "TEXT"]` |
 | `generationConfig.imageConfig.aspectRatio` | 图片比例 |
 | `generationConfig.imageConfig.imageSize` | 图片清晰度 |
+
+## 图生图到底看哪几个字段
+
+| 字段 | 图生图里的作用 |
+| --- | --- |
+| `parts[].text` | 描述要生成什么、保留什么、改什么 |
+| `parts[].inlineData.mimeType` | 标记参考图格式 |
+| `parts[].inlineData.data` | 参考图 Base64 内容 |
+| `imageConfig.aspectRatio` | 最终出图比例 |
+| `imageConfig.imageSize` | 最终出图清晰度 |
+
+## 返回后怎么看图片
+
+通常看这里：
+
+- `candidates[0].content.parts[].inlineData.data`
+
+这个字段在你的插件里可能是：
+
+1. Base64 图片数据
+2. 图片 URL
 
 <Info>
 根据 `main.py` 当前实现，这个模型会把请求中的 `imageSize` 强制改成 `1K`；即使前端或文档示例里填写 `2K`，插件实际发出去的仍然是 `1K`。

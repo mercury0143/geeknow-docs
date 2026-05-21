@@ -14,6 +14,69 @@ api: "POST /v1beta/models/{model}:generateContent"
 - 插件里 `responseModalities` 默认同时请求 `IMAGE` 和 `TEXT`。
 - 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
 
+## 先看懂图生图
+
+Gemini 这里的图生图，本质上就是：
+
+1. 把文字提示词放进 `parts[].text`
+2. 把参考图按顺序继续塞进同一个 `parts[]`
+3. 让模型在同一次 `generateContent` 里同时看到“文字要求 + 图片参考”
+
+最关键的区别只有一处：
+
+- 文生图：`parts[]` 里只有 `text`
+- 图生图：`parts[]` 里除了 `text`，还会追加一个或多个 `inlineData`
+
+也就是说，Gemini 不是单独再开一个“edit”接口；它是直接在 `generateContent` 里，把图片当作输入的一部分传进去。
+
+## 文生图 vs 图生图
+
+| 场景 | `parts[]` 内容 | 说明 |
+| --- | --- | --- |
+| 文生图 | 只有 `text` | 纯提示词生成 |
+| 图生图 | `text` + 一个或多个 `inlineData` | 让模型参考已有图片风格、主体或构图 |
+
+## 图生图怎么传
+
+你只需要记住一个规则：
+
+- 第一类内容是提示词：`{ "text": "..." }`
+- 第二类内容是参考图：`{ "inlineData": { "mimeType": "...", "data": "BASE64..." } }`
+
+插件里的实际做法也是这样：
+
+- 先放 `prompt`
+- 再把每一张参考图转成 Base64
+- 逐张 append 到同一个 `parts[]`
+
+## 图生图最小示例
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "保留参考图的主体氛围，重做成更高级的海报" },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE"
+          }
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageConfig": {
+      "aspectRatio": "16:9",
+      "imageSize": "2K"
+    }
+  }
+}
+```
+
 ## 方法与路径
 
 ```http
@@ -121,6 +184,37 @@ print(resp.json())
   }
 }
 ```
+
+## 图生图字段解释
+
+| 字段 | 图生图里的作用 |
+| --- | --- |
+| `parts[].text` | 告诉模型“你要怎么改、保留什么、输出成什么风格” |
+| `parts[].inlineData.mimeType` | 声明参考图格式 |
+| `parts[].inlineData.data` | 参考图的 Base64 内容 |
+| `imageConfig.aspectRatio` | 约束最终出图比例 |
+| `imageConfig.imageSize` | 约束最终出图清晰度 |
+
+## 能传几张参考图
+
+从你的 `main.py` 现有实现看，插件会遍历 `reference_images`，把每一张图都追加到 `parts[]` 里，所以文档上可以理解为：
+
+- 支持 1 张参考图
+- 也支持多张参考图
+- 多张时就是连续放多个 `inlineData`
+
+## 返回后怎么看结果
+
+Gemini 生图返回的图片通常在：
+
+- `candidates[0].content.parts[].inlineData.data`
+
+这个字段可能有两种情况：
+
+1. 直接是 Base64 图片数据
+2. 直接是图片 URL
+
+你的插件已经兼容了这两种返回方式，所以文档里看到 `BASE64_OR_URL` 是有意这么写的。
 
 ## Body
 
