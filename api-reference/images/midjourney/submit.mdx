@@ -1,0 +1,308 @@
+---
+title: Midjourney 任务提交
+description: 提交 Midjourney 的 imagine、blend、modal、describe、shorten、swap face、video 和上传 Discord 图片任务。
+api: "POST /mj/submit/imagine"
+---
+
+# Midjourney 任务提交
+
+Midjourney 提交接口统一属于 `/mj/submit/*` 这一组。不同动作使用不同路径，但成功响应风格基本一致。
+
+## 通用响应
+
+<ResponseExample>
+
+```json 200
+{
+  "code": 1,
+  "description": "Submit success",
+  "result": "1712158011464906"
+}
+```
+
+</ResponseExample>
+
+<ResponseField name="code" type="integer">
+状态码。常见值：`1` 提交成功、`22` 排队中、`23` 队列已满、`24` prompt 可能包含敏感词。
+</ResponseField>
+
+<ResponseField name="description" type="string">
+状态说明。
+</ResponseField>
+
+<ResponseField name="result" type="string | array<string>">
+任务 ID。上传 Discord 图片接口返回的是图片 URL 数组。
+</ResponseField>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 提交 Imagine 任务
+
+```http
+POST /mj/submit/imagine
+```
+
+执行 `Imagine` 操作，提交绘图任务。
+
+```json
+{
+  "mode": "RELAX",
+  "prompt": "Cat",
+  "base64Array": [
+    "data:image/png;base64,xxx1",
+    "data:image/png;base64,xxx2"
+  ],
+  "state": "",
+  "notifyHook": ""
+}
+```
+
+<ParamField body="mode" type="string" required>
+调用模式，常见值为 `RELAX`、`FAST`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+提示词。
+</ParamField>
+
+<ParamField body="base64Array" type="array<string>">
+垫图 Base64 数组。
+</ParamField>
+
+<ParamField body="state" type="string">
+自定义参数。
+</ParamField>
+
+<ParamField body="notifyHook" type="string">
+回调地址。
+</ParamField>
+
+## 提交 Blend 任务
+
+```http
+POST /mj/submit/blend
+```
+
+执行 `Blend` 操作，提交融图任务。
+
+```json
+{
+  "mode": "RELAX",
+  "base64Array": [
+    "data:image/png;base64,xxx1",
+    "data:image/png;base64,xxx2"
+  ],
+  "dimensions": "SQUARE",
+  "botType": "mj",
+  "notifyHook": "",
+  "state": ""
+}
+```
+
+<ParamField body="mode" type="string" required>
+调用模式，常见值为 `RELAX`、`FAST`。
+</ParamField>
+
+<ParamField body="base64Array" type="array<string>" required>
+图片 Base64 数组。
+</ParamField>
+
+<ParamField body="dimensions" type="string">
+比例。常见值：`PORTRAIT`、`SQUARE`、`LANDSCAPE`。
+</ParamField>
+
+<ParamField body="botType" type="string">
+bot 类型，常见值：`mj`、`niji`。
+</ParamField>
+
+<ParamField body="notifyHook" type="string">
+回调地址。
+</ParamField>
+
+<ParamField body="state" type="string">
+自定义参数。
+</ParamField>
+
+## 提交 Modal 任务
+
+```http
+POST /mj/submit/modal
+```
+
+当其他任务返回 `code = 21` 或需要补充提示词时，可调用该接口继续提交。
+
+```json
+{
+  "taskId": "1712204995849323",
+  "maskBase64": "data:image/png;base64,xxx1",
+  "prompt": "Cat"
+}
+```
+
+<ParamField body="taskId" type="string" required>
+原任务 ID。
+</ParamField>
+
+<ParamField body="maskBase64" type="string">
+局部重绘蒙版 Base64。
+</ParamField>
+
+<ParamField body="prompt" type="string">
+新的提示词。
+</ParamField>
+
+## 提交 Describe 任务
+
+```http
+POST /mj/submit/describe
+```
+
+执行 `Describe` 操作，提交图生文任务。
+
+```json
+{
+  "mode": "RELAX",
+  "base64": "data:image/png;base64,xxx",
+  "botType": "mj",
+  "notifyHook": "",
+  "state": ""
+}
+```
+
+<Warning>
+你给的 Apifox 使用 `base64` 字段；但当前项目 DTO 中显式接收的是 `base64Array`。如果上游渠道要求单图 `base64`，建议同时结合实际网关行为验证。文档这里保留 Apifox 的调用写法，但项目侧主要保证的是这条路由存在。
+</Warning>
+
+## 提交 Shorten 任务
+
+```http
+POST /mj/submit/shorten
+```
+
+执行 `Shorten` 操作。
+
+```json
+{
+  "mode": "RELAX",
+  "prompt": "Cat",
+  "botType": "mj",
+  "notifyHook": "",
+  "state": ""
+}
+```
+
+## 提交 SwapFace 任务
+
+```http
+POST /mj/insight-face/swap
+```
+
+提交 `SwapFace` 换脸任务。
+
+项目当前代码实际按 JSON Base64 方式解析：
+
+```json
+{
+  "sourceBase64": "data:image/png;base64,xxx1",
+  "targetBase64": "data:image/png;base64,xxx2"
+}
+```
+
+<Warning>
+这和你给的 Apifox `multipart/form-data` 文件上传示例不一样。当前网关代码实际校验的是 `sourceBase64` 与 `targetBase64`，缺少时会返回 `sour_base64_and_target_base64_is_required`。
+</Warning>
+
+## 提交 Video 任务
+
+```http
+POST /mj/submit/video
+```
+
+Video 接口当前支持两种模式：
+
+1. 基于 `prompt` 直接生成视频
+2. 基于已有 `taskId` 继续生成视频
+
+```json
+{
+  "mode": "FAST",
+  "prompt": "a car",
+  "taskId": "1712204995849323",
+  "index": 1,
+  "motion": "low",
+  "image": "url",
+  "action": "extend",
+  "state": "",
+  "notifyHook": ""
+}
+```
+
+<ParamField body="mode" type="string" required>
+调用模式，常见值为 `RELAX`、`FAST`。
+</ParamField>
+
+<ParamField body="taskId" type="string">
+父任务 ID。基于已有图片扩展视频时使用。
+</ParamField>
+
+<ParamField body="index" type="integer">
+视频索引号。
+</ParamField>
+
+<ParamField body="motion" type="string">
+运动强度，常见值：`low`、`high`。
+</ParamField>
+
+<ParamField body="action" type="string">
+视频任务动作。示例里常见值为 `extend`。
+</ParamField>
+
+## 上传文件到 Discord
+
+```http
+POST /mj/submit/upload-discord-images
+```
+
+上传图片到 Discord，返回图片 URL 列表。
+
+```json
+{
+  "mode": "RELAX",
+  "base64Array": [
+    "data:image/png;base64,xxx1"
+  ]
+}
+```
+
+```json
+{
+  "code": 1,
+  "description": "success",
+  "result": [
+    "https://cdn.discordapp.com/attachments/..."
+  ]
+}
+```
+
+## 常见本地校验错误
+
+| 描述 | 常见触发条件 |
+| --- | --- |
+| `bind_request_body_failed` | 请求体格式错误 |
+| `prompt_is_required` | Imagine 未传 `prompt` |
+| `task_id_is_required` | 需要基于任务继续操作时未传 `taskId` |
+| `action_is_required` | 继续操作类接口缺少 `action` |
+| `index_is_required` | 继续操作类接口缺少 `index` |
+| `content_is_required` | simple-change 类操作缺少 `content` |
+| `task_not_found` | 传入的原任务不存在 |
+| `task_status_not_success` | 需要依赖原任务成功态时，原任务尚未成功 |
+| `quota_not_enough` | 余额不足 |
+
+## 相关接口
+
+- [Midjourney 概览](/api-reference/images/midjourney/overview)
+- [Midjourney 任务查询](/api-reference/images/midjourney/query)

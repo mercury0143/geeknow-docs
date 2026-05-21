@@ -73,6 +73,15 @@
             ]
           },
           {
+            "group": "Midjourney",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/midjourney/overview",
+              "api-reference/images/midjourney/submit",
+              "api-reference/images/midjourney/query"
+            ]
+          },
+          {
             "group": "OpenAI Images 兼容",
             "expanded": true,
             "pages": [
@@ -103,8 +112,7 @@
         "group": "任务管理",
         "pages": [
           "api-reference/tasks/overview",
-          "api-reference/tasks/task-status",
-          "api-reference/tasks/midjourney-task"
+          "api-reference/tasks/task-status"
         ]
       },
       {

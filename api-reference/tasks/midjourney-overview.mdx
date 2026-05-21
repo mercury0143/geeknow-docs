@@ -1,0 +1,84 @@
+---
+title: Midjourney 概览
+description: 汇总 Midjourney 的任务提交、任务查询、图片代理和常见返回码。
+---
+
+# Midjourney 概览
+
+Midjourney 相关接口使用独立的一套路由，不和 OpenAI Images 或统一视频任务结构混用。
+
+- 任务提交主要走 `/mj/submit/*`
+- 任务查询主要走 `/mj/task/*`
+- 公开图片可通过 `/mj/image/{id}` 访问
+- 常见操作包括 `IMAGINE`、`BLEND`、`DESCRIBE`、`SHORTEN`、`MODAL`、`VIDEO`、`SWAP_FACE`
+
+<CardGroup cols={2}>
+  <Card title="任务提交" icon="wand-sparkles" href="/api-reference/tasks/midjourney-submit">
+    `POST /mj/submit/imagine`、`/blend`、`/modal`、`/describe`、`/shorten`、`/video`、`/upload-discord-images`、`/insight-face/swap`
+  </Card>
+  <Card title="任务查询" icon="hourglass" href="/api-reference/tasks/midjourney-query">
+    `GET /mj/task/{id}/fetch`、`POST /mj/task/list-by-condition`、`GET /mj/task/{id}/image-seed`
+  </Card>
+</CardGroup>
+
+## 路由清单
+
+| Method | Path | 说明 |
+| --- | --- | --- |
+| `POST` | `/mj/submit/imagine` | 提交 Imagine 任务 |
+| `POST` | `/mj/submit/blend` | 提交 Blend 任务 |
+| `POST` | `/mj/submit/modal` | 提交 Modal 任务 |
+| `POST` | `/mj/submit/describe` | 提交 Describe 任务 |
+| `POST` | `/mj/submit/shorten` | 提交 Shorten 任务 |
+| `POST` | `/mj/submit/video` | 提交 Video 任务 |
+| `POST` | `/mj/submit/upload-discord-images` | 上传图片到 Discord |
+| `POST` | `/mj/insight-face/swap` | 提交 SwapFace 任务 |
+| `GET` | `/mj/task/{id}/fetch` | 查询单个任务 |
+| `POST` | `/mj/task/list-by-condition` | 批量查询任务 |
+| `GET` | `/mj/task/{id}/image-seed` | 查询任务 seed |
+| `GET` | `/mj/image/{id}` | 代理返回任务图片 |
+
+## 常见返回码
+
+Midjourney 提交接口常见返回结构为：
+
+```json
+{
+  "code": 1,
+  "description": "Submit success",
+  "result": "1712158011464906"
+}
+```
+
+常见 `code` 含义：
+
+| `code` | 说明 |
+| --- | --- |
+| `1` | 提交成功 |
+| `21` | 任务已存在，通常代表已有处理中或已有结果 |
+| `22` | 排队中 |
+| `23` | 队列已满，请稍后再试 |
+| `24` | prompt 可能包含敏感词 |
+| `4` | 本地参数校验或网关处理错误 |
+| `30` | 当前分组负载已饱和 |
+
+<Info>
+当前网关会把部分上游 `21`、`22` 状态转成成功写回客户端，因此你在实际调用时，可能看到响应是成功，但任务本质上仍处于“已存在”或“排队中”状态。稳妥做法仍然是拿 `result` 里的任务 ID 再去查询任务状态。
+</Info>
+
+## 常见字段约定
+
+| 字段 | 说明 |
+| --- | --- |
+| `mode` | 常见值为 `RELAX`、`FAST`，项目里还存在 `TURBO` 计费模式 |
+| `notifyHook` | 回调地址，项目当前代码使用驼峰写法 `notifyHook` |
+| `taskId` | 原任务 ID，用于基于已有任务继续操作 |
+| `base64Array` | 多图 Base64 数组 |
+| `maskBase64` | 局部重绘蒙版 |
+| `state` | 自定义透传字段 |
+
+## 推荐阅读顺序
+
+1. [Midjourney 任务提交](/api-reference/tasks/midjourney-submit)
+2. [Midjourney 任务查询](/api-reference/tasks/midjourney-query)
+3. [图片系列概览](/api-reference/images/overview)

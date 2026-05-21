@@ -1,0 +1,197 @@
+---
+title: Midjourney 任务查询
+description: 查询 Midjourney 单任务、批量任务和任务图片 seed。
+api: "GET /mj/task/{id}/fetch"
+---
+
+# Midjourney 任务查询
+
+Midjourney 查询接口用于轮询任务进度、获取最终图片信息，以及读取任务按钮和 seed。
+
+- 单任务查询走 `GET /mj/task/{id}/fetch`
+- 批量查询走 `POST /mj/task/list-by-condition`
+- 图片 seed 查询走 `GET /mj/task/{id}/image-seed`
+
+## 查询单个任务
+
+```http
+GET /mj/task/{id}/fetch
+```
+
+```bash
+curl https://www.geeknow.top/mj/task/1712158011464906/fetch \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### 响应字段
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="action" type="string">
+任务动作，常见值包括 `IMAGINE`、`UPSCALE`、`VARIATION`、`ZOOM`、`PAN`、`DESCRIBE`、`BLEND`、`SHORTEN`、`SWAP_FACE`。
+</ResponseField>
+
+<ResponseField name="prompt" type="string">
+原始提示词。
+</ResponseField>
+
+<ResponseField name="promptEn" type="string">
+英文提示词。
+</ResponseField>
+
+<ResponseField name="description" type="string">
+任务描述。
+</ResponseField>
+
+<ResponseField name="submitTime" type="integer">
+提交时间。
+</ResponseField>
+
+<ResponseField name="startTime" type="integer">
+开始执行时间。
+</ResponseField>
+
+<ResponseField name="finishTime" type="integer">
+结束时间。
+</ResponseField>
+
+<ResponseField name="imageUrl" type="string">
+主图片地址。
+</ResponseField>
+
+<ResponseField name="videoUrl" type="string">
+视频地址。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值为 `NOT_START`、`SUBMITTED`、`MODAL`、`IN_PROGRESS`、`FAILURE`、`SUCCESS`、`CANCEL`。
+</ResponseField>
+
+<ResponseField name="progress" type="string">
+任务进度，例如 `0%`、`65%`、`100%`。
+</ResponseField>
+
+<ResponseField name="failReason" type="string">
+失败原因。
+</ResponseField>
+
+<ResponseField name="buttons" type="array<object> | null">
+图片下方可继续触发的操作按钮数组。
+</ResponseField>
+
+<ResponseField name="state" type="string">
+自定义参数。
+</ResponseField>
+
+<ResponseField name="imageUrls" type="array<object> | array<string>">
+图片列表。
+</ResponseField>
+
+### 响应示例
+
+<ResponseExample>
+
+```json 200 - 进行中
+{
+  "id": "1712158011464906",
+  "action": "IMAGINE",
+  "prompt": "Cat",
+  "promptEn": "Cat",
+  "description": "Submit success",
+  "submitTime": 1735689600000,
+  "startTime": 1735689610000,
+  "finishTime": 0,
+  "imageUrl": "",
+  "videoUrl": "",
+  "status": "IN_PROGRESS",
+  "progress": "65%",
+  "failReason": "",
+  "buttons": null,
+  "state": "",
+  "imageUrls": []
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "1712158011464906",
+  "action": "IMAGINE",
+  "prompt": "Cat",
+  "promptEn": "Cat",
+  "description": "success",
+  "submitTime": 1735689600000,
+  "startTime": 1735689610000,
+  "finishTime": 1735689720000,
+  "imageUrl": "https://.../image.png",
+  "videoUrl": "",
+  "status": "SUCCESS",
+  "progress": "100%",
+  "failReason": "",
+  "buttons": [
+    {
+      "customId": "MJ::JOB::upsample::1::xxx",
+      "emoji": "",
+      "label": "U1",
+      "type": 2,
+      "style": 2
+    }
+  ],
+  "state": "",
+  "imageUrls": [
+    {
+      "url": "https://.../image.png"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## 批量查询任务
+
+```http
+POST /mj/task/list-by-condition
+```
+
+```json
+{
+  "ids": [
+    "1712158011464906"
+  ]
+}
+```
+
+返回值是任务对象数组，字段与单任务查询基本一致。
+
+## 获取任务图片 seed
+
+```http
+GET /mj/task/{id}/image-seed
+```
+
+```json
+{
+  "code": 1,
+  "description": "",
+  "result": "1234567890"
+}
+```
+
+## 获取公开图片
+
+```http
+GET /mj/image/{id}
+```
+
+这个接口会代理任务图片，适合直接下载最终图片：
+
+```bash
+curl -L https://www.geeknow.top/mj/image/1712158011464906 --output output.png
+```
+
+## 相关接口
+
+- [Midjourney 概览](/api-reference/images/midjourney/overview)
+- [Midjourney 任务提交](/api-reference/images/midjourney/submit)
