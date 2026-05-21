@@ -1,0 +1,205 @@
+---
+title: Grok 视频生成
+description: 使用 `POST /v1/videos` 调用 Grok 视频系列模型提交异步生成任务。
+api: "POST /v1/videos"
+---
+
+# Grok 视频生成
+
+Grok 视频生成接口使用 `multipart/form-data` 提交，请优先按这里的字段组织请求。
+
+- 接口路径是 `POST /v1/videos`。
+- `input_reference` 是参考图字段，支持重复上传多张图片。
+- `grok-video-3-pro` 会自动固定为 `10` 秒，`grok-video-3-max` 会自动固定为 `15` 秒。
+- 基础版 `grok-video-3` 在脚本里没有额外固定秒数逻辑，按实际传参处理。
+
+## 当前可用模型
+
+- `grok-video-3`
+- `grok-video-3-pro`
+- `grok-video-3-max`
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=grok-video-3" \
+  -F "prompt=猫咪听歌摇头晃脑，下大雨" \
+  -F "aspect_ratio=2:3" \
+  -F "seconds=6" \
+  -F "size=720P" \
+  -F "input_reference=@reference.png"
+```
+
+```python
+import requests
+
+with open("reference.png", "rb") as f:
+    resp = requests.post(
+        "https://www.geeknow.top/v1/videos",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+        data={
+            "model": "grok-video-3",
+            "prompt": "猫咪听歌摇头晃脑，下大雨",
+            "aspect_ratio": "2:3",
+            "seconds": 6,
+            "size": "720P",
+        },
+        files={"input_reference": ("reference.png", f, "image/png")},
+        timeout=60,
+    )
+
+print(resp.json())
+```
+
+```javascript
+const formData = new FormData();
+formData.append("model", "grok-video-3");
+formData.append("prompt", "猫咪听歌摇头晃脑，下大雨");
+formData.append("aspect_ratio", "2:3");
+formData.append("seconds", "6");
+formData.append("size", "720P");
+formData.append("input_reference", fileInput.files[0]);
+
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+  body: formData,
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "grok-video-3",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "size": "720P"
+}
+```
+
+```json 400
+{
+  "error": {
+    "message": "prompt is required",
+    "type": "new_api_error",
+    "param": "",
+    "code": "invalid_request"
+  }
+}
+```
+
+```json 401
+{
+  "error": {
+    "message": "无效的令牌",
+    "type": "new_api_error",
+    "param": "",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+模型名称。当前 Grok 系列可用值为 `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+提示词。
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+尺寸比例。当前常见值为 `2:3`、`3:2`、`1:1`。
+</ParamField>
+
+<ParamField body="seconds" type="integer">
+目标秒数。对 `grok-video-3-pro` 和 `grok-video-3-max`，脚本会自动纠正为固定值。
+</ParamField>
+
+<ParamField body="size" type="string">
+分辨率档位，常用值是 `720P` 或 `1080P`。
+</ParamField>
+
+<ParamField body="input_reference" type="file">
+参考图文件。可重复传多次，对应多张 `input_reference` 上传。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+实际提交的模型名。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值有 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+进度百分比。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+创建时间戳。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出清晰度档位。
+</ResponseField>
+
+## 使用场景
+
+### 文生视频
+
+只传 `model`、`prompt`、`seconds`、`size` 这组字段即可。
+
+### 图生视频
+
+在文生视频的基础上追加一个或多个 `input_reference` 文件。
+
+### 固定时长模型
+
+如果你传的是 `grok-video-3-pro` 或 `grok-video-3-max`，应预期服务端按固定秒数处理。
+
+## 相关接口
+
+- [Grok 视频概览](./overview)
+- [Grok 任务查询](./query)

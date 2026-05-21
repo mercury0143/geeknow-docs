@@ -40,7 +40,7 @@
         ]
       },
       {
-        "group": "图片系列",
+        "group": "图像系列",
         "pages": [
           "api-reference/images/overview",
           "api-reference/images/model-matrix",
@@ -97,8 +97,15 @@
         "pages": [
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
-          "api-reference/videos/video-generations",
-          "api-reference/videos/openai-videos"
+          {
+            "group": "Grok 视频",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/grok/overview",
+              "api-reference/videos/grok/generation",
+              "api-reference/videos/grok/query"
+            ]
+          }
         ]
       },
       {
@@ -111,8 +118,7 @@
       {
         "group": "任务管理",
         "pages": [
-          "api-reference/tasks/overview",
-          "api-reference/tasks/task-status"
+          "api-reference/tasks/overview"
         ]
       },
       {
@@ -132,7 +138,7 @@
         "href": "/api-reference/texts/overview"
       },
       {
-        "label": "图片系列",
+        "label": "图像系列",
         "href": "/api-reference/images/overview"
       },
       {

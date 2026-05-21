@@ -1,6 +1,6 @@
 ---
 title: 上传图片
-description: 调用 `/api/upload/presign` 生成预签名上传地址，再把返回的 `public_url` 传给图像或视频接口。
+description: 调用 `/api/upload/presign` 生成预签名上传地址，再把返回的 `public_url` 传给接受公网素材 URL 的接口。
 api: "POST /api/upload/presign"
 ---
 
@@ -151,11 +151,11 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 使用场景
 
-### 上传后再做图生视频
+### 上传后再用于素材 URL 接口
 
 1. 调用 `/api/upload/presign` 取得 `upload_url` 与 `public_url`。
 2. 对 `upload_url` 发起 `PUT` 上传文件。
-3. 在 `/v1/video/generations` 或 `/v1/videos` 请求体中把 `public_url` 传给 `image`。
+3. 在接受公网素材 URL 的接口中把 `public_url` 作为输入字段传入。
 
 ## 注意事项
 
@@ -165,5 +165,5 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 相关接口
 
-- [统一视频生成接口](../videos/video-generations)
+- [视频系列概览](../videos/overview)
 - [图像系列概览](../images/overview)

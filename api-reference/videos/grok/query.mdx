@@ -1,0 +1,190 @@
+---
+title: Grok 任务查询
+description: 使用 `GET /v1/videos/{task_id}` 查询 Grok 视频任务进度、结果与错误信息。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Grok 任务查询
+
+Grok 系列任务提交后，需要通过 `GET /v1/videos/{task_id}` 轮询状态。现有插件脚本也是按这个路径查询，并在完成后优先读取 `output.url`、其次读取 `video_url`。
+
+- 接口路径是 `GET /v1/videos/{task_id}`。
+- 任务完成后通常可从 `video_url` 或 `output.url` 读取结果地址。
+- 如果直接下载 `video_url` 失败，脚本还会回退到 `GET /v1/videos/{task_id}/content`。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl https://www.geeknow.top/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python
+import requests
+
+resp = requests.get(
+    "https://www.geeknow.top/v1/videos/video_abc123",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/videos/video_abc123", {
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "grok-video-3",
+  "status": "processing",
+  "progress": 42,
+  "created_at": 1735689600,
+  "completed_at": 0,
+  "expires_at": 1735776000,
+  "seconds": "6",
+  "size": "720P",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": ""
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "grok-video-3",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689900,
+  "expires_at": 1735776000,
+  "seconds": "6",
+  "size": "720P",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "",
+    "code": ""
+  },
+  "video_url": "https://example.com/video.mp4"
+}
+```
+
+```json 200 - 失败
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "grok-video-3",
+  "status": "failed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689700,
+  "expires_at": 1735776000,
+  "seconds": "6",
+  "size": "720P",
+  "remixed_from_video_id": "",
+  "error": {
+    "message": "Content policy violation",
+    "code": "content_policy"
+  },
+  "video_url": ""
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField body="task_id" type="string" required>
+视频任务 ID。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值有 `processing`、`failed`、`completed`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+进度百分比。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+完成时间戳。
+</ResponseField>
+
+<ResponseField name="expires_at" type="integer">
+结果过期时间戳。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+输出时长。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出清晰度档位。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+视频地址。脚本在完成时会优先尝试读取这个字段，或兼容读取 `output.url`。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+失败原因对象。
+</ResponseField>
+
+## 轮询建议
+
+插件默认会持续轮询这个接口，并按以下顺序取结果地址：
+
+1. `output.url`
+2. `video_url`
+3. `url`
+4. `detail.url`
+
+如果直接下载返回的视频地址失败，再回退请求：
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+## 相关接口
+
+- [Grok 视频概览](./overview)
+- [Grok 视频生成](./generation)

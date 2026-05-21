@@ -17,7 +17,7 @@ description: "基于 `router/` 实际路由整理的 Mintlify 文档入口，覆
   </Card>
 
   <Card title="视频系列" icon="clapperboard" href="/api-reference/videos/overview">
-    `/v1/video/generations`、`/v1/videos`、`/kling/v1/*`、`/jimeng`、`/sora/v1/*`。
+    按模型系列整理的视频能力，当前先提供 Grok 视频的生成与查询文档。
   </Card>
 
   <Card title="音频系列" icon="audio-description" href="/api-reference/audio/overview">
@@ -54,7 +54,7 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
 - 异步任务接口提交后通常返回公开 `task_id` 或 OpenAI 兼容 `video id`。查询时再映射回真实上游任务。
 
 <Info>
-  如果你在文档里同时看到 `/v1/videos/{task_id}` 和 `/v1/video/generations/{task_id}`，前者是 OpenAI 视频兼容查询接口，后者是平台统一任务查询接口，它们对应同一批视频任务但返回结构不同。
+  视频文档正在从“按入口分组”切换为“按模型系列分组”。当前第一批已经整理的是 Grok。
 </Info>
 
 ## 路由来源
@@ -62,7 +62,7 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
 | 文件 | 主要覆盖内容 |
 | --- | --- |
 | `router/relay-router.go` | `/v1`、`/v1beta`、`/pg`、`/mj`、`/suno` 等文本、图像、音频和任务路由 |
-| `router/video-router.go` | `/v1/video/generations`、`/v1/videos`、`/kling/v1`、`/jimeng`、`/sora/v1` |
+| `router/video-router.go` | `/v1/videos`、`/kling/v1`、`/jimeng`、`/sora/v1` 等视频相关路由 |
 | `router/api-router.go` | `/api/upload/presign`、`/api/oauth/*`、`/api/usage/token`、用户和后台接口 |
 | `router/dashboard.go` | `/dashboard/billing/*` 与 `/v1/dashboard/billing/*` 兼容余额接口 |
 

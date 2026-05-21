@@ -1,60 +1,49 @@
 ---
 title: 视频系列概览
-description: 汇总统一视频任务入口、OpenAI Videos 兼容路由、Kling 官方路由和视频内容代理接口。
+description: 按模型系列整理当前视频文档，第一批先提供 Grok 系列的生成与查询页面。
 ---
 
 # 视频系列
 
-视频能力主要分为平台统一任务格式和 OpenAI Videos 兼容格式两套入口；两者最终都会落到异步任务体系中，再通过任务查询或内容代理获取结果。
+视频文档开始按模型系列组织，结构与图像系列、文本系列保持一致。当前第一批先整理 Grok，后续再继续补齐 Sora、Veo、Seedance、wan2.6、Vidu、Kling、Hailuo 等页面。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/videos/model-matrix">
-    按模型家族查看视频接口支持范围、生成模式、固定时长和参考图传递方式。
+    按模型家族查看视频能力、推荐入口、参考图传递方式和固定时长规则。
   </Card>
-  <Card title="统一任务入口" icon="film" href="/api-reference/videos/video-generations">
-    `POST /v1/video/generations`，适合统一接入多家视频供应商。
+  <Card title="Grok 视频概览" icon="clapperboard" href="/api-reference/videos/grok/overview">
+    `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max` 的总览页。
   </Card>
-  <Card title="OpenAI Videos" icon="clapperboard" href="/api-reference/videos/openai-videos">
-    `POST /v1/videos`、`GET /v1/videos/{task_id}`、`POST /v1/videos/{video_id}/remix`。
+  <Card title="Grok 视频生成" icon="film" href="/api-reference/videos/grok/generation">
+    `POST /v1/videos`，按 Grok 系列真实字段提交任务。
   </Card>
-  <Card title="Kling 官方" icon="sparkles">
-    `/kling/v1/videos/text2video` 和 `/kling/v1/videos/image2video`，请求会先做格式转换再分发。
-  </Card>
-  <Card title="任务与下载" icon="download" href="/api-reference/tasks/task-status">
-    `GET /v1/video/generations/{task_id}` 与 `GET /v1/videos/{task_id}/content`。
+  <Card title="Grok 任务查询" icon="hourglass" href="/api-reference/videos/grok/query">
+    `GET /v1/videos/{task_id}`，轮询任务状态并获取结果。
   </Card>
 </CardGroup>
 
-## 路由清单
+## 当前分组
 
-| Method | Path | 说明 |
+| 模型系列 | 状态 | 页面 |
 | --- | --- | --- |
-| `POST` | `/v1/video/generations` | 统一视频生成入口 |
-| `GET` | `/v1/video/generations/{task_id}` | 统一任务查询接口 |
-| `POST` | `/v1/videos` | OpenAI Videos 兼容创建接口 |
-| `GET` | `/v1/videos/{task_id}` | OpenAI Videos 兼容查询接口 |
-| `POST` | `/v1/videos/{video_id}/remix` | 对已有视频任务发起 remix |
-| `GET` | `/v1/videos/{task_id}/content` | 代理下载视频内容，支持 TokenAuth 或 UserAuth |
-| `POST` | `/kling/v1/videos/text2video` | Kling 官方文生视频 |
-| `POST` | `/kling/v1/videos/image2video` | Kling 官方图生视频 |
-| `GET` | `/kling/v1/videos/text2video/{task_id}` | Kling 文生视频查询 |
-| `GET` | `/kling/v1/videos/image2video/{task_id}` | Kling 图生视频查询 |
-| `POST` | `/jimeng/` | 即梦官方格式映射入口 |
-| `POST` | `/sora/v1/characters` | Sora 角色创建，当前仅允许 KK 渠道 |
+| Grok | 已整理 | [概览](/api-reference/videos/grok/overview) |
+| Sora / Sora Pro | 待整理 | 后续补充 |
+| Veo | 待整理 | 后续补充 |
+| 豆包 Seedance | 待整理 | 后续补充 |
+| 阿里 wan2.6 | 待整理 | 后续补充 |
+| Vidu | 待整理 | 后续补充 |
+| Kling | 待整理 | 后续补充 |
+| Hailuo | 待整理 | 后续补充 |
 
-## 统一入口说明
+## 整理原则
 
-- `/v1/video/generations` 与 `/v1/videos` 都会分发到具体视频渠道。
-- Remix 请求会先根据 `video_id` 回查原始任务，再锁定到原渠道继续处理。
-- 公开返回给客户端的任务 ID 是平台生成的 `public task id`，不会直接暴露上游真实任务 ID。
-
-<Info>
-视频接口默认是异步任务。提交成功通常先返回 `queued` 或 `in_progress` 状态，再通过查询接口拿到 `video_url` 或代理下载地址。
-</Info>
+- 每个模型系列独立成组，不再以通用入口页面作为视频系列主结构。
+- 每一组优先描述真实请求字段、参考图传法、固定时长和任务查询方式。
+- 细节优先以现有插件脚本的实际行为为准。
 
 ## 推荐阅读顺序
 
 1. [视频模型支持矩阵](./model-matrix)
-2. [统一视频生成接口](./video-generations)
-3. [OpenAI 视频兼容接口](./openai-videos)
-4. [获取任务状态](../tasks/task-status)
+2. [Grok 视频概览](./grok/overview)
+3. [Grok 视频生成](./grok/generation)
+4. [Grok 任务查询](./grok/query)

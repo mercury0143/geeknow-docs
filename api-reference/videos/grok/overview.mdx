@@ -1,0 +1,53 @@
+---
+title: Grok 视频概览
+description: 按模型系列整理 `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max` 的视频生成与任务查询接口。
+---
+
+# Grok 视频
+
+Grok 视频系列当前按模型分组整理，主要围绕 `POST /v1/videos` 和 `GET /v1/videos/{task_id}` 这一组接口展开。
+
+- 请求方式以 `multipart/form-data` 为准。
+- 参考图统一通过 `input_reference` 传入，支持单张或多张。
+- 常用字段是 `model`、`prompt`、`aspect_ratio`、`seconds`、`size`。
+- 文档优先以现有插件脚本的真实请求行为为准。
+
+<CardGroup cols={2}>
+  <Card title="视频生成" icon="clapperboard" href="/api-reference/videos/grok/generation">
+    `POST /v1/videos`，提交 Grok 视频生成任务。
+  </Card>
+  <Card title="任务查询" icon="hourglass" href="/api-reference/videos/grok/query">
+    `GET /v1/videos/{task_id}`，查询任务状态并获取结果地址。
+  </Card>
+</CardGroup>
+
+## 支持模型
+
+| 模型 | 说明 | 时长规则 |
+| --- | --- | --- |
+| `grok-video-3` | 基础版，支持文生视频、首帧生视频、首尾帧、参考生视频 | 按请求传入 |
+| `grok-video-3-pro` | Pro 版 | 固定 `10s` |
+| `grok-video-3-max` | Max 版 | 固定 `15s` |
+
+## 常见能力
+
+| 能力 | 传参方式 | 说明 |
+| --- | --- | --- |
+| 文生视频 | 仅传文本字段 | 最基础调用方式 |
+| 首帧生视频 | `input_reference` 传 1 张图 | 可把首帧图或指定参考图作为第一张输入 |
+| 首尾帧 | `input_reference` 传 2 张图 | 按顺序传入首帧、尾帧 |
+| 参考生视频 | `input_reference` 传多张图 | 脚本侧最多读取 6 张 |
+
+## 参数约束
+
+| 字段 | 可用值 | 说明 |
+| --- | --- | --- |
+| `aspect_ratio` | `2:3`、`3:2`、`1:1` | 当前按现有脚本与 Apifox 定义整理 |
+| `size` | `720P`、`1080P` | 脚本里优先使用这组值 |
+| `seconds` | 整数 | `pro/max` 会被脚本自动纠正为固定秒数 |
+
+## 相关页面
+
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)
+- [Grok 视频生成](./generation)
+- [Grok 任务查询](./query)
