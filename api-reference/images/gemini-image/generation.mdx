@@ -1,0 +1,370 @@
+---
+title: Gemini 图像生成 API
+description: 使用 `POST /v1beta/models/{model}:generateContent` 调用 Gemini 图像生成接口，统一覆盖 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview` 和 `gemini-3.1-flash-image-preview`。
+api: "POST /v1beta/models/{model}:generateContent"
+---
+
+# Gemini 图像生成 API
+
+Gemini 图像模型统一使用官方 `generateContent` 格式生图，适合直接复用 `contents` / `parts` 结构。
+
+- 路径为 `POST /v1beta/models/{model}:generateContent`。
+- 文生图和图生图都走同一套 `contents[].parts[]` 结构。
+- 参考图通过 `parts[].inlineData` 传入。
+- 插件里 `responseModalities` 默认同时请求 `IMAGE` 和 `TEXT`。
+- 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
+
+## 支持模型
+
+- `gemini-3-pro-image-preview`
+- `gemini-2.5-flash-image-preview`
+- `gemini-3.1-flash-image-preview`
+
+## 模型差异
+
+| 模型 | `imageSize` 行为 | 说明 |
+| --- | --- | --- |
+| `gemini-3-pro-image-preview` | 支持 `1K`、`2K` | 会按请求里的 `imageSize` 真实下发 |
+| `gemini-2.5-flash-image-preview` | 实际回落为 `1K` | 即使界面允许选 `2K`，插件最终也会发 `1K` |
+| `gemini-3.1-flash-image-preview` | 实际回落为 `1K` | 即使界面允许选 `2K`，插件最终也会发 `1K` |
+
+## 先看懂图生图
+
+Gemini 这里没有单独的“编辑接口”。图生图就是把参考图直接作为输入拼进 `contents[].parts[]`。
+
+最简单的理解是：
+
+- 文生图：`parts[]` 里只有文字
+- 图生图：`parts[]` 里有文字，也有图片
+
+也就是说，提示词和参考图是一起发给模型的。
+
+## 文生图 vs 图生图
+
+| 场景 | `parts[]` 内容 | 说明 |
+| --- | --- | --- |
+| 文生图 | 只有 `text` | 纯提示词生成 |
+| 图生图 | `text` + 一个或多个 `inlineData` | 让模型参考已有图片风格、主体或构图 |
+
+## 图生图怎么传
+
+你只需要记住一个规则：
+
+- 第一类内容是提示词：`{ "text": "..." }`
+- 第二类内容是参考图：`{ "inlineData": { "mimeType": "...", "data": "BASE64..." } }`
+
+插件里的实际做法也是这样：
+
+- 先放 `prompt`
+- 再把每一张参考图转成 Base64
+- 逐张 append 到同一个 `parts[]`
+
+## 图生图最小示例
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "保留参考图的主体氛围，重做成更高级的海报" },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE"
+          }
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageConfig": {
+      "aspectRatio": "16:9",
+      "imageSize": "2K"
+    }
+  }
+}
+```
+
+## 方法与路径
+
+```http
+POST /v1beta/models/{model}:generateContent
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1beta/models/gemini-3-pro-image-preview:generateContent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contents": [
+      {
+        "role": "user",
+        "parts": [
+          { "text": "一张未来感 AI 工作台场景，冷色氛围，电影级布光" }
+        ]
+      }
+    ],
+    "generationConfig": {
+      "responseModalities": ["TEXT", "IMAGE"],
+      "temperature": 1.0,
+      "topP": 0.95,
+      "maxOutputTokens": 8192,
+      "imageConfig": {
+        "aspectRatio": "16:9",
+        "imageSize": "2K"
+      }
+    }
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1beta/models/gemini-3-pro-image-preview:generateContent",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    },
+    json={
+        "contents": [
+            {
+                "role": "user",
+                "parts": [
+                    {"text": "一张未来感 AI 工作台场景，冷色氛围，电影级布光"}
+                ],
+            }
+        ],
+        "generationConfig": {
+            "responseModalities": ["TEXT", "IMAGE"],
+            "temperature": 1.0,
+            "topP": 0.95,
+            "maxOutputTokens": 8192,
+            "imageConfig": {
+                "aspectRatio": "16:9",
+                "imageSize": "2K",
+            },
+        },
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch(
+  "https://www.geeknow.top/v1beta/models/gemini-3-pro-image-preview:generateContent",
+  {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer YOUR_API_KEY",
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: "一张未来感 AI 工作台场景，冷色氛围，电影级布光" }],
+        },
+      ],
+      generationConfig: {
+        responseModalities: ["TEXT", "IMAGE"],
+        temperature: 1.0,
+        topP: 0.95,
+        maxOutputTokens: 8192,
+        imageConfig: {
+          aspectRatio: "16:9",
+          imageSize: "2K",
+        },
+      },
+    }),
+  }
+);
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 图生图示例
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "融合参考图风格，输出一张高清横版海报" },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE_1"
+          }
+        },
+        {
+          "inlineData": {
+            "mimeType": "image/jpeg",
+            "data": "BASE64_IMAGE_2"
+          }
+        }
+      ]
+    }
+  ],
+  "generationConfig": {
+    "responseModalities": ["TEXT", "IMAGE"],
+    "imageConfig": {
+      "aspectRatio": "16:9",
+      "imageSize": "2K"
+    }
+  }
+}
+```
+
+## 图生图字段解释
+
+| 字段 | 图生图里的作用 |
+| --- | --- |
+| `parts[].text` | 告诉模型“你要怎么改、保留什么、输出成什么风格” |
+| `parts[].inlineData.mimeType` | 声明参考图格式 |
+| `parts[].inlineData.data` | 参考图的 Base64 内容 |
+| `imageConfig.aspectRatio` | 约束最终出图比例 |
+| `imageConfig.imageSize` | 约束最终出图清晰度 |
+
+## 能传几张参考图
+
+从你的 `main.py` 现有实现看，插件会遍历 `reference_images`，把每一张图都追加到 `parts[]` 里，所以文档上可以理解为：
+
+- 支持 1 张参考图
+- 也支持多张参考图
+- 多张时就是连续放多个 `inlineData`
+
+## 返回后怎么看结果
+
+Gemini 生图返回的图片通常在：
+
+- `candidates[0].content.parts[].inlineData.data`
+
+这个字段可能有两种情况：
+
+1. 直接是 Base64 图片数据
+2. 直接是图片 URL
+
+你的插件已经兼容了这两种返回方式，所以文档里看到 `BASE64_OR_URL` 是有意这么写的。
+
+## Body
+
+<ParamField body="contents" type="array<object>" required>
+输入内容列表。每项通常包含 `role` 和 `parts`。
+</ParamField>
+
+<ParamField body="contents[].role" type="string">
+角色字段。插件固定使用 `user`。
+</ParamField>
+
+<ParamField body="contents[].parts" type="array<object>" required>
+内容片段数组。提示词和参考图都在这里构造。
+</ParamField>
+
+<ParamField body="contents[].parts[].text" type="string">
+文本提示词。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData" type="object">
+参考图输入。包含 `mimeType` 和 `data` 两个字段。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.mimeType" type="string">
+图片 MIME 类型，常见值为 `image/jpeg`、`image/png`、`image/webp`。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.data" type="string">
+Base64 编码的图片内容。
+</ParamField>
+
+<ParamField body="generationConfig" type="object" required>
+生成配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.responseModalities" type="array<string>">
+返回模态列表。插件默认使用 `["IMAGE", "TEXT"]`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig" type="object" required>
+图像配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.aspectRatio" type="string">
+图片比例。插件支持 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.imageSize" type="string">
+图片清晰度。`gemini-3-pro-image-preview` 支持插件里暴露的 `1K` 和 `2K`；`gemini-2.5-flash-image-preview` 与 `gemini-3.1-flash-image-preview` 会实际回落为 `1K`。
+</ParamField>
+
+<ParamField body="safetySettings" type="array<object>">
+安全设置。可不传。
+</ParamField>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "inlineData": {
+              "mimeType": "image/png",
+              "data": "BASE64_OR_URL"
+            }
+          }
+        ]
+      },
+      "finishReason": "STOP"
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 123,
+    "candidatesTokenCount": 456,
+    "totalTokenCount": 579,
+    "trafficType": "ON_DEMAND"
+  },
+  "modelVersion": "gemini-3-pro-image-preview",
+  "createTime": "2026-05-21T00:00:00Z"
+}
+```
+
+</ResponseExample>
+
+## Response
+
+<ResponseField name="candidates[].content.parts[].inlineData.mimeType" type="string">
+返回图片 MIME 类型。
+</ResponseField>
+
+<ResponseField name="candidates[].content.parts[].inlineData.data" type="string">
+图片数据。可能是 Base64，也可能直接是图片 URL。
+</ResponseField>
+
+<ResponseField name="usageMetadata" type="object">
+Token 统计信息。
+</ResponseField>
+
+## 相关接口
+
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+- [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)

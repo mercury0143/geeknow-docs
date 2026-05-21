@@ -11,14 +11,8 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
     按模型家族查看图像接口支持范围、参考图输入方式、比例和尺寸约束。
   </Card>
-  <Card title="gemini-3-pro-image-preview" icon="image" href="/api-reference/images/gemini-3-pro-image-preview/generation">
-    `POST /v1beta/models/gemini-3-pro-image-preview:generateContent`，支持插件里暴露的 `2K` 生图。
-  </Card>
-  <Card title="gemini-2.5-flash-image-preview" icon="image" href="/api-reference/images/gemini-2.5-flash-image-preview/generation">
-    `POST /v1beta/models/gemini-2.5-flash-image-preview:generateContent`，按 Gemini 官方格式生图。
-  </Card>
-  <Card title="gemini-3.1-flash-image-preview" icon="image" href="/api-reference/images/gemini-3.1-flash-image-preview/generation">
-    `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent`，按 Gemini 官方格式生图。
+  <Card title="Gemini 图像生成" icon="image" href="/api-reference/images/gemini-image/generation">
+    `POST /v1beta/models/{model}:generateContent`，统一覆盖 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`。
   </Card>
   <Card title="gpt-image-2" icon="image-plus" href="/api-reference/images/gpt-image-2/generation">
     `POST /v1/images/generations`，按基础比例和尺寸档位调用 `gpt-image-2`。
@@ -64,16 +58,14 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 ## 推荐阅读顺序
 
 1. [图像模型支持矩阵](/api-reference/images/model-matrix)
-2. [gemini-3-pro-image-preview 生图 API](/api-reference/images/gemini-3-pro-image-preview/generation)
-3. [gemini-2.5-flash-image-preview 生图 API](/api-reference/images/gemini-2.5-flash-image-preview/generation)
-4. [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)
-5. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
-6. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
-7. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
-8. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-9. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-10. [上传图片](/api-reference/uploads/image-upload)
-11. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
+2. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
+3. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+4. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+5. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+6. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+7. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
+8. [上传图片](/api-reference/uploads/image-upload)
+9. [Midjourney 任务查询](/api-reference/tasks/midjourney-task)
 
 ## 相关页面
 
