@@ -1,0 +1,221 @@
+---
+title: gpt-image-2-pro 生成图像 API
+description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2-pro` 的高分辨率生图入口。
+api: "POST /v1/images/generations"
+---
+
+# gpt-image-2-pro 生成图像 API
+
+`gpt-image-2-pro` 与 `gpt-image-2` 共用统一图像生成入口，但额外开放了 `2K`、`4K` 高分辨率档位，适合需要更大画幅和更高输出尺寸的场景。
+
+- 统一入口为 `POST /v1/images/generations`。
+- 通过 `model = "gpt-image-2-pro"` 选择目标模型。
+- 除基础尺寸外，还补充 `2K`、`4K` 高分档位。
+- 支持 `url` 和 `b64_json` 两种返回格式。
+- 可在 JSON 中附带 `image` 作为参考图，是否生效取决于实际命中的图像渠道。
+
+## 方法与路径
+
+```http
+POST /v1/images/generations
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2-pro",
+    "prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+    "n": 1,
+    "size": "3840x2160",
+    "response_format": "url"
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "gpt-image-2-pro",
+        "prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+        "n": 1,
+        "size": "3840x2160",
+        "response_format": "url",
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/images/generations", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "gpt-image-2-pro",
+    prompt: "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+    n: 1,
+    size: "3840x2160",
+    response_format: "url",
+  }),
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - URL
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "url": "https://.../images/img-pro-abc123.png",
+      "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
+    }
+  ]
+}
+```
+
+```json 200 - Base64
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+固定传 `gpt-image-2-pro`。
+</ParamField>
+
+<ParamField body="prompt" type="string">
+生成提示词。对于文生图语义应视为必填。
+</ParamField>
+
+<ParamField body="n" type="integer">
+生成数量。若不传或显式传 `0`，统一层回退为 `1`。
+</ParamField>
+
+<ParamField body="size" type="string">
+输出尺寸。除基础档位外，还支持高分辨率扩展档位。
+</ParamField>
+
+<ParamField body="image" type="string | array<string> | object">
+可选参考图输入。常见写法是 Base64 字符串或 Base64 数组。
+</ParamField>
+
+<ParamField body="response_format" type="string">
+返回格式，常见值为 `url`、`b64_json`。
+</ParamField>
+
+<ParamField body="quality" type="string">
+质量字段。是否真正生效取决于最终命中的渠道。
+</ParamField>
+
+<ParamField body="style" type="string | object">
+风格字段，原样透传给支持的上游。
+</ParamField>
+
+<ParamField body="background" type="string | object">
+背景控制字段，原样透传给支持的上游。
+</ParamField>
+
+<ParamField body="watermark" type="boolean">
+显式水印开关。`false` 与不传语义不同。
+</ParamField>
+
+## 高分辨率档位
+
+### 基础档位
+
+| 预设 | 实际目标尺寸 |
+| --- | --- |
+| `1:1` | `1024x1024` |
+| `4:3` | `1536x1152` |
+| `3:2` | `1536x1024` |
+| `2:3` | `1024x1536` |
+| `16:9` | `1920x1080` |
+| `9:16` | `1080x1920` |
+
+### `2K` 扩展档位
+
+| 预设 | 实际目标尺寸 |
+| --- | --- |
+| `1:1(2K)` | `2048x2048` |
+| `4:3(2K)` | `2048x1536` |
+| `3:2(2K)` | `2560x1712` |
+| `2:3(2K)` | `1712x2560` |
+| `16:9(2K)` | `2048x1152` |
+| `9:16(2K)` | `1152x2048` |
+
+### `4K` 扩展档位
+
+| 预设 | 实际目标尺寸 |
+| --- | --- |
+| `1:1(4K)` | `2880x2880` |
+| `4:3(4K)` | `3840x2880` |
+| `3:2(4K)` | `3840x2560` |
+| `2:3(4K)` | `2560x3840` |
+| `16:9(4K)` | `3840x2160` |
+| `9:16(4K)` | `2160x3840` |
+
+<Info>
+这些高分档位反映的是插件侧暴露的目标尺寸。若上游不原生接受对应尺寸，网关或插件可能回退到更接近的官方尺寸，并把比例意图附加到 prompt。
+</Info>
+
+## Response
+
+<ResponseField name="created" type="integer">
+生成时间戳。
+</ResponseField>
+
+<ResponseField name="data[].url" type="string">
+`response_format = url` 时返回的图片 URL。
+</ResponseField>
+
+<ResponseField name="data[].b64_json" type="string">
+`response_format = b64_json` 时返回的图片 Base64 数据。
+</ResponseField>
+
+<ResponseField name="data[].revised_prompt" type="string">
+部分上游会改写提示词并返回在这个字段里。
+</ResponseField>
+
+## 相关接口
+
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+- [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)

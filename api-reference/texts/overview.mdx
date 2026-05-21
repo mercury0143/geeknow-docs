@@ -1,11 +1,11 @@
 ---
 title: 文字系列概览
-description: 汇总 `router/relay-router.go` 中的文本、聊天、多模态响应、模型列表和网页工具路由。
+description: 汇总 `router/relay-router.go` 中的文本、聊天、多模态响应、模型列表和 Realtime 路由。
 ---
 
 # 文字系列
 
-文字系列覆盖 OpenAI 兼容文本接口、Claude 原生消息接口、Gemini 原生接口、OpenAI Responses、多模态输入、Embedding、Rerank、Moderation 与网页工具。
+文字系列覆盖 OpenAI 兼容文本接口、Claude 原生消息接口、Gemini 原生接口、OpenAI Responses、多模态输入、模型列表与 Realtime。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/texts/model-matrix">
@@ -56,12 +56,6 @@ x-goog-api-key: YOUR_API_KEY
 | `POST` | `/v1/messages` | [Claude 消息接口](./claude-messages) | Anthropic Messages 原生协议 |
 | `POST` | `/v1/responses` | [OpenAI 多模态响应接口](./openai-responses) | Responses API |
 | `POST` | `/v1/responses/compact` | [OpenAI 多模态响应接口](./openai-responses#上下文压缩) | 上下文压缩 |
-| `POST` | `/v1/embeddings` | [向量接口](./embeddings) | OpenAI Embeddings 兼容格式 |
-| `POST` | `/v1/engines/{model}/embeddings` | [向量接口](./embeddings) | Legacy embedding 路径 |
-| `POST` | `/v1/rerank` | [重排序接口](./rerank) | 文档相关性重排序 |
-| `POST` | `/v1/moderations` | [内容审核接口](./moderations) | OpenAI Moderations 兼容格式 |
-| `POST` | `/v1/web-reader/read` | [网页工具接口](./web-tools) | 网页读取 |
-| `POST` | `/v1/web-search/search` | [网页工具接口](./web-tools) | 网页搜索 |
 | `GET` | `/v1/realtime` | [Realtime 接口](./realtime) | OpenAI Realtime 兼容 WebSocket |
 | `GET` | `/v1/models` | [模型列表](./models) | OpenAI/Claude/Gemini 兼容模型列表 |
 | `GET` | `/v1/models/{model}` | [模型列表](./models) | 单模型查询 |
@@ -94,3 +88,4 @@ x-goog-api-key: YOUR_API_KEY
 4. [Claude 消息接口](./claude-messages)
 5. [Gemini 原生格式](./gemini-native)
 6. [模型列表](./models)
+7. [Realtime 接口](./realtime)

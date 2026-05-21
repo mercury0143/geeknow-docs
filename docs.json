@@ -36,10 +36,6 @@
           "api-reference/texts/openai-responses",
           "api-reference/texts/models",
           "api-reference/texts/completions",
-          "api-reference/texts/embeddings",
-          "api-reference/texts/rerank",
-          "api-reference/texts/moderations",
-          "api-reference/texts/web-tools",
           "api-reference/texts/realtime"
         ]
       },
@@ -48,9 +44,29 @@
         "pages": [
           "api-reference/images/overview",
           "api-reference/images/model-matrix",
-          "api-reference/images/gpt-image-1/overview",
-          "api-reference/images/gpt-image-1/generation",
-          "api-reference/images/gpt-image-1/edit"
+          {
+            "group": "gpt-image-2",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-2/generation"
+            ]
+          },
+          {
+            "group": "gpt-image-2-pro",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-2-pro/generation"
+            ]
+          },
+          {
+            "group": "OpenAI Images 兼容",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-1/overview",
+              "api-reference/images/gpt-image-1/generation",
+              "api-reference/images/gpt-image-1/edit"
+            ]
+          }
         ]
       },
       {

@@ -1,0 +1,197 @@
+---
+title: gpt-image-2 生成图像 API
+description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2` 的统一生图入口。
+api: "POST /v1/images/generations"
+---
+
+# gpt-image-2 生成图像 API
+
+`gpt-image-2` 使用统一图像生成入口，适合按基础比例和尺寸档位发起文生图请求。
+
+- 统一入口为 `POST /v1/images/generations`。
+- 通过 `model = "gpt-image-2"` 选择目标模型。
+- 支持 `url` 和 `b64_json` 两种返回格式。
+- 可在 JSON 中附带 `image` 作为参考图，是否生效取决于实际命中的图像渠道。
+- `n` 不传或显式传 `0` 时，统一层会回退为 `1`。
+
+## 方法与路径
+
+```http
+POST /v1/images/generations
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/images/generations \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "一张现代 API 平台首页插图，白底，青蓝色块，干净留白",
+    "n": 1,
+    "size": "1536x1024",
+    "response_format": "url"
+  }'
+```
+
+```python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/images/generations",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "gpt-image-2",
+        "prompt": "一张现代 API 平台首页插图，白底，青蓝色块，干净留白",
+        "n": 1,
+        "size": "1536x1024",
+        "response_format": "url",
+    },
+    timeout=60,
+)
+print(resp.json())
+```
+
+```javascript
+const response = await fetch("https://www.geeknow.top/v1/images/generations", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "gpt-image-2",
+    prompt: "一张现代 API 平台首页插图，白底，青蓝色块，干净留白",
+    n: 1,
+    size: "1536x1024",
+    response_format: "url",
+  }),
+});
+
+console.log(await response.json());
+```
+
+</CodeGroup>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - URL
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "url": "https://.../images/img-abc123.png",
+      "revised_prompt": "一张现代 API 平台首页插图，白底，青蓝色块，干净留白"
+    }
+  ]
+}
+```
+
+```json 200 - Base64
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "revised_prompt": "一张现代 API 平台首页插图，白底，青蓝色块，干净留白"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+固定传 `gpt-image-2`。
+</ParamField>
+
+<ParamField body="prompt" type="string">
+生成提示词。对于文生图语义应视为必填。
+</ParamField>
+
+<ParamField body="n" type="integer">
+生成数量。若不传或显式传 `0`，统一层回退为 `1`。
+</ParamField>
+
+<ParamField body="size" type="string">
+输出尺寸。常见基础档位为 `1024x1024`、`1536x1152`、`1536x1024`、`1024x1536`、`1920x1080`、`1080x1920`。
+</ParamField>
+
+<ParamField body="image" type="string | array<string> | object">
+可选参考图输入。常见写法是 Base64 字符串或 Base64 数组，适合需要图像风格参考的渠道。
+</ParamField>
+
+<ParamField body="response_format" type="string">
+返回格式，常见值为 `url`、`b64_json`。
+</ParamField>
+
+<ParamField body="quality" type="string">
+质量字段。是否真正生效取决于最终命中的渠道。
+</ParamField>
+
+<ParamField body="style" type="string | object">
+风格字段，原样透传给支持的上游。
+</ParamField>
+
+<ParamField body="background" type="string | object">
+背景控制字段，原样透传给支持的上游。
+</ParamField>
+
+<ParamField body="watermark" type="boolean">
+显式水印开关。`false` 与不传语义不同。
+</ParamField>
+
+## 基础比例与尺寸档位
+
+| 预设 | 实际目标尺寸 |
+| --- | --- |
+| `1:1` | `1024x1024` |
+| `4:3` | `1536x1152` |
+| `3:2` | `1536x1024` |
+| `2:3` | `1024x1536` |
+| `16:9` | `1920x1080` |
+| `9:16` | `1080x1920` |
+
+<Info>
+如果实际渠道不原生接受目标尺寸，网关或插件会回退到更接近的官方尺寸，并把比例意图附加到 prompt。
+</Info>
+
+## Response
+
+<ResponseField name="created" type="integer">
+生成时间戳。
+</ResponseField>
+
+<ResponseField name="data[].url" type="string">
+`response_format = url` 时返回的图片 URL。
+</ResponseField>
+
+<ResponseField name="data[].b64_json" type="string">
+`response_format = b64_json` 时返回的图片 Base64 数据。
+</ResponseField>
+
+<ResponseField name="data[].revised_prompt" type="string">
+部分上游会改写提示词并返回在这个字段里。
+</ResponseField>
+
+## 相关接口
+
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
