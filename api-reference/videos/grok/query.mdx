@@ -6,11 +6,11 @@ api: "GET /v1/videos/{task_id}"
 
 # Grok 任务查询
 
-Grok 系列任务提交后，需要通过 `GET /v1/videos/{task_id}` 轮询状态。现有插件脚本也是按这个路径查询，并在完成后优先读取 `output.url`、其次读取 `video_url`。
+Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。
 
 - 接口路径是 `GET /v1/videos/{task_id}`。
 - 任务完成后通常可从 `video_url` 或 `output.url` 读取结果地址。
-- 如果直接下载 `video_url` 失败，脚本还会回退到 `GET /v1/videos/{task_id}/content`。
+- 如果直接下载 `video_url` 失败，可回退到 `GET /v1/videos/{task_id}/content`。
 
 ## 方法与路径
 
@@ -162,7 +162,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-视频地址。脚本在完成时会优先尝试读取这个字段，或兼容读取 `output.url`。
+视频地址。完成时会优先尝试读取这个字段，或兼容读取 `output.url`。
 </ResponseField>
 
 <ResponseField name="error" type="object">
@@ -171,7 +171,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 轮询建议
 
-插件默认会持续轮询这个接口，并按以下顺序取结果地址：
+实现会按以下顺序取结果地址：
 
 1. `output.url`
 2. `video_url`

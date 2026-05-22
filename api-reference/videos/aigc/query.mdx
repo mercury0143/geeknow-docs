@@ -1,0 +1,74 @@
+---
+title: 国产视频模型查询
+description: 使用 `GET /v1/videos/{task_id}` 查询国产视频任务状态与结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# 国产视频模型查询
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 响应字段
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+模型名称。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值有 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+进度百分比。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+创建时间戳。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+完成时间戳。
+</ResponseField>
+
+<ResponseField name="expires_at" type="integer">
+结果过期时间戳。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+输出时长。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出尺寸。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+视频地址。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+错误信息。
+</ResponseField>
+
+## 内容获取
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+## 相关页面
+
+- [国产视频模型概览](./overview)
+- [国产视频模型生成](./generation)

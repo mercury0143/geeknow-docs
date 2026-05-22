@@ -98,6 +98,15 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "国产视频模型",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/aigc/overview",
+              "api-reference/videos/aigc/generation",
+              "api-reference/videos/aigc/query"
+            ]
+          },
+          {
             "group": "Sora 视频",
             "expanded": true,
             "pages": [

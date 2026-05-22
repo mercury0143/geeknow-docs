@@ -1,0 +1,115 @@
+---
+title: 国产视频模型概览
+description: 汇总国产视频模型系列的接口、模型命名、参数优先级与查询方式。
+---
+
+# 国产视频模型
+
+国产视频模型统一使用 `POST /v1/videos` 提交任务，使用 `GET /v1/videos/{task_id}` 查询进度，使用 `GET /v1/videos/{task_id}/content` 获取视频内容。
+
+<CardGroup cols={2}>
+  <Card title="视频生成" icon="clapperboard" href="/api-reference/videos/aigc/generation">
+    提交国产视频任务，支持文生、图生、参考图、参考视频、首尾帧、动作控制、数字人、对口型和模板特效。
+  </Card>
+  <Card title="任务查询" icon="hourglass" href="/api-reference/videos/aigc/query">
+    查询任务状态、进度、错误与结果地址。
+  </Card>
+</CardGroup>
+
+## 鉴权
+
+渠道密钥格式：
+
+- `SubAppId|SecretId|SecretKey`
+- `SubAppId|SecretId|SecretKey|Region`
+
+## 模型命名
+
+### 基础模型
+
+- `Vidu-*`
+- `Kling-*`
+- `GV-*`
+- `OS-*`
+- `Hunyuan-*`
+- `Mingmou-*`
+- `Hailuo-*`
+- `SV-*`
+- `JV-*`
+
+### 组合计费模型
+
+可直接作为 `model` 传入，例如：
+
+- `vidu-q2-pro-reference-1080p-offpeak`
+- `kling-3.0-omni-1080p-ref-audio`
+- `kling-2.6-motion-pro-1080p`
+- `kling-avatar-720p`
+- `kling-identify-face`
+- `sv-1.5-pro-1080p-audio`
+
+## 参数优先级
+
+时长优先级：
+
+1. 顶层 `seconds`
+2. 顶层 `duration`
+3. `metadata.seconds` / `metadata.duration` / `metadata.video_duration`
+4. 默认 `5`
+
+分辨率优先级：
+
+1. `metadata.output_config.resolution`
+2. 顶层 `size`
+3. 模型默认值
+
+## 请求字段
+
+| 字段 | 说明 |
+| --- | --- |
+| `model` | 模型名称，支持基础模型或组合计费模型 |
+| `prompt` | 提示词 |
+| `seconds` / `duration` | 时长，顶层优先级最高 |
+| `size` | 快速尺寸输入 |
+| `image` / `images` / `input_reference` | 图生、参考图、首帧、首尾帧等输入 |
+| `metadata` | 扩展参数，建议放上游原生配置 |
+
+## 场景类型
+
+常见 `metadata.scene_type`：
+
+- `motion_control`
+- `avatar_i2v`
+- `lip_sync`
+- `template_effect`
+
+## `metadata.output_config`
+
+常用字段：
+
+- `resolution`
+- `aspect_ratio`
+- `audio_generation`
+- `duration`
+- `person_generation`
+- `input_compliance_check`
+- `output_compliance_check`
+- `enhance_switch`
+- `frame_interpolate`
+- `logo_add`
+
+## 模型分组
+
+| 模型家族 | 说明 |
+| --- | --- |
+| `Vidu` | 参考图、首帧、首尾帧、模板特效 |
+| `Kling` | 文生、参考图、动作控制、数字人、对口型 |
+| `GV` / `OS` / `Hunyuan` / `Mingmou` | 国产视频模型常见家族 |
+| `Hailuo` | 文生、首帧生视频 |
+| `SV` / `JV` | 组合计费模型支持 |
+
+## 相关页面
+
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)
+- [国产视频模型生成](./generation)
+- [国产视频模型查询](./query)

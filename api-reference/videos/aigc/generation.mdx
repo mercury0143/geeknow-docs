@@ -1,0 +1,126 @@
+---
+title: 国产视频模型生成
+description: 使用 `POST /v1/videos` 提交国产视频任务。
+api: "POST /v1/videos"
+---
+
+# 国产视频模型生成
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<CodeGroup>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Kling-3.0-Omni",
+    "prompt": "镜头环绕建筑并使用希区柯克变焦",
+    "seconds": "15",
+    "size": "720x1280",
+    "metadata": {
+      "scene_type": "motion_control",
+      "motion_level": "pro",
+      "file_infos": [
+        {
+          "type": "Url",
+          "category": "Video",
+          "url": "https://example.com/motion-ref.mp4"
+        }
+      ],
+      "output_config": {
+        "duration": 15,
+        "resolution": "720P",
+        "aspect_ratio": "9:16",
+        "audio_generation": "Enabled"
+      }
+    }
+  }'
+```
+
+</CodeGroup>
+
+## 字段
+
+<ParamField body="model" type="string" required>
+模型名称。可以直接传基础模型，也可以传组合计费模型。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+提示词。
+</ParamField>
+
+<ParamField body="seconds" type="string | integer">
+时长。顶层 `seconds` 优先级最高。
+</ParamField>
+
+<ParamField body="duration" type="integer">
+时长兼容字段。
+</ParamField>
+
+<ParamField body="size" type="string">
+快速尺寸字段，例如 `720x1280` 或 `1280x720`。
+</ParamField>
+
+<ParamField body="image" type="string">
+单张参考图或首帧图。
+</ParamField>
+
+<ParamField body="images" type="array<string>">
+多张参考图。
+</ParamField>
+
+<ParamField body="input_reference" type="string | array<string>">
+参考图输入，兼容 URL、base64、data URI 与文件上传。
+</ParamField>
+
+<ParamField body="metadata" type="object">
+扩展参数。常用 `metadata.output_config`、`scene_type`、`motion_level`、`offpeak`、`video_url`、`file_infos`、`ext_info`。
+</ParamField>
+
+## 场景
+
+| 场景 | 关键字段 |
+| --- | --- |
+| 文生视频 | `prompt` + `seconds` |
+| 图生视频 | `image` / `images` / `input_reference` |
+| 首尾帧 | `image` + `metadata.last_frame_url` |
+| 动作控制 | `metadata.scene_type=motion_control` + 视频参考 |
+| 数字人 | `metadata.scene_type=avatar_i2v` |
+| 对口型 | `metadata.scene_type=lip_sync` |
+| 模板特效 | `metadata.scene_type=template_effect` |
+
+## 规则
+
+- `seconds` / `duration` 可以放顶层，也可以放 `metadata`
+- 顶层时长优先级最高
+- `scene_type=motion_control` 必须提供视频参考
+- `scene_type=lip_sync` 不足 5 秒按 5 秒计
+- `FileInfos` 最多 3 项
+
+## `metadata.output_config`
+
+常用字段：
+
+- `resolution`
+- `aspect_ratio`
+- `audio_generation`
+- `duration`
+- `person_generation`
+- `input_compliance_check`
+- `output_compliance_check`
+- `enhance_switch`
+- `frame_interpolate`
+- `logo_add`
+
+## 相关页面
+
+- [国产视频模型概览](./overview)
+- [国产视频模型查询](./query)

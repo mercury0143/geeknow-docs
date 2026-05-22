@@ -5,12 +5,11 @@ description: 按模型系列整理 Veo 视频生成与任务查询接口。
 
 # Veo 视频
 
-Veo 系列当前也走 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，并以 JSON 请求为主。
+Veo 系列使用 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，请求为 JSON 格式。
 
 - 入口路由仍然是 `POST /v1/videos`。
-- 当前以 JSON 提交为主。
-- 参考图会先放进 `input_reference`，后续由网关映射到 Gemini/Vertex Veo 请求结构。
-- 当前只整理两个模型：`veo_3_1`、`veo_3_1-fast`。
+- 参考图会先放进 `input_reference`，再由服务端映射到 Veo 请求结构。
+- 模型包括 `veo_3_1`、`veo_3_1-fast`。
 
 <CardGroup cols={2}>
   <Card title="视频生成" icon="clapperboard" href="/api-reference/videos/veo/generation">

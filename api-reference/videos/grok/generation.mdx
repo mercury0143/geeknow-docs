@@ -6,12 +6,12 @@ api: "POST /v1/videos"
 
 # Grok 视频生成
 
-Grok 视频生成接口使用 `multipart/form-data` 提交，请优先按这里的字段组织请求。
+Grok 视频生成接口使用 `multipart/form-data` 提交，请按这里的字段组织请求。
 
 - 接口路径是 `POST /v1/videos`。
 - `input_reference` 是参考图字段，支持重复上传多张图片。
 - `grok-video-3-pro` 会自动固定为 `10` 秒，`grok-video-3-max` 会自动固定为 `15` 秒。
-- 基础版 `grok-video-3` 在脚本里没有额外固定秒数逻辑，按实际传参处理。
+- 基础版 `grok-video-3` 没有额外固定秒数逻辑，按实际传参处理。
 
 ## 当前可用模型
 
@@ -144,7 +144,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="seconds" type="integer">
-目标秒数。对 `grok-video-3-pro` 和 `grok-video-3-max`，脚本会自动纠正为固定值。
+目标秒数。对 `grok-video-3-pro` 和 `grok-video-3-max`，会自动纠正为固定值。
 </ParamField>
 
 <ParamField body="size" type="string">

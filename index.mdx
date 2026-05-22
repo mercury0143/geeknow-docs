@@ -53,10 +53,6 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
 - Dashboard 与账户类接口主要位于 `/api/*`，很多接口使用统一包装：`success`、`message`、`data`。这类接口即使业务失败，也可能仍返回 HTTP `200`。
 - 异步任务接口提交后通常返回公开 `task_id` 或 OpenAI 兼容 `video id`。查询时再映射回真实上游任务。
 
-<Info>
-  视频文档正在从“按入口分组”切换为“按模型系列分组”。当前第一批已经整理的是 Grok。
-</Info>
-
 ## 路由来源
 
 | 文件 | 主要覆盖内容 |
