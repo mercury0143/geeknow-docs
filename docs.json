@@ -98,6 +98,17 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "Seedance-2",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/seedance-2/overview",
+              "api-reference/videos/seedance-2/generation",
+              "api-reference/videos/seedance-2/query",
+              "api-reference/videos/seedance-2/asset-create-media",
+              "api-reference/videos/seedance-2/asset-get"
+            ]
+          },
+          {
             "group": "国产视频模型",
             "expanded": true,
             "pages": [

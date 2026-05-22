@@ -1,0 +1,55 @@
+---
+title: Seedance-2 概览
+description: 汇总 Seedance-2 视频任务与素材接口。
+---
+
+# Seedance-2
+
+Seedance-2 相关能力当前包含两类接口：
+
+- 视频任务接口：`POST /v1/videos`、`GET /v1/videos/{task_id}`、`GET /v1/videos/{task_id}/content`
+- 素材接口：`POST /api/asset/createMedia`、`GET /api/asset/get`
+
+<CardGroup cols={2}>
+  <Card title="创建视频任务" icon="clapperboard" href="/api-reference/videos/seedance-2/generation">
+    提交 Seedance-2 视频任务，支持 JSON 和 multipart URL 字段。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/seedance-2/query">
+    查询任务状态、进度、时长、尺寸与结果地址。
+  </Card>
+  <Card title="创建素材" icon="image" href="/api-reference/videos/seedance-2/asset-create-media">
+    创建虚拟资源库素材。
+  </Card>
+  <Card title="查询素材" icon="search" href="/api-reference/videos/seedance-2/asset-get">
+    查询素材详情与状态。
+  </Card>
+</CardGroup>
+
+## 当前模型
+
+- `seedance-2.0-lite`
+- `seedance-2.0-pro`
+- `seedance-2.0-fast`
+
+## 兼容模型名
+
+你给的 Apifox 还列出了以下兼容模型名：
+
+- `doubao-seedance-2-0-260128`
+- `doubao-seedance-2-0-fast-260128`
+- `sd2_manxue_720p`
+
+## 请求特点
+
+- `application/json` 与 `multipart/form-data` 都支持。
+- `multipart/form-data` 只支持 URL 字段，不支持真实文件上传。
+- `prompt` 必填。
+- `duration` 优先于 `seconds`。
+- `input_reference` / `image` / `image_url` 默认映射为首帧图。
+
+## 相关页面
+
+- [创建视频任务](./generation)
+- [查询视频任务](./query)
+- [创建素材](./asset-create-media)
+- [查询素材](./asset-get)

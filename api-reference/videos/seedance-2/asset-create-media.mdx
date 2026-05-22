@@ -1,0 +1,32 @@
+---
+title: Seedance-2 创建素材
+description: 使用 `POST /api/asset/createMedia` 创建虚拟资源库素材。
+api: "POST /api/asset/createMedia"
+---
+
+# Seedance-2 创建素材
+
+## 方法与路径
+
+```http
+POST /api/asset/createMedia
+```
+
+## 请求字段
+
+<ParamField body="url" type="string" required>
+素材 URL。
+</ParamField>
+
+<ParamField body="name" type="string" required>
+素材名称。
+</ParamField>
+
+<ParamField body="assetType" type="string" required>
+素材类型，例如 `Image`。
+</ParamField>
+
+## 相关页面
+
+- [Seedance-2 概览](./overview)
+- [查询素材](./asset-get)

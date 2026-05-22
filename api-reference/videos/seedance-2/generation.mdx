@@ -1,0 +1,146 @@
+---
+title: Seedance-2 创建视频任务
+description: 使用 `POST /v1/videos` 创建 Seedance-2 视频任务。
+api: "POST /v1/videos"
+---
+
+# Seedance-2 创建视频任务
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求说明
+
+- 支持 `application/json`
+- 支持 `multipart/form-data`
+- `multipart/form-data` 仅支持 URL 字段，不支持真实文件上传
+
+## 请求示例
+
+<CodeGroup>
+
+```json
+{
+  "model": "doubao-seedance-2-0-fast-260128",
+  "prompt": "使用参考图中的主体风格，参考视频的镜头语言，并使用参考音频作为背景音乐，生成一个6秒的广告感短视频，保持画面连贯自然。",
+  "reference_image_urls": [
+    "https://example.com/ref-image-1.png",
+    "https://example.com/ref-image-2.jpg"
+  ],
+  "reference_video_urls": [
+    "https://example.com/ref-video-1.mp4",
+    "https://example.com/ref-video-2.mp4"
+  ],
+  "audio_url": "https://example.com/ref-audio.mp3",
+  "duration": 6,
+  "ratio": "adaptive",
+  "resolution": "480p",
+  "generate_audio": true,
+  "watermark": false
+}
+```
+
+</CodeGroup>
+
+## 字段
+
+<ParamField body="model" type="string" required>
+模型名称。当前代码内置模型为 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`；也可兼容 `doubao-seedance-2-0-260128`、`doubao-seedance-2-0-fast-260128`、`sd2_manxue_720p` 等名称。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+提示词。
+</ParamField>
+
+<ParamField body="duration" type="integer">
+视频时长（秒），优先于 `seconds`。
+</ParamField>
+
+<ParamField body="seconds" type="integer">
+视频时长（秒）。未传 `duration` 时使用。
+</ParamField>
+
+<ParamField body="size" type="string">
+OpenAI 兼容尺寸字段，仅支持固定映射值。
+</ParamField>
+
+<ParamField body="ratio" type="string">
+画幅比例。支持 `21:9`、`16:9`、`4:3`、`1:1`、`3:4`、`9:16`、`adaptive`。
+</ParamField>
+
+<ParamField body="resolution" type="string">
+输出分辨率。支持 `480p`、`720p`。
+</ParamField>
+
+<ParamField body="watermark" type="boolean">
+是否带水印。
+</ParamField>
+
+<ParamField body="generate_audio" type="boolean">
+是否生成音频。
+</ParamField>
+
+<ParamField body="input_reference" type="string">
+单参考图片 URL，默认映射为首帧图。
+</ParamField>
+
+<ParamField body="image" type="string">
+单参考图片 URL，默认映射为首帧图。
+</ParamField>
+
+<ParamField body="image_url" type="string">
+单参考图片 URL，默认映射为首帧图。
+</ParamField>
+
+<ParamField body="input_reference_role" type="string">
+当使用 `input_reference` / `image` / `image_url` 时指定角色。支持 `first_frame`、`reference_image`。
+</ParamField>
+
+<ParamField body="first_frame_url" type="string">
+首帧图 URL。
+</ParamField>
+
+<ParamField body="last_frame_url" type="string">
+尾帧图 URL。
+</ParamField>
+
+<ParamField body="reference_image_urls" type="array<string>">
+多张参考图 URL。
+</ParamField>
+
+<ParamField body="reference_video_url" type="string">
+单个参考视频 URL。
+</ParamField>
+
+<ParamField body="reference_video_urls" type="array<string>">
+多个参考视频 URL。
+</ParamField>
+
+<ParamField body="audio_url" type="string">
+参考音频 URL。不能单独出现，至少要配合参考图或参考视频。
+</ParamField>
+
+<ParamField body="tools" type="array<object>">
+显式工具列表。当前仅支持 `[{\"type\":\"web_search\"}]`。
+</ParamField>
+
+<ParamField body="web_search" type="boolean">
+为 `true` 时桥接为 `tools=[{\"type\":\"web_search\"}]`。如果同时传 `tools`，优先使用 `tools`。
+</ParamField>
+
+## 规则
+
+- `prompt` 必填
+- `duration` 优先于 `seconds`
+- `audio_url` 不能单独出现，至少要配合参考图或参考视频
+- `input_reference` / `image` / `image_url` 默认映射为 `first_frame`
+- `tools` 与 `web_search` 同时传时，优先使用 `tools`
+- `size` 仅支持固定映射表，不支持任意像素值
+
+## 相关页面
+
+- [Seedance-2 概览](./overview)
+- [查询视频任务](./query)

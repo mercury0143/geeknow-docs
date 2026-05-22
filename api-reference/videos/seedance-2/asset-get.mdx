@@ -1,0 +1,50 @@
+---
+title: Seedance-2 查询素材
+description: 使用 `GET /api/asset/get` 查询素材详情。
+api: "GET /api/asset/get"
+---
+
+# Seedance-2 查询素材
+
+## 方法与路径
+
+```http
+GET /api/asset/get?id={asset_id}
+```
+
+## 查询参数
+
+<ParamField body="id" type="string" required>
+素材 ID，例如 `asset-20260327164915-cj6zh`。
+</ParamField>
+
+## 响应字段
+
+<ResponseField name="ResponseMetadata" type="object">
+请求元信息。
+</ResponseField>
+
+<ResponseField name="Result.Id" type="string">
+素材 ID。
+</ResponseField>
+
+<ResponseField name="Result.Name" type="string">
+素材名称。
+</ResponseField>
+
+<ResponseField name="Result.URL" type="string">
+素材 URL。
+</ResponseField>
+
+<ResponseField name="Result.AssetType" type="string">
+素材类型。
+</ResponseField>
+
+<ResponseField name="Result.Status" type="string">
+素材状态。
+</ResponseField>
+
+## 相关页面
+
+- [Seedance-2 概览](./overview)
+- [创建素材](./asset-create-media)

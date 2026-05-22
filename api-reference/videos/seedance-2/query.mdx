@@ -1,0 +1,79 @@
+---
+title: Seedance-2 查询视频任务
+description: 使用 `GET /v1/videos/{id}` 查询 Seedance-2 视频任务。
+api: "GET /v1/videos/{id}"
+---
+
+# Seedance-2 查询视频任务
+
+## 方法与路径
+
+```http
+GET /v1/videos/{id}
+```
+
+## 状态映射
+
+- `pending` / `queued` -> `queued`
+- `processing` / `running` / `in_progress` -> `in_progress`
+- `succeeded` / `completed` -> `completed`
+- `failed` / `cancelled` -> `failed`
+
+## 响应字段
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="id" type="string">
+桥接层签名任务令牌。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。支持 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+简化进度百分比。当前固定为 `0` / `50` / `100`。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+创建时间戳。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+完成时间戳。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+模型名称。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+视频时长。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+桥接层展示尺寸，例如 `1280x720`。
+</ResponseField>
+
+<ResponseField name="url" type="string">
+任务完成时返回的视频 URL。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+与 `url` 相同的兼容字段。
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+用量信息。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+错误信息。
+</ResponseField>
+
+## 相关页面
+
+- [Seedance-2 概览](./overview)
+- [创建视频任务](./generation)
