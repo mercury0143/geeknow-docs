@@ -1,37 +1,74 @@
 ---
 title: 国产视频模型查询
-description: 使用 `GET /v1/videos/{task_id}` 查询国产视频任务状态与结果。
+description: 使用 `GET /v1/videos/{task_id}` 查询国产视频任务状态、进度、错误和视频结果。
 api: "GET /v1/videos/{task_id}"
 ---
 
 # 国产视频模型查询
 
-## 方法与路径
+提交任务后，使用网关任务 ID 轮询查询。国产视频模型查询结果已对齐上游 `DescribeTaskDetail` 中的 `AigcVideoTask`，网关会把上游状态、进度、错误和视频地址整理成统一的视频任务响应。
+
+## 查询任务
 
 ```http
 GET /v1/videos/{task_id}
 ```
 
+<CodeGroup>
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "$BASE_URL/v1/videos/{task_id}"
+```
+
+</CodeGroup>
+
+## 获取视频内容
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+<CodeGroup>
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  "$BASE_URL/v1/videos/{task_id}/content"
+```
+
+</CodeGroup>
+
+## 状态映射
+
+| 上游状态 | 网关状态 | 说明 |
+| --- | --- | --- |
+| `WAITING` | `queued` | 任务排队中 |
+| `PROCESSING` | `processing` | 任务生成中 |
+| `FINISH` | `completed` | 任务完成 |
+| `ABORTED` | `failed` / `cancelled` | 任务失败或被中止 |
+
+进度读取 `AigcVideoTask.Progress`。错误信息读取 `ErrCode`、`ErrCodeExt`、`Message`。视频地址优先读取 `AigcVideoTask.Output.FileInfos[].FileUrl`。
+
 ## 响应字段
 
 <ResponseField name="id" type="string">
-任务 ID。
+任务 ID。通常与提交接口返回的 `task_id` 一致。
 </ResponseField>
 
 <ResponseField name="object" type="string">
-固定为 `video`。
+对象类型，固定为 `video`。
 </ResponseField>
 
 <ResponseField name="model" type="string">
-模型名称。
+请求时使用的模型名称，可能是基础模型，也可能是组合计费模型。
 </ResponseField>
 
 <ResponseField name="status" type="string">
-任务状态，常见值有 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+任务状态，常见值为 `queued`、`processing`、`completed`、`failed`、`cancelled`。
 </ResponseField>
 
 <ResponseField name="progress" type="integer">
-进度百分比。
+任务进度百分比。上游未返回进度时可能为空或为默认值。
 </ResponseField>
 
 <ResponseField name="created_at" type="integer">
@@ -39,34 +76,72 @@ GET /v1/videos/{task_id}
 </ResponseField>
 
 <ResponseField name="completed_at" type="integer">
-完成时间戳。
+完成时间戳。任务未完成时可能为空。
 </ResponseField>
 
 <ResponseField name="expires_at" type="integer">
-结果过期时间戳。
+结果过期时间戳。是否存在取决于上游返回和存储模式。
 </ResponseField>
 
 <ResponseField name="seconds" type="string">
-输出时长。
+输出视频时长。
 </ResponseField>
 
 <ResponseField name="size" type="string">
-输出尺寸。
+输出尺寸或分辨率描述。
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-视频地址。
+生成完成后的视频地址。网关优先从上游输出文件信息中读取。
+</ResponseField>
+
+<ResponseField name="metadata" type="object">
+附加信息。完成后通常会包含结果 URL 等便于前端或转存流程使用的信息。
 </ResponseField>
 
 <ResponseField name="error" type="object">
-错误信息。
+错误信息。上游返回错误时，通常会包含错误码和错误消息。
 </ResponseField>
 
-## 内容获取
+## 成功响应示例
 
-```http
-GET /v1/videos/{task_id}/content
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "Kling-3.0-Omni",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1760000000,
+  "completed_at": 1760000060,
+  "video_url": "https://example.com/output.mp4",
+  "metadata": {
+    "url": "https://example.com/output.mp4"
+  }
+}
 ```
+
+## 失败响应示例
+
+```json
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "Kling-3.0-Omni",
+  "status": "failed",
+  "error": {
+    "code": "InvalidParameter",
+    "message": "videoUrl must not be blank"
+  }
+}
+```
+
+## 排查建议
+
+- 如果动作控制任务失败并提示 `videoUrl must not be blank`，确认 `metadata.video_url` 或 `metadata.file_infos` 中是否提供了 `Category=Video` 的视频参考。
+- 如果任务完成但没有 `video_url`，优先检查上游任务详情中的 `AigcVideoTask.Output.FileInfos[].FileUrl` 是否为空。
+- 如果比例或分辨率不符合预期，生成时显式传 `metadata.output_config.resolution` 和 `metadata.output_config.aspect_ratio`。
+- 如果对口型计费时长和请求时长不一致，检查是否命中 `scene_type=lip_sync` 不足 5 秒按 5 秒计的规则。
 
 ## 相关页面
 

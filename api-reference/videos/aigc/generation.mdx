@@ -1,10 +1,12 @@
 ---
 title: 国产视频模型生成
-description: 使用 `POST /v1/videos` 提交国产视频任务。
+description: 使用 `POST /v1/videos` 提交国产视频模型任务，覆盖文生、图生、参考图、参考视频、首尾帧、动作控制、数字人、对口型和模板特效。
 api: "POST /v1/videos"
 ---
 
 # 国产视频模型生成
+
+国产视频模型统一使用网关接口提交任务。请求时传入基础模型或组合计费模型，网关会负责转换上游 `ModelName` / `ModelVersion`，并按参数拼接内部计费模型键。
 
 ## 方法与路径
 
@@ -12,7 +14,7 @@ api: "POST /v1/videos"
 POST /v1/videos
 ```
 
-## 请求示例
+## 最小示例
 
 <CodeGroup>
 
@@ -22,19 +24,10 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Content-Type: application/json" \
   -d '{
     "model": "Kling-3.0-Omni",
-    "prompt": "镜头环绕建筑并使用希区柯克变焦",
+    "prompt": "死寂系统空间中，角色被蓝色面板照亮",
     "seconds": "15",
     "size": "720x1280",
     "metadata": {
-      "scene_type": "motion_control",
-      "motion_level": "pro",
-      "file_infos": [
-        {
-          "type": "Url",
-          "category": "Video",
-          "url": "https://example.com/motion-ref.mp4"
-        }
-      ],
       "output_config": {
         "duration": 15,
         "resolution": "720P",
@@ -45,80 +38,419 @@ curl -X POST https://www.geeknow.top/v1/videos \
   }'
 ```
 
+```json
+{
+  "model": "Kling-3.0-Omni",
+  "prompt": "死寂系统空间中，角色被蓝色面板照亮",
+  "seconds": "15",
+  "size": "720x1280",
+  "metadata": {
+    "output_config": {
+      "duration": 15,
+      "resolution": "720P",
+      "aspect_ratio": "9:16",
+      "audio_generation": "Enabled"
+    }
+  }
+}
+```
+
 </CodeGroup>
 
-## 字段
+## 请求字段
 
 <ParamField body="model" type="string" required>
-模型名称。可以直接传基础模型，也可以传组合计费模型。
+模型名称。推荐传基础模型，例如 `Kling-2.6`、`Vidu-q2-pro`、`GV-3.1-fast`；也可以直接传组合计费模型，例如 `kling-3.0-omni-1080p-ref-audio`、`vidu-q2-pro-reference-1080p-offpeak`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-提示词。
+提示词。文生视频必须传；图生、参考图、动作控制等场景也建议传清楚运动、镜头、主体和风格。
 </ParamField>
 
 <ParamField body="seconds" type="string | integer">
-时长。顶层 `seconds` 优先级最高。
+生成时长。顶层 `seconds` 优先级最高，例如 `"seconds": "5"`。
 </ParamField>
 
 <ParamField body="duration" type="integer">
-时长兼容字段。
+时长兼容字段。优先级低于顶层 `seconds`，高于 `metadata.seconds` / `metadata.duration` / `metadata.video_duration`。
 </ParamField>
 
 <ParamField body="size" type="string">
-快速尺寸字段，例如 `720x1280` 或 `1280x720`。
+快速尺寸字段，支持 `720P` / `1080P`，也支持 `WxH`，例如 `720x1280`。复杂场景建议同时显式传 `metadata.output_config.resolution` 和 `metadata.output_config.aspect_ratio`。
 </ParamField>
 
 <ParamField body="image" type="string">
-单张参考图或首帧图。
+单张参考图或首帧图。当前支持可访问的 `http(s)` 图片 URL 或文件 ID；不支持 `data:image/...;base64,...` 这类 base64 data URI。
 </ParamField>
 
 <ParamField body="images" type="array<string>">
-多张参考图。
+多张参考图。网关会自动转换为 `FileInfos`，每张图默认按 `Type=Url`、`Category=Image` 处理；最多 3 张。
 </ParamField>
 
 <ParamField body="input_reference" type="string | array<string>">
-参考图输入，兼容 URL、base64、data URI 与文件上传。
+参考图兼容字段。国产模型侧建议优先使用 `image` / `images`；高级场景建议使用 `metadata.file_infos`。
 </ParamField>
 
 <ParamField body="metadata" type="object">
-扩展参数。常用 `metadata.output_config`、`scene_type`、`motion_level`、`offpeak`、`video_url`、`file_infos`、`ext_info`。
+扩展参数。常用字段包括 `output_config`、`scene_type`、`motion_level`、`offpeak`、`last_frame_url`、`video_url`、`file_infos`、`ext_info`。
 </ParamField>
 
-## 场景
+## 参数优先级
+
+时长优先级：
+
+1. 顶层 `seconds`
+2. 顶层 `duration`
+3. `metadata.seconds` / `metadata.duration` / `metadata.video_duration`
+4. 默认 `5`
+
+分辨率优先级：
+
+1. `metadata.output_config.resolution`
+2. 顶层 `size`
+3. 模型默认值
+
+文生 / 图生判定：
+
+- 有 `image`、`images`、`input_reference` 或 `last_frame_*` 这类参考输入时，按图生或参考输入场景处理。
+- 没有参考输入时，按文生视频处理。
+
+## 场景字段
 
 | 场景 | 关键字段 |
 | --- | --- |
 | 文生视频 | `prompt` + `seconds` |
 | 图生视频 | `image` / `images` / `input_reference` |
-| 首尾帧 | `image` + `metadata.last_frame_url` |
+| 多图参考 | `images` 或 `metadata.file_infos` |
+| 首尾帧 | `image` + `metadata.last_frame_url` / `metadata.last_frame_file_id` |
+| 参考视频 | `metadata.video_url` 或 `metadata.file_infos[].category=Video` |
 | 动作控制 | `metadata.scene_type=motion_control` + 视频参考 |
 | 数字人 | `metadata.scene_type=avatar_i2v` |
 | 对口型 | `metadata.scene_type=lip_sync` |
 | 模板特效 | `metadata.scene_type=template_effect` |
 
-## 规则
-
-- `seconds` / `duration` 可以放顶层，也可以放 `metadata`
-- 顶层时长优先级最高
-- `scene_type=motion_control` 必须提供视频参考
-- `scene_type=lip_sync` 不足 5 秒按 5 秒计
-- `FileInfos` 最多 3 项
-
 ## `metadata.output_config`
 
-常用字段：
+`metadata.output_config` 会透传为上游 `AigcVideoOutputConfig`。支持 snake_case 字段，网关会自动映射到官方字段。
 
-- `resolution`
-- `aspect_ratio`
-- `audio_generation`
-- `duration`
-- `person_generation`
-- `input_compliance_check`
-- `output_compliance_check`
-- `enhance_switch`
-- `frame_interpolate`
-- `logo_add`
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `storage_mode` | String | `Permanent` / `Temporary`，默认 `Temporary` |
+| `media_name` | String | 输出媒体名，最长 64 字符 |
+| `class_id` | Integer | 分类 ID，默认 `0` |
+| `expire_time` | String | 过期时间，ISO 8601，例如 `2025-12-28T00:35:00Z` |
+| `duration` | Float | 生成时长，单位秒 |
+| `resolution` | String | 分辨率档位，例如 `720P` / `1080P` |
+| `aspect_ratio` | String | 宽高比，例如 `16:9` / `9:16` |
+| `audio_generation` | String | `Enabled` / `Disabled` |
+| `person_generation` | String | `AllowAdult` / `Disallowed` |
+| `input_compliance_check` | String | `Enabled` / `Disabled` |
+| `output_compliance_check` | String | `Enabled` / `Disabled` |
+| `enhance_switch` | String | `Enabled` / `Disabled` |
+| `frame_interpolate` | String | `Enabled` / `Disabled`，Vidu 常用 |
+| `logo_add` | String | `Enabled` / `Disabled`，Vidu 常用 |
+
+时长字段建议保持顶层 `seconds` 和 `metadata.output_config.duration` 一致。如果只传一处，优先传顶层 `seconds`。
+
+## `size` 规则
+
+- 已明确目标档位时，优先直接传 `metadata.output_config.resolution` 和 `metadata.output_config.aspect_ratio`。
+- 顶层 `size` 支持 `720P` / `1080P`，也支持 `WxH`。
+- 当只传 `size=WxH` 时，网关会推导 `Resolution` 和 `AspectRatio`。
+
+示例：
+
+- `size=720x1280` + `model=Kling-3.0-Omni` 会推导为 `Resolution=720P`、`AspectRatio=9:16`。
+- `size=1792x1024` + `model=Kling-3.0-Omni` 会推导为 `Resolution=1080P`、`AspectRatio=7:4`，最终是否可用由上游模型校验。
+
+## `file_infos` 高级输入
+
+`metadata.file_infos` 会透传为上游 `FileInfos`，最多 3 项。
+
+| 字段 | 说明 |
+| --- | --- |
+| `type` / `Type` | `File` / `Url` |
+| `category` / `Category` | `Image` / `Video` |
+| `file_id` / `FileId` | `Type=File` 时使用 |
+| `url` / `Url` | `Type=Url` 时使用 |
+| `usage` / `Usage` | 例如 `FirstFrame` / `Reference` |
+| `reference_type` / `ReferenceType` | 适用于 GV / Kling；Kling + `Category=Video` 时，`feature` 表示特征参考视频，`base` 表示待编辑视频 |
+| `object_id` / `ObjectId` | 适用于 Vidu 主体 / 参考图模式 |
+| `voice_id` / `VoiceId` | 适用于 `Vidu-q2` |
+| `keep_original_sound` / `KeepOriginalSound` | `Category=Video` 时有效 |
+
+校验规则：
+
+- `Type=Url` 时必须有 `Url`。
+- `Type=File` 时必须有 `FileId`。
+- `motion_control` 必须提供视频参考，不能只传图片。
+
+## `ext_info` 透传
+
+`metadata.ext_info` 会直接透传为上游顶层字段 `ExtInfo`。`ExtInfo` 必须是字符串，不能直接传对象。
+
+如果官方要求 `AdditionalParameters` 也是字符串，需要按官方格式进行双层 JSON 字符串编码。它常用于 `Kling 3.0` 多镜头等尚未拆入 `output_config` 的扩展参数。
+
+```json
+{
+  "model": "Kling-3.0",
+  "metadata": {
+    "ext_info": "{\"AdditionalParameters\":\"{\\\"multi_prompt\\\":[{\\\"index\\\":1,\\\"prompt\\\":\\\"美女在跳舞\\\",\\\"duration\\\":\\\"2\\\"},{\\\"index\\\":2,\\\"prompt\\\":\\\"美女跳起来\\\",\\\"duration\\\":\\\"3\\\"}],\\\"shot_type\\\":\\\"customize\\\",\\\"multi_shot\\\":true}\"}"
+  }
+}
+```
+
+最终透传到上游的核心字段会是：
+
+```json
+{
+  "ModelName": "Kling",
+  "ModelVersion": "3.0",
+  "ExtInfo": "{\"AdditionalParameters\":\"{\\\"multi_prompt\\\":[{\\\"index\\\":1,\\\"prompt\\\":\\\"美女在跳舞\\\",\\\"duration\\\":\\\"2\\\"},{\\\"index\\\":2,\\\"prompt\\\":\\\"美女跳起来\\\",\\\"duration\\\":\\\"3\\\"}],\\\"shot_type\\\":\\\"customize\\\",\\\"multi_shot\\\":true}\"}"
+}
+```
+
+`shot_type` 请按官方字段名传，不要写成 `short_type`。业务代码中建议先生成 `AdditionalParameters` 对象，再序列化为字符串，最后包成 `ExtInfo`。
+
+## 全场景示例
+
+以下均为 `POST /v1/videos` 请求体。
+
+### 文生视频
+
+```json
+{
+  "model": "Vidu-q2",
+  "prompt": "赛博朋克城市夜景，镜头慢慢推进",
+  "seconds": "5",
+  "metadata": {
+    "output_config": {
+      "resolution": "720P",
+      "aspect_ratio": "16:9"
+    }
+  }
+}
+```
+
+### 图生视频
+
+```json
+{
+  "model": "Vidu-q2-pro",
+  "prompt": "让人物向前走并微笑",
+  "image": "https://example.com/character.png",
+  "seconds": "5",
+  "metadata": {
+    "output_config": {
+      "resolution": "1080P",
+      "aspect_ratio": "9:16"
+    }
+  }
+}
+```
+
+### 多图参考
+
+顶层 `images` 会自动转换为 `FileInfos`。每张图默认映射为 `Type=Url`、`Category=Image`。
+
+```json
+{
+  "model": "Vidu-q2-pro",
+  "prompt": "镜头从远到近展示产品细节",
+  "images": [
+    "https://example.com/ref-1.png",
+    "https://example.com/ref-2.png"
+  ],
+  "seconds": "6",
+  "metadata": {
+    "offpeak": true,
+    "output_config": {
+      "resolution": "1080P"
+    }
+  }
+}
+```
+
+### 首尾帧
+
+```json
+{
+  "model": "GV-3.1-fast",
+  "prompt": "第一帧到最后一帧平滑过渡",
+  "image": "https://example.com/first.png",
+  "seconds": "8",
+  "metadata": {
+    "last_frame_url": "https://example.com/last.png",
+    "output_config": {
+      "resolution": "1080P",
+      "aspect_ratio": "16:9",
+      "audio_generation": "Enabled"
+    }
+  }
+}
+```
+
+### 模板特效
+
+```json
+{
+  "model": "Vidu-q2-pro",
+  "prompt": "使用模板特效生成炫酷转场",
+  "seconds": "5",
+  "metadata": {
+    "scene_type": "template_effect",
+    "output_config": {
+      "resolution": "720P"
+    }
+  }
+}
+```
+
+### 动作控制
+
+`scene_type=motion_control` 必须提供视频参考。可使用 `metadata.video_url`，或在 `metadata.file_infos` 中传 `Category=Video`。
+
+```json
+{
+  "model": "Kling-2.6",
+  "prompt": "人物惊恐逃窜",
+  "seconds": "5",
+  "metadata": {
+    "video_url": "https://example.com/motion-ref.mp4",
+    "scene_type": "motion_control",
+    "motion_level": "pro",
+    "output_config": {
+      "resolution": "1080P"
+    }
+  }
+}
+```
+
+### 数字人
+
+```json
+{
+  "model": "Kling-2.1",
+  "prompt": "数字人播报今日新闻",
+  "seconds": "5",
+  "metadata": {
+    "scene_type": "avatar_i2v",
+    "output_config": {
+      "resolution": "720P",
+      "aspect_ratio": "9:16"
+    }
+  }
+}
+```
+
+### 对口型
+
+`scene_type=lip_sync` 不足 5 秒按 5 秒计。
+
+```json
+{
+  "model": "Kling-2.1",
+  "prompt": "人物口型与音频同步",
+  "image": "https://example.com/face.png",
+  "seconds": "4",
+  "metadata": {
+    "scene_type": "lip_sync"
+  }
+}
+```
+
+### 参考视频高级透传
+
+```json
+{
+  "model": "Kling-3.0-Omni",
+  "prompt": "基于参考视频生成同风格镜头",
+  "seconds": "5",
+  "metadata": {
+    "file_infos": [
+      {
+        "type": "Url",
+        "category": "Video",
+        "url": "https://example.com/ref-video.mp4",
+        "reference_type": "feature"
+      }
+    ],
+    "output_config": {
+      "resolution": "720P"
+    }
+  }
+}
+```
+
+### `ExtInfo` 多镜头透传
+
+```json
+{
+  "model": "Kling-3.0",
+  "seconds": "5",
+  "metadata": {
+    "file_infos": [
+      {
+        "type": "Url",
+        "category": "Image",
+        "url": "https://example.com/ref-image.png"
+      }
+    ],
+    "output_config": {
+      "duration": 5,
+      "resolution": "720P",
+      "input_compliance_check": "Disabled"
+    },
+    "ext_info": "{\"AdditionalParameters\":\"{\\\"multi_prompt\\\":[{\\\"index\\\":1,\\\"prompt\\\":\\\"美女在跳舞\\\",\\\"duration\\\":\\\"2\\\"},{\\\"index\\\":2,\\\"prompt\\\":\\\"美女跳起来\\\",\\\"duration\\\":\\\"3\\\"}],\\\"shot_type\\\":\\\"customize\\\",\\\"multi_shot\\\":true}\"}"
+  }
+}
+```
+
+### `ExtInfo` + 视频参考
+
+```json
+{
+  "model": "Kling-3.0-Omni",
+  "prompt": "让人物按参考视频动作运动",
+  "seconds": "5",
+  "metadata": {
+    "scene_type": "motion_control",
+    "file_infos": [
+      {
+        "type": "Url",
+        "category": "Video",
+        "url": "https://example.com/motion-ref.mp4"
+      }
+    ],
+    "output_config": {
+      "duration": 5,
+      "resolution": "720P"
+    },
+    "ext_info": "{\"AdditionalParameters\":\"{\\\"shot_type\\\":\\\"customize\\\",\\\"multi_shot\\\":true}\"}"
+  }
+}
+```
+
+### 竖屏 9:16
+
+```json
+{
+  "model": "Kling-3.0-Omni",
+  "prompt": "图1是角色陈舟，图2是角色大邪神系统，图3是场景虚无幽暗系统空间...",
+  "seconds": "15",
+  "size": "720x1280",
+  "metadata": {
+    "output_config": {
+      "duration": 15,
+      "resolution": "720P",
+      "aspect_ratio": "9:16",
+      "audio_generation": "Enabled"
+    }
+  }
+}
+```
+
+为避免“比例没生效”的歧义，建议同时显式传 `output_config.resolution` 和 `output_config.aspect_ratio`。
 
 ## 相关页面
 
