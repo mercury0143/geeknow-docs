@@ -145,7 +145,7 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 </ParamField>
 
 <ParamField body="n" type="integer">
-生成数量。你给的 Apifox 将其作为必填；从现有统一图像 DTO 看，这个字段在网关里是可选指针类型。若要和当前插件行为保持一致，建议传 `1`。
+生成数量。网关侧该字段可选；建议显式传 `1`，便于和常见上游行为保持一致。
 </ParamField>
 
 <ParamField body="size" type="string">
@@ -153,7 +153,7 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 </ParamField>
 
 <ParamField body="image" type="array<string> | string">
-可选参考图输入。你给的 Apifox 定义为“图片链接或者 BASE64 数组”，当前插件也是把参考图编码成 Base64 数组后放进这个字段。
+可选参考图输入。支持图片链接或 Base64 数组，图生图时把参考图放进这个字段。
 </ParamField>
 
 <ParamField body="response_format" type="string">
@@ -178,7 +178,7 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 
 ## 尺寸映射
 
-你给的 Apifox 和插件里的 `DOUBAO_SIZE_MAP` 一致，可按下表使用：
+Doubao 这组模型通常按宽高比映射到固定像素尺寸，可按下表使用：
 
 | 宽高比 | `size` 值 |
 | --- | --- |
@@ -192,7 +192,7 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 | `21:9` | `3024x1296` |
 
 <Info>
-和 Gemini 不同，Doubao 这组接口在你现有插件里不是传“比例枚举”，而是先把比例映射成具体像素尺寸，再把该尺寸写入 `size`。
+和 Gemini 不同，Doubao 这组接口不是传“比例枚举”，而是把比例映射成具体像素尺寸，再把该尺寸写入 `size`。
 </Info>
 
 ## 文生图 vs 图生图
@@ -209,11 +209,11 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 </ResponseField>
 
 <ResponseField name="data[].url" type="string">
-返回图片 URL。当前插件遇到该字段时会再下载到本地。
+返回图片 URL。
 </ResponseField>
 
 <ResponseField name="data[].b64_json" type="string">
-返回图片 Base64 数据。当前插件会优先使用这个字段。
+返回图片 Base64 数据。
 </ResponseField>
 
 <ResponseField name="data[].revised_prompt" type="string">

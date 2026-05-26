@@ -6,12 +6,12 @@ api: "POST /v1beta/models/{model}:generateContent"
 
 # gemini-3-pro-image-preview 生图 API
 
-这个模型使用 Gemini 官方 `generateContent` 格式生图，适合直接复用 `contents` / `parts` 结构，并且支持插件里暴露的 `2K` 尺寸档位。
+这个模型使用 Gemini 官方 `generateContent` 格式生图，适合直接复用 `contents` / `parts` 结构，并且支持 `2K` 尺寸档位。
 
 - 路径为 `POST /v1beta/models/{model}:generateContent`。
 - `model` 固定传 `gemini-3-pro-image-preview`。
 - 文生图和图生图都走同一套 `contents[].parts[]` 结构。
-- 插件里 `responseModalities` 默认同时请求 `IMAGE` 和 `TEXT`。
+- `generationConfig.responseModalities` 建议同时请求 `IMAGE` 和 `TEXT`。
 - 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
 
 ## 先看懂图生图
@@ -43,11 +43,7 @@ Gemini 这里的图生图，本质上就是：
 - 第一类内容是提示词：`{ "text": "..." }`
 - 第二类内容是参考图：`{ "inlineData": { "mimeType": "...", "data": "BASE64..." } }`
 
-插件里的实际做法也是这样：
-
-- 先放 `prompt`
-- 再把每一张参考图转成 Base64
-- 逐张 append 到同一个 `parts[]`
+构造请求时通常先放文本提示词，再把每一张参考图转成 Base64，按顺序追加到同一个 `parts[]`。
 
 ## 图生图最小示例
 
@@ -197,7 +193,7 @@ print(resp.json())
 
 ## 能传几张参考图
 
-从你的 `main.py` 现有实现看，插件会遍历 `reference_images`，把每一张图都追加到 `parts[]` 里，所以文档上可以理解为：
+多参考图可以按顺序追加多个 `inlineData`：
 
 - 支持 1 张参考图
 - 也支持多张参考图
@@ -214,7 +210,7 @@ Gemini 生图返回的图片通常在：
 1. 直接是 Base64 图片数据
 2. 直接是图片 URL
 
-你的插件已经兼容了这两种返回方式，所以文档里看到 `BASE64_OR_URL` 是有意这么写的。
+因此文档示例中用 `BASE64_OR_URL` 表示这两种可能的返回形式。
 
 ## Body
 
@@ -223,7 +219,7 @@ Gemini 生图返回的图片通常在：
 </ParamField>
 
 <ParamField body="contents[].role" type="string">
-角色字段。插件固定使用 `user`。
+角色字段，常用值为 `user`。
 </ParamField>
 
 <ParamField body="contents[].parts" type="array<object>" required>
@@ -251,7 +247,7 @@ Base64 编码的图片内容。
 </ParamField>
 
 <ParamField body="generationConfig.responseModalities" type="array<string>">
-返回模态列表。插件默认使用 `["IMAGE", "TEXT"]`。
+返回模态列表。建议使用 `["IMAGE", "TEXT"]`。
 </ParamField>
 
 <ParamField body="generationConfig.imageConfig" type="object" required>
@@ -259,11 +255,11 @@ Base64 编码的图片内容。
 </ParamField>
 
 <ParamField body="generationConfig.imageConfig.aspectRatio" type="string">
-图片比例。插件支持 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
+图片比例。常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
 </ParamField>
 
 <ParamField body="generationConfig.imageConfig.imageSize" type="string">
-图片清晰度。这个模型支持插件里暴露的 `1K` 和 `2K`。
+图片清晰度。这个模型支持 `1K` 和 `2K`。
 </ParamField>
 
 <ParamField body="safetySettings" type="array<object>">
@@ -332,7 +328,7 @@ Token 统计信息。
 </ResponseField>
 
 <Info>
-根据你的插件实现，`gemini-3-pro-image-preview` 会按请求里的 `imageSize` 真实下发，`2K` 会保留，不会被强制回落到 `1K`。
+`gemini-3-pro-image-preview` 会按请求里的 `imageSize` 下发，`2K` 会保留，不会被强制回落到 `1K`。
 </Info>
 
 ## 相关接口

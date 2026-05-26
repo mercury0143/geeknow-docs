@@ -11,7 +11,7 @@ api: "POST /v1beta/models/{model}:generateContent"
 - 路径为 `POST /v1beta/models/{model}:generateContent`。
 - `model` 固定传 `gemini-3.1-flash-image-preview`。
 - 文生图和图生图都使用同一套 `contents[].parts[]`。
-- 插件里虽然允许选择 `2K`，但这个模型会实际回落为 `1K`。
+- 这个模型会实际回落为 `1K`；即使请求中传 `2K`，最终也会按 `1K` 处理。
 - 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
 
 ## 先看懂图生图
@@ -89,7 +89,7 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-image-previe
 | --- | --- |
 | `contents[].parts[].text` | 文本提示词 |
 | `contents[].parts[].inlineData` | 参考图输入 |
-| `generationConfig.responseModalities` | 插件默认 `["IMAGE", "TEXT"]` |
+| `generationConfig.responseModalities` | 建议使用 `["IMAGE", "TEXT"]` |
 | `generationConfig.imageConfig.aspectRatio` | 图片比例 |
 | `generationConfig.imageConfig.imageSize` | 图片清晰度 |
 
@@ -109,13 +109,13 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-image-previe
 
 - `candidates[0].content.parts[].inlineData.data`
 
-这个字段在你的插件里可能是：
+这个字段可能是：
 
 1. Base64 图片数据
 2. 图片 URL
 
 <Info>
-根据 `main.py` 当前实现，这个模型会把请求中的 `imageSize` 强制改成 `1K`；即使前端或文档示例里填写 `2K`，插件实际发出去的仍然是 `1K`。
+这个模型会把请求中的 `imageSize` 按 `1K` 处理；即使请求或示例中填写 `2K`，最终也会回落为 `1K`。
 </Info>
 
 ## 响应示例
