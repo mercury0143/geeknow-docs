@@ -40,6 +40,41 @@ curl -X POST https://www.geeknow.top/v1/videos \
   }'
 ```
 
+```bash 文生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "veo_3_1-fast",
+    "prompt": "一辆红色跑车穿过雨夜街道，路面反射霓虹灯光，镜头低角度跟拍",
+    "size": "1280x720",
+    "duration": 8
+  }'
+```
+
+```bash JSON 参考图生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "veo_3_1",
+    "prompt": "让画面中的人物自然转身，背景保持一致",
+    "size": "1280x720",
+    "duration": 8,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+  }'
+```
+
+```bash 上传参考图生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=veo_3_1" \
+  -F "prompt=让参考图中的主体缓慢向镜头走来，保持服装和场景风格一致" \
+  -F "size=1280x720" \
+  -F "duration=8" \
+  -F "input_reference=@first-frame.png"
+```
+
 ```python Python
 import requests
 
@@ -292,41 +327,6 @@ Future<void> main() async {
 
   print(response.body);
 }
-```
-
-```bash 文生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "veo_3_1-fast",
-    "prompt": "一辆红色跑车穿过雨夜街道，路面反射霓虹灯光，镜头低角度跟拍",
-    "size": "1280x720",
-    "duration": 8
-  }'
-```
-
-```bash JSON 参考图生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "veo_3_1",
-    "prompt": "让画面中的人物自然转身，背景保持一致",
-    "size": "1280x720",
-    "duration": 8,
-    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-  }'
-```
-
-```bash 上传参考图生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=veo_3_1" \
-  -F "prompt=让参考图中的主体缓慢向镜头走来，保持服装和场景风格一致" \
-  -F "size=1280x720" \
-  -F "duration=8" \
-  -F "input_reference=@first-frame.png"
 ```
 
 </RequestExample>
