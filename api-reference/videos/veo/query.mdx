@@ -9,8 +9,8 @@ api: "GET /v1/videos/{task_id}"
 Veo 系列提交后同样通过 `GET /v1/videos/{task_id}` 查询。对外返回仍然是 OpenAI 风格 `video` 对象。
 
 - 查询路径是 `GET /v1/videos/{task_id}`。
-- 任务完成后通常可从 `video_url` 或代理内容地址读取结果。
-- 路由层仍由 `controller.RelayTaskFetch` 统一处理。
+- 任务完成后通常可从 `video_url` 读取视频结果。
+- 查询结果返回任务状态、进度、完成时间和视频地址。
 
 ## 方法与路径
 
@@ -59,7 +59,7 @@ console.log(await response.json());
   "id": "video_abc123",
   "object": "video",
   "model": "veo_3_1-fast",
-  "status": "processing",
+  "status": "in_progress",
   "progress": 50,
   "created_at": 1735689600,
   "completed_at": 0,
@@ -121,7 +121,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="status" type="string">
-任务状态，常见值包括 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+任务状态，常见值包括 `queued`、`in_progress`、`completed`、`failed`。
 </ResponseField>
 
 <ResponseField name="progress" type="integer">

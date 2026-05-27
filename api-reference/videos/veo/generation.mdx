@@ -6,17 +6,19 @@ api: "POST /v1/videos"
 
 # Veo 视频生成
 
-Veo 系列当前通过 `POST /v1/videos` 提交，并以 JSON 提交为主。
+Veo 系列用于提交异步视频生成任务，适合文生视频和带参考图的视频生成场景。
 
-- 路由入口是 `POST /v1/videos`。
-- 当前模型只有 `veo_3_1`、`veo_3_1-fast`。
-- 当前会把 `size` 转换成 `metadata.output_config.resolution` 与 `aspect_ratio` 一并提交。
-- 参考图仍由 `input_reference` 表达，但 JSON 请求里通常表现为 URL、base64 或 Data URL。
+- 通过 `model` 选择 `veo_3_1` 或 `veo_3_1-fast`
+- 支持 JSON 请求；带本地参考图时也支持 `multipart/form-data`
+- 异步处理模式，提交成功后返回 `id` / `task_id`
+- 任务状态和结果通过 `GET /v1/videos/{task_id}` 查询
 
 ## 当前模型
 
-- `veo_3_1`
-- `veo_3_1-fast`
+| 模型 | 说明 |
+| --- | --- |
+| `veo_3_1` | 标准质量视频生成模型 |
+| `veo_3_1-fast` | 更快的视频生成模型 |
 
 ## 方法与路径
 
@@ -24,9 +26,7 @@ Veo 系列当前通过 `POST /v1/videos` 提交，并以 JSON 提交为主。
 POST /v1/videos
 ```
 
-## 请求示例
-
-<CodeGroup>
+<RequestExample>
 
 ```bash cURL
 curl -X POST https://www.geeknow.top/v1/videos \
@@ -34,16 +34,9 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Content-Type: application/json" \
   -d '{
     "model": "veo_3_1",
-    "prompt": "在广场中央跳舞",
+    "prompt": "在广场中央跳舞，镜头缓慢推进，电影感光照",
     "size": "1280x720",
-    "seconds": "25",
-    "metadata": {
-      "output_config": {
-        "aspect_ratio": "16:9",
-        "audio_generation": "Disabled",
-        "resolution": "720P"
-      }
-    }
+    "duration": 10
   }'
 ```
 
@@ -58,19 +51,13 @@ resp = requests.post(
     },
     json={
         "model": "veo_3_1",
-        "prompt": "在广场中央跳舞",
+        "prompt": "在广场中央跳舞，镜头缓慢推进，电影感光照",
         "size": "1280x720",
-        "seconds": "25",
-        "metadata": {
-            "output_config": {
-                "aspect_ratio": "16:9",
-                "audio_generation": "Disabled",
-                "resolution": "720P",
-            }
-        },
+        "duration": 10,
     },
     timeout=60,
 )
+
 print(resp.json())
 ```
 
@@ -83,16 +70,9 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
   },
   body: JSON.stringify({
     model: "veo_3_1",
-    prompt: "在广场中央跳舞",
+    prompt: "在广场中央跳舞，镜头缓慢推进，电影感光照",
     size: "1280x720",
-    seconds: "25",
-    metadata: {
-      output_config: {
-        aspect_ratio: "16:9",
-        audio_generation: "Disabled",
-        resolution: "720P",
-      },
-    },
+    duration: 10,
   }),
 });
 
@@ -112,17 +92,10 @@ import (
 
 func main() {
 	payload := map[string]interface{}{
-		"model":   "veo_3_1",
-		"prompt":  "在广场中央跳舞",
-		"size":    "1280x720",
-		"seconds": "25",
-		"metadata": map[string]interface{}{
-			"output_config": map[string]interface{}{
-				"aspect_ratio":     "16:9",
-				"audio_generation": "Disabled",
-				"resolution":       "720P",
-			},
-		},
+		"model":    "veo_3_1",
+		"prompt":   "在广场中央跳舞，镜头缓慢推进，电影感光照",
+		"size":     "1280x720",
+		"duration": 10,
 	}
 
 	body, err := json.Marshal(payload)
@@ -162,16 +135,9 @@ public class Main {
         String json = """
         {
           "model": "veo_3_1",
-          "prompt": "在广场中央跳舞",
+          "prompt": "在广场中央跳舞，镜头缓慢推进，电影感光照",
           "size": "1280x720",
-          "seconds": "25",
-          "metadata": {
-            "output_config": {
-              "aspect_ratio": "16:9",
-              "audio_generation": "Disabled",
-              "resolution": "720P"
-            }
-          }
+          "duration": 10
         }
         """;
 
@@ -196,16 +162,9 @@ $ch = curl_init('https://www.geeknow.top/v1/videos');
 
 $payload = [
     'model' => 'veo_3_1',
-    'prompt' => '在广场中央跳舞',
+    'prompt' => '在广场中央跳舞，镜头缓慢推进，电影感光照',
     'size' => '1280x720',
-    'seconds' => '25',
-    'metadata' => [
-        'output_config' => [
-            'aspect_ratio' => '16:9',
-            'audio_generation' => 'Disabled',
-            'resolution' => '720P',
-        ],
-    ],
+    'duration' => 10,
 ];
 
 curl_setopt_array($ch, [
@@ -239,16 +198,9 @@ request["Content-Type"] = "application/json"
 
 request.body = JSON.generate({
   model: "veo_3_1",
-  prompt: "在广场中央跳舞",
+  prompt: "在广场中央跳舞，镜头缓慢推进，电影感光照",
   size: "1280x720",
-  seconds: "25",
-  metadata: {
-    output_config: {
-      aspect_ratio: "16:9",
-      audio_generation: "Disabled",
-      resolution: "720P"
-    }
-  }
+  duration: 10
 })
 
 response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
@@ -269,16 +221,9 @@ request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
 let payload: [String: Any] = [
     "model": "veo_3_1",
-    "prompt": "在广场中央跳舞",
+    "prompt": "在广场中央跳舞，镜头缓慢推进，电影感光照",
     "size": "1280x720",
-    "seconds": "25",
-    "metadata": [
-        "output_config": [
-            "aspect_ratio": "16:9",
-            "audio_generation": "Disabled",
-            "resolution": "720P"
-        ]
-    ]
+    "duration": 10
 ]
 
 request.httpBody = try JSONSerialization.data(withJSONObject: payload)
@@ -307,18 +252,9 @@ using var client = new HttpClient();
 var payload = new
 {
     model = "veo_3_1",
-    prompt = "在广场中央跳舞",
+    prompt = "在广场中央跳舞，镜头缓慢推进，电影感光照",
     size = "1280x720",
-    seconds = "25",
-    metadata = new
-    {
-        output_config = new
-        {
-            aspect_ratio = "16:9",
-            audio_generation = "Disabled",
-            resolution = "720P"
-        }
-    }
+    duration = 10
 };
 
 using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.geeknow.top/v1/videos");
@@ -340,16 +276,9 @@ import 'package:http/http.dart' as http;
 Future<void> main() async {
   final payload = {
     'model': 'veo_3_1',
-    'prompt': '在广场中央跳舞',
+    'prompt': '在广场中央跳舞，镜头缓慢推进，电影感光照',
     'size': '1280x720',
-    'seconds': '25',
-    'metadata': {
-      'output_config': {
-        'aspect_ratio': '16:9',
-        'audio_generation': 'Disabled',
-        'resolution': '720P',
-      },
-    },
+    'duration': 10,
   };
 
   final response = await http.post(
@@ -363,29 +292,6 @@ Future<void> main() async {
 
   print(response.body);
 }
-```
-
-</CodeGroup>
-
-<RequestExample>
-
-```bash 标准请求 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "veo_3_1",
-    "prompt": "在广场中央跳舞",
-    "size": "1280x720",
-    "seconds": "25",
-    "metadata": {
-      "output_config": {
-        "aspect_ratio": "16:9",
-        "audio_generation": "Disabled",
-        "resolution": "720P"
-      }
-    }
-  }'
 ```
 
 ```bash 文生视频 cURL
@@ -393,356 +299,34 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "veo_3_1",
-    "prompt": "多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格",
+    "model": "veo_3_1-fast",
+    "prompt": "一辆红色跑车穿过雨夜街道，路面反射霓虹灯光，镜头低角度跟拍",
     "size": "1280x720",
-    "seconds": "25",
-    "metadata": {
-      "output_config": {
-        "aspect_ratio": "16:9",
-        "audio_generation": "Disabled",
-        "resolution": "720P"
-      }
-    }
+    "duration": 8
   }'
 ```
 
-```bash 首帧生视频 cURL
+```bash JSON 参考图生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "veo_3_1",
-    "prompt": "多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格",
+    "prompt": "让画面中的人物自然转身，背景保持一致",
     "size": "1280x720",
-    "seconds": "25",
-    "metadata": {
-      "output_config": {
-        "aspect_ratio": "16:9",
-        "audio_generation": "Disabled",
-        "resolution": "720P"
-      }
-    },
-    "input_reference": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    "duration": 8,
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
   }'
 ```
 
-```python Python
-import requests
-
-resp = requests.post(
-    "https://www.geeknow.top/v1/videos",
-    headers={
-        "Authorization": "Bearer YOUR_API_KEY",
-        "Content-Type": "application/json",
-    },
-    json={
-        "model": "veo_3_1",
-        "prompt": "在广场中央跳舞",
-        "size": "1280x720",
-        "seconds": "25",
-        "metadata": {
-            "output_config": {
-                "aspect_ratio": "16:9",
-                "audio_generation": "Disabled",
-                "resolution": "720P",
-            }
-        },
-    },
-    timeout=60,
-)
-print(resp.json())
-```
-
-```javascript JavaScript
-const response = await fetch("https://www.geeknow.top/v1/videos", {
-  method: "POST",
-  headers: {
-    Authorization: "Bearer YOUR_API_KEY",
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    model: "veo_3_1",
-    prompt: "在广场中央跳舞",
-    size: "1280x720",
-    seconds: "25",
-    metadata: {
-      output_config: {
-        aspect_ratio: "16:9",
-        audio_generation: "Disabled",
-        resolution: "720P",
-      },
-    },
-  }),
-});
-
-console.log(await response.json());
-```
-
-```go Go
-package main
-
-import (
-	"bytes"
-	"encoding/json"
-	"fmt"
-	"io"
-	"net/http"
-)
-
-func main() {
-	payload := map[string]interface{}{
-		"model":   "veo_3_1",
-		"prompt":  "在广场中央跳舞",
-		"size":    "1280x720",
-		"seconds": "25",
-		"metadata": map[string]interface{}{
-			"output_config": map[string]interface{}{
-				"aspect_ratio":     "16:9",
-				"audio_generation": "Disabled",
-				"resolution":       "720P",
-			},
-		},
-	}
-
-	body, err := json.Marshal(payload)
-	if err != nil {
-		panic(err)
-	}
-
-	req, err := http.NewRequest("POST", "https://www.geeknow.top/v1/videos", bytes.NewReader(body))
-	if err != nil {
-		panic(err)
-	}
-	req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(respBody))
-}
-```
-
-```java Java
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-
-public class Main {
-    public static void main(String[] args) throws Exception {
-        String json = """
-        {
-          "model": "veo_3_1",
-          "prompt": "在广场中央跳舞",
-          "size": "1280x720",
-          "seconds": "25",
-          "metadata": {
-            "output_config": {
-              "aspect_ratio": "16:9",
-              "audio_generation": "Disabled",
-              "resolution": "720P"
-            }
-          }
-        }
-        """;
-
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("https://www.geeknow.top/v1/videos"))
-            .header("Authorization", "Bearer YOUR_API_KEY")
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(json))
-            .build();
-
-        HttpResponse<String> response = HttpClient.newHttpClient()
-            .send(request, HttpResponse.BodyHandlers.ofString());
-
-        System.out.println(response.body());
-    }
-}
-```
-
-```php PHP
-<?php
-$ch = curl_init('https://www.geeknow.top/v1/videos');
-
-$payload = [
-    'model' => 'veo_3_1',
-    'prompt' => '在广场中央跳舞',
-    'size' => '1280x720',
-    'seconds' => '25',
-    'metadata' => [
-        'output_config' => [
-            'aspect_ratio' => '16:9',
-            'audio_generation' => 'Disabled',
-            'resolution' => '720P',
-        ],
-    ],
-];
-
-curl_setopt_array($ch, [
-    CURLOPT_POST => true,
-    CURLOPT_HTTPHEADER => [
-        'Authorization: Bearer YOUR_API_KEY',
-        'Content-Type: application/json',
-    ],
-    CURLOPT_POSTFIELDS => json_encode($payload),
-    CURLOPT_RETURNTRANSFER => true,
-]);
-
-$response = curl_exec($ch);
-if ($response === false) {
-    throw new RuntimeException(curl_error($ch));
-}
-
-curl_close($ch);
-echo $response;
-```
-
-```ruby Ruby
-require "net/http"
-require "uri"
-require "json"
-
-uri = URI("https://www.geeknow.top/v1/videos")
-request = Net::HTTP::Post.new(uri)
-request["Authorization"] = "Bearer YOUR_API_KEY"
-request["Content-Type"] = "application/json"
-
-request.body = JSON.generate({
-  model: "veo_3_1",
-  prompt: "在广场中央跳舞",
-  size: "1280x720",
-  seconds: "25",
-  metadata: {
-    output_config: {
-      aspect_ratio: "16:9",
-      audio_generation: "Disabled",
-      resolution: "720P"
-    }
-  }
-})
-
-response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-  http.request(request)
-end
-
-puts response.body
-```
-
-```swift Swift
-import Foundation
-
-let url = URL(string: "https://www.geeknow.top/v1/videos")!
-var request = URLRequest(url: url)
-request.httpMethod = "POST"
-request.setValue("Bearer YOUR_API_KEY", forHTTPHeaderField: "Authorization")
-request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
-let payload: [String: Any] = [
-    "model": "veo_3_1",
-    "prompt": "在广场中央跳舞",
-    "size": "1280x720",
-    "seconds": "25",
-    "metadata": [
-        "output_config": [
-            "aspect_ratio": "16:9",
-            "audio_generation": "Disabled",
-            "resolution": "720P"
-        ]
-    ]
-]
-
-request.httpBody = try JSONSerialization.data(withJSONObject: payload)
-
-let task = URLSession.shared.dataTask(with: request) { data, _, error in
-    if let error {
-        print(error)
-        return
-    }
-    if let data, let text = String(data: data, encoding: .utf8) {
-        print(text)
-    }
-}
-
-task.resume()
-RunLoop.main.run()
-```
-
-```csharp C#
-using System.Net.Http.Headers;
-using System.Text;
-using System.Text.Json;
-
-using var client = new HttpClient();
-
-var payload = new
-{
-    model = "veo_3_1",
-    prompt = "在广场中央跳舞",
-    size = "1280x720",
-    seconds = "25",
-    metadata = new
-    {
-        output_config = new
-        {
-            aspect_ratio = "16:9",
-            audio_generation = "Disabled",
-            resolution = "720P"
-        }
-    }
-};
-
-using var request = new HttpRequestMessage(HttpMethod.Post, "https://www.geeknow.top/v1/videos");
-request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_API_KEY");
-request.Content = new StringContent(
-    JsonSerializer.Serialize(payload),
-    Encoding.UTF8,
-    "application/json"
-);
-
-using var response = await client.SendAsync(request);
-Console.WriteLine(await response.Content.ReadAsStringAsync());
-```
-
-```dart Dart
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
-Future<void> main() async {
-  final payload = {
-    'model': 'veo_3_1',
-    'prompt': '在广场中央跳舞',
-    'size': '1280x720',
-    'seconds': '25',
-    'metadata': {
-      'output_config': {
-        'aspect_ratio': '16:9',
-        'audio_generation': 'Disabled',
-        'resolution': '720P',
-      },
-    },
-  };
-
-  final response = await http.post(
-    Uri.parse('https://www.geeknow.top/v1/videos'),
-    headers: {
-      'Authorization': 'Bearer YOUR_API_KEY',
-      'Content-Type': 'application/json',
-    },
-    body: jsonEncode(payload),
-  );
-
-  print(response.body);
-}
+```bash 上传参考图生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=veo_3_1" \
+  -F "prompt=让参考图中的主体缓慢向镜头走来，保持服装和场景风格一致" \
+  -F "size=1280x720" \
+  -F "duration=8" \
+  -F "input_reference=@first-frame.png"
 ```
 
 </RequestExample>
@@ -751,22 +335,63 @@ Future<void> main() async {
 
 <ResponseExample>
 
-```json 200
+```json 200 - 任务已提交
 {
   "id": "video_abc123",
+  "task_id": "video_abc123",
   "object": "video",
-  "model": "veo_3_1-fast",
+  "model": "veo_3_1",
   "status": "queued",
   "progress": 0,
-  "created_at": 1735689600,
-  "seconds": "8",
-  "size": "720x1280"
+  "created_at": 1735689600
+}
+```
+
+```json 400 - 参数错误
+{
+  "code": "invalid_request",
+  "message": "prompt is required",
+  "data": null
+}
+```
+
+```json 401 - 认证失败
+{
+  "code": "unauthorized",
+  "message": "无效的令牌",
+  "data": null
+}
+```
+
+```json 402 - 额度不足
+{
+  "code": "insufficient_quota",
+  "message": "用户额度不足",
+  "data": null
+}
+```
+
+```json 429 - 请求过多
+{
+  "code": "rate_limit_exceeded",
+  "message": "当前分组上游负载已饱和，请稍后再试",
+  "data": null
+}
+```
+
+```json 500 - 服务端错误
+{
+  "code": "do_request_failed",
+  "message": "请求处理失败",
+  "data": null
 }
 ```
 
 </ResponseExample>
 
 ## 认证
+
+使用 Bearer Token 认证：
 
 ```http
 Authorization: Bearer YOUR_API_KEY
@@ -775,41 +400,89 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。当前只整理 `veo_3_1` 与 `veo_3_1-fast`。
+模型名称。可选值：`veo_3_1`、`veo_3_1-fast`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-提示词。
+视频提示词。建议描述主体、动作、镜头、场景、光照和风格。
 </ParamField>
 
 <ParamField body="size" type="string">
-尺寸字符串。当前常见会传 `720x1280` 或 `1280x720`，并据此推导 Veo 的分辨率和宽高比。
+输出尺寸。常见值：`1280x720`、`720x1280`。横向尺寸通常对应 `16:9`，纵向尺寸通常对应 `9:16`。
 </ParamField>
 
-<ParamField body="seconds" type="string | integer">
-目标时长。当前通过 `seconds` 提交；网关也会兼容 `duration` 与 `metadata.durationSeconds`。
+<ParamField body="duration" type="integer">
+目标时长，单位为秒。不同模型可用时长可能不同，建议使用当前模型支持的常见值，例如 `8` 或 `10`。
 </ParamField>
 
-<ParamField body="input_reference" type="string | array<string>">
-参考图输入。当前 JSON 请求可使用 URL、base64、data URI；Veo 适配层也兼容 multipart 文件上传。
+<ParamField body="image" type="string">
+JSON 请求中的单张参考图。支持 Data URL 或 base64 字符串，常用于首帧 / 参考图生视频。
 </ParamField>
 
-<ParamField body="metadata" type="object">
-扩展配置。Veo 链路会继续解析 `metadata` 到 Veo 上游的 `DurationSeconds`、`AspectRatio`、`Resolution` 等字段。
+<ParamField body="images" type="array<string>">
+JSON 请求中的参考图数组。当前建议只传一张参考图；如果传入多张，实际效果取决于当前模型支持。
 </ParamField>
 
-<ParamField body="enable_upsample" type="boolean">
-这是你给的 Apifox 字段参考，但从当前仓库主链路看，它不是 Veo 通用 DTO 的显式顶层字段。若要表达清晰度或分辨率，当前更建议使用 `size` 与 `metadata`。
+<ParamField body="input_reference" type="file | string">
+参考图字段。使用 `multipart/form-data` 上传本地图片时，文件字段名为 `input_reference`；使用 JSON 时建议改用 `image` 或 `images`。
 </ParamField>
 
-## 当前规则
+## Response
 
-| 项目 | 规则 |
+<ResponseField name="id" type="string">
+视频任务 ID。查询任务时使用这个值。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+兼容字段，通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+固定为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+本次请求使用的模型。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值包括 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度百分比。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+任务创建时间，Unix 秒级时间戳。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+任务完成时间，Unix 秒级时间戳。任务完成后返回。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+视频结果地址。任务完成后可在查询接口返回。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败时返回的错误信息。
+</ResponseField>
+
+## 使用场景
+
+| 场景 | 推荐参数 |
 | --- | --- |
-| 请求格式 | JSON |
-| 参考图格式 | 支持 URL、base64、data URI，也兼容 multipart 文件 |
-| 参考生视频模式 | 会把宽高比强制收敛到 `16:9` |
-| 参数映射 | `size` 会进一步映射到 Veo 所需的 `resolution`、`aspectRatio` |
+| 文生视频 | `model`、`prompt`、`size`、`duration` |
+| JSON 参考图生视频 | `model`、`prompt`、`size`、`duration`、`image` |
+| 上传参考图生视频 | `multipart/form-data`，并上传 `input_reference` 文件 |
+
+## 注意事项
+
+- 这是异步接口，提交成功不代表视频已经生成完成。
+- 提交后请使用 `GET /v1/videos/{task_id}` 查询任务状态。
+- 参考图建议使用清晰主体和明确构图，避免过小或过度压缩的图片。
+- 不同模型和账户配置可能影响可用时长、尺寸和预计耗时。
 
 ## 相关接口
 
