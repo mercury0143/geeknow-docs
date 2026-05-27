@@ -6,7 +6,7 @@ api: "GET /v1/videos/{task_id}"
 
 # Sora 任务查询
 
-Sora 系列任务提交后，通过 `GET /v1/videos/{task_id}` 查询。路由层对应 `router/video-router.go` 里的 `videoV1Router.GET("/videos/:task_id", controller.RelayTaskFetch)`。
+Sora 系列任务提交后，通过 `GET /v1/videos/{task_id}` 查询。
 
 - 查询路径是 `GET /v1/videos/{task_id}`。
 - 成功返回的是 OpenAI 风格 `video` 对象。
