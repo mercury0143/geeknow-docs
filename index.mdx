@@ -1,70 +1,62 @@
 ---
 title: "Geeknow API 文档"
-description: "基于 `router/` 实际路由整理的 Mintlify 文档入口，覆盖文本、图像、视频、音频、上传、任务和账户接口。"
+description: "面向开发者的 Geeknow API 文档入口，覆盖文本、图像、视频、音频、上传、任务和账户能力。"
 ---
 
 # Geeknow API 文档
 
-这套文档直接对应仓库里的真实路由，优先以 `router/`、`controller/`、`dto/` 为准，不按外部平台文档猜测接口行为。
+这套文档面向接入 Geeknow API 的开发者，汇总可公开调用的能力、鉴权方式、参数说明、响应格式和异步任务流程。
+
+文档只说明开发者调用 Geeknow API 时需要关注的公开 API 行为与使用约定。
 
 <CardGroup cols={2}>
   <Card title="文字系列" icon="text" href="/api-reference/texts/overview">
-    `/v1/chat/completions`、`/v1/responses`、`/v1/messages`、`/v1beta/models/*` 等文本与多模态接口。
+    聊天补全、Responses、Claude Messages、Gemini 原生格式、模型列表和实时能力。
   </Card>
 
   <Card title="图像系列" icon="image" href="/api-reference/images/overview">
-    `/v1/images/*`、`/mj/*` 和 Gemini 原生图像能力的路由总览。
+    图像生成、图像编辑、Gemini 原生图像、Midjourney 任务和模型能力矩阵。
   </Card>
 
   <Card title="视频系列" icon="clapperboard" href="/api-reference/videos/overview">
-    按模型系列整理的视频能力，当前先提供 Grok 视频的生成与查询文档。
+    Grok、Sora、Veo、Seedance-2、国产视频模型等视频生成与查询能力。
   </Card>
 
   <Card title="音频系列" icon="audio-description" href="/api-reference/audio/overview">
-    `/v1/audio/transcriptions`、`/v1/audio/translations`、`/v1/audio/speech`、`/suno/*`。
+    语音转文字、语音翻译、语音合成和 Suno 音乐相关能力。
   </Card>
 
   <Card title="上传管理" icon="upload" href="/api-reference/uploads/overview">
-    `/api/upload/presign` 的预签名上传能力，用于图片、视频和媒体资源预上传。
+    图片、视频和媒体资源的预签名上传能力。
+  </Card>
+
+  <Card title="任务管理" icon="list-checks" href="/api-reference/tasks/overview">
+    异步任务提交后的状态查询、结果读取和失败信息说明。
   </Card>
 
   <Card title="账户管理" icon="key-round" href="/api-reference/account/overview">
-    Bearer Token、原生兼容认证头、OAuth 状态码和余额查询接口。
+    API Key 认证、兼容认证头、OAuth 状态码和余额查询。
   </Card>
 </CardGroup>
 
-## 快速开始
+## 适合从这里开始
 
-```bash
-curl -X POST https://www.geeknow.top/v1/chat/completions \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "gpt-4o",
-    "messages": [
-      { "role": "user", "content": "用三句话介绍 new-api 这套网关。" }
-    ]
-  }'
-```
+1. 新接入先阅读账户管理，确认 API Key 获取方式、认证头和余额查询。
+2. 需要文本或多模态能力时，先阅读文字系列概览，再进入具体协议页面。
+3. 需要图像或视频生成时，先阅读对应系列概览和模型矩阵，再进入模型家族页面。
+4. 使用异步生成能力时，先确认提交接口和任务查询接口的完整链路。
 
 ## 文档约定
 
-- Relay 路由主要位于 `/v1`、`/v1beta`、`/mj`、`/suno`、`/kling/v1`，大多返回 OpenAI 兼容结构或上游原生结构，并使用真实 HTTP 状态码。
-- Dashboard 与账户类接口主要位于 `/api/*`，很多接口使用统一包装：`success`、`message`、`data`。这类接口即使业务失败，也可能仍返回 HTTP `200`。
-- 异步任务接口提交后通常返回公开 `task_id` 或 OpenAI 兼容 `video id`。查询时再映射回真实上游任务。
-
-## 路由来源
-
-| 文件 | 主要覆盖内容 |
-| --- | --- |
-| `router/relay-router.go` | `/v1`、`/v1beta`、`/pg`、`/mj`、`/suno` 等文本、图像、音频和任务路由 |
-| `router/video-router.go` | `/v1/videos`、`/kling/v1`、`/jimeng`、`/sora/v1` 等视频相关路由 |
-| `router/api-router.go` | `/api/upload/presign`、`/api/oauth/*`、`/api/usage/token`、用户和后台接口 |
-| `router/dashboard.go` | `/dashboard/billing/*` 与 `/v1/dashboard/billing/*` 兼容余额接口 |
+- 每个接口页都会说明请求方法、接口地址、鉴权方式、参数、响应字段和常见状态码。
+- 文本接口、图像接口、视频接口和任务接口的响应格式以对应页面展示为准。
+- 异步任务提交后会返回任务标识，生成结果需要通过任务查询页面读取。
+- 页面中的模型名、字段名和状态值以具体接口页为准。
 
 ## 推荐阅读顺序
 
-1. [文字系列概览](/api-reference/texts/overview)
-2. [视频系列概览](/api-reference/videos/overview)
-3. [任务管理概览](/api-reference/tasks/overview)
-4. [账户管理概览](/api-reference/account/overview)
+1. [账户管理概览](/api-reference/account/overview)
+2. [文字系列概览](/api-reference/texts/overview)
+3. [图像系列概览](/api-reference/images/overview)
+4. [视频系列概览](/api-reference/videos/overview)
+5. [任务管理概览](/api-reference/tasks/overview)
