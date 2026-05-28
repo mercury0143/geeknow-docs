@@ -1,10 +1,17 @@
 ---
 title: Seedance-2 查询视频任务
-description: 使用 `GET /v1/videos/{id}` 查询 Seedance-2 视频任务。
+description: 使用 `GET /v1/videos/{id}` 查询 Seedance-2 视频任务状态、进度和结果地址。
 api: "GET /v1/videos/{id}"
 ---
 
 # Seedance-2 查询视频任务
+
+这个接口用于查询 Seedance-2 异步视频任务的最新状态。
+
+- 根据创建任务返回的 `id` 查询
+- 任务完成后返回 `video_url`
+- 失败任务会返回 `error`
+- 状态统一为 `queued`、`in_progress`、`completed`、`failed`
 
 ## 方法与路径
 
@@ -12,68 +19,215 @@ api: "GET /v1/videos/{id}"
 GET /v1/videos/{id}
 ```
 
-## 状态映射
+<RequestExample>
 
-- `pending` / `queued` -> `queued`
-- `processing` / `running` / `in_progress` -> `in_progress`
-- `succeeded` / `completed` -> `completed`
-- `failed` / `cancelled` -> `failed`
+```bash 查询任务 cURL
+curl -X GET https://www.geeknow.top/v1/videos/task_01jz8s3dbke8p9vq2m8r9a7gk4 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
 
-## 响应字段
+```python Python
+import requests
+
+task_id = "task_01jz8s3dbke8p9vq2m8r9a7gk4"
+
+resp = requests.get(
+    f"https://www.geeknow.top/v1/videos/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const taskId = "task_01jz8s3dbke8p9vq2m8r9a7gk4";
+
+const response = await fetch(`https://www.geeknow.top/v1/videos/${taskId}`, {
+  method: "GET",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 任务处理中
+{
+  "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
+  "object": "video",
+  "created": 1790557800,
+  "model": "seedance-2.0-pro",
+  "status": "in_progress"
+}
+```
+
+```json 200 - 任务完成
+{
+  "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
+  "object": "video",
+  "created": 1790557800,
+  "model": "seedance-2.0-pro",
+  "status": "completed",
+  "video_url": "https://example.com/results/seedance-video.mp4",
+  "actualDuration": 6,
+  "totalTokens": 1200
+}
+```
+
+```json 200 - 任务失败
+{
+  "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
+  "object": "video",
+  "created": 1790557800,
+  "model": "seedance-2.0-pro",
+  "status": "failed",
+  "error": "task failed"
+}
+```
+
+```json 400 - 无效任务 ID
+{
+  "error": {
+    "message": "task_id is required",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 401 - 未提供有效 API Key
+{
+  "error": {
+    "message": "无效的令牌",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 404 - 任务不存在
+{
+  "error": {
+    "message": "Task not found",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 429 - 请求过于频繁
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_exceeded"
+  }
+}
+```
+
+```json 500 - 服务端处理失败
+{
+  "error": {
+    "message": "Failed to query task",
+    "type": "server_error"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+视频任务 ID。创建视频任务接口返回的 `id`，例如 `task_01jz8s3dbke8p9vq2m8r9a7gk4`。
+</ParamField>
+
+## Response
 
 <ResponseField name="object" type="string">
-固定为 `video`。
+对象类型，通常为 `video`。
 </ResponseField>
 
 <ResponseField name="id" type="string">
-桥接层签名任务令牌。
+视频任务 ID。
 </ResponseField>
 
 <ResponseField name="status" type="string">
 任务状态。支持 `queued`、`in_progress`、`completed`、`failed`。
 </ResponseField>
 
-<ResponseField name="progress" type="integer">
-简化进度百分比。当前固定为 `0` / `50` / `100`。
-</ResponseField>
-
-<ResponseField name="created_at" type="integer">
+<ResponseField name="created" type="integer">
 创建时间戳。
 </ResponseField>
 
-<ResponseField name="completed_at" type="integer">
-完成时间戳。
-</ResponseField>
-
 <ResponseField name="model" type="string">
-模型名称。
-</ResponseField>
-
-<ResponseField name="seconds" type="string">
-视频时长。
-</ResponseField>
-
-<ResponseField name="size" type="string">
-桥接层展示尺寸，例如 `1280x720`。
-</ResponseField>
-
-<ResponseField name="url" type="string">
-任务完成时返回的视频 URL。
+任务使用的模型名称。
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-与 `url` 相同的兼容字段。
+任务完成时返回的视频 URL。
 </ResponseField>
 
-<ResponseField name="usage" type="object">
-用量信息。
+<ResponseField name="actualDuration" type="integer">
+实际生成的视频时长。上游返回该字段时透出。
 </ResponseField>
 
-<ResponseField name="error" type="object">
-错误信息。
+<ResponseField name="totalTokens" type="integer">
+任务计费用量。上游返回该字段时透出。
 </ResponseField>
+
+<ResponseField name="error" type="string">
+任务失败原因。
+</ResponseField>
+
+## 状态映射
+
+| 上游状态 | 返回状态 |
+| --- | --- |
+| `pending`、`queued` | `queued` |
+| `processing`、`running`、`in_progress` | `in_progress` |
+| `succeeded`、`completed` | `completed` |
+| `failed`、`cancelled` | `failed` |
+
+## 使用场景
+
+### 轮询到任务完成
+
+创建任务后保存返回的 `id`，每隔数秒调用一次查询接口。`status` 为 `completed` 时读取 `video_url`。
+
+```http
+GET /v1/videos/task_01jz8s3dbke8p9vq2m8r9a7gk4
+```
+
+### 获取失败原因
+
+当 `status` 为 `failed` 时，读取 `error` 字段定位失败原因。
+
+```json
+{
+  "status": "failed",
+  "error": "task failed"
+}
+```
+
+## 注意事项
+
+- 查询接口只读取任务状态，不会重新提交生成任务。
+- `video_url` 只在任务完成且上游返回结果地址后出现。
+- 如果需要代理下载视频内容，可使用 `GET /v1/videos/{id}/content`。
 
 ## 相关页面
 
 - [Seedance-2 概览](./overview)
 - [创建视频任务](./generation)
+- [创建素材](./asset-create-media)

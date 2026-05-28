@@ -1,10 +1,17 @@
 ---
 title: Seedance-2 创建视频任务
-description: 使用 `POST /v1/videos` 创建 Seedance-2 视频任务。
+description: 使用 `POST /v1/videos` 创建 Seedance-2 异步视频生成任务。
 api: "POST /v1/videos"
 ---
 
 # Seedance-2 创建视频任务
+
+Seedance-2 视频生成接口用于提交文生视频、首帧生视频、首尾帧生视频和参考素材生成任务。
+
+- 异步处理模式，提交成功后返回视频任务 ID
+- 支持 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`
+- 支持首帧图、尾帧图、参考图、参考视频和参考音频 URL
+- 支持 `application/json`，也支持仅 URL 字段的 `multipart/form-data`
 
 ## 方法与路径
 
@@ -12,135 +19,438 @@ api: "POST /v1/videos"
 POST /v1/videos
 ```
 
-## 请求说明
+<RequestExample>
 
-- 支持 `application/json`
-- 支持 `multipart/form-data`
-- `multipart/form-data` 仅支持 URL 字段，不支持真实文件上传
+```bash 标准请求 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.0-pro",
+    "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+    "duration": 6,
+    "aspect_ratio": "16:9"
+  }'
+```
 
-## 请求示例
+```bash 首帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.0-fast",
+    "prompt": "让画面中的人物自然转身，看向镜头并微笑，背景灯光轻微闪烁",
+    "duration": 5,
+    "aspect_ratio": "9:16",
+    "first_image": "https://example.com/assets/first-frame.png"
+  }'
+```
 
-<CodeGroup>
+```bash 首尾帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.0-pro",
+    "prompt": "从首帧自然过渡到尾帧，保持人物服装和场景一致，动作连贯",
+    "duration": 6,
+    "aspect_ratio": "16:9",
+    "first_image": "https://example.com/assets/opening-frame.png",
+    "last_image": "https://example.com/assets/ending-frame.png"
+  }'
+```
 
-```json
-{
-  "model": "doubao-seedance-2-0-fast-260128",
-  "prompt": "使用参考图中的主体风格，参考视频的镜头语言，并使用参考音频作为背景音乐，生成一个6秒的广告感短视频，保持画面连贯自然。",
-  "reference_image_urls": [
-    "https://example.com/ref-image-1.png",
-    "https://example.com/ref-image-2.jpg"
-  ],
-  "reference_video_urls": [
-    "https://example.com/ref-video-1.mp4",
-    "https://example.com/ref-video-2.mp4"
-  ],
-  "audio_url": "https://example.com/ref-audio.mp3",
-  "duration": 6,
-  "ratio": "adaptive",
-  "resolution": "480p",
-  "generate_audio": true,
-  "watermark": false
+```bash 多参考素材 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance-2.0-pro",
+    "prompt": "参考图片中的产品外观、参考视频的镜头运动，并使用参考音频作为背景音乐，生成广告感短视频",
+    "duration": 6,
+    "aspect_ratio": "adaptive",
+    "reference_images": [
+      "https://example.com/assets/product-front.png",
+      "https://example.com/assets/product-side.png"
+    ],
+    "reference_videos": [
+      "https://example.com/assets/camera-motion.mp4"
+    ],
+    "reference_audios": [
+      "https://example.com/assets/background-music.mp3"
+    ],
+    "generate_audio": true
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "seedance-2.0-pro",
+        "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+        "duration": 6,
+        "aspect_ratio": "16:9",
+    },
+    timeout=60,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "seedance-2.0-pro",
+    prompt: "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+    duration: 6,
+    aspect_ratio: "16:9",
+  }),
+});
+
+console.log(await response.json());
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	payload := map[string]interface{}{
+		"model":        "seedance-2.0-pro",
+		"prompt":       "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+		"duration":     6,
+		"aspect_ratio": "16:9",
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		panic(err)
+	}
+
+	req, err := http.NewRequest("POST", "https://www.geeknow.top/v1/videos", bytes.NewReader(body))
+	if err != nil {
+		panic(err)
+	}
+	req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(respBody))
 }
 ```
 
-</CodeGroup>
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-## 字段
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String json = """
+        {
+          "model": "seedance-2.0-pro",
+          "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+          "duration": 6,
+          "aspect_ratio": "16:9"
+        }
+        """;
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://www.geeknow.top/v1/videos"))
+            .header("Authorization", "Bearer YOUR_API_KEY")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json))
+            .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
+    }
+}
+```
+
+```php PHP
+<?php
+
+$payload = [
+    "model" => "seedance-2.0-pro",
+    "prompt" => "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+    "duration" => 6,
+    "aspect_ratio" => "16:9",
+];
+
+$ch = curl_init("https://www.geeknow.top/v1/videos");
+curl_setopt_array($ch, [
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        "Authorization: Bearer YOUR_API_KEY",
+        "Content-Type: application/json",
+    ],
+    CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+
+echo $response;
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 视频任务已提交
+{
+  "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
+  "object": "video",
+  "created": 1790557800,
+  "model": "seedance-2.0-pro",
+  "status": "queued"
+}
+```
+
+```json 400 - 缺少提示词
+{
+  "code": "invalid_request",
+  "message": "prompt is required"
+}
+```
+
+```json 401 - 未提供有效 API Key
+{
+  "error": {
+    "message": "无效的令牌",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 402 - 额度不足
+{
+  "error": {
+    "message": "余额不足",
+    "type": "insufficient_quota"
+  }
+}
+```
+
+```json 429 - 请求过于频繁
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_exceeded"
+  }
+}
+```
+
+```json 500 - 上游请求失败
+{
+  "code": "do_request_failed",
+  "message": "upstream request failed"
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
 
 <ParamField body="model" type="string" required>
-模型名称。当前代码内置模型为 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`；也可兼容 `doubao-seedance-2-0-260128`、`doubao-seedance-2-0-fast-260128`、`sd2_manxue_720p` 等名称。
+模型名称。支持 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-提示词。
+视频生成提示词。
 </ParamField>
 
 <ParamField body="duration" type="integer">
-视频时长（秒），优先于 `seconds`。
+视频时长，单位秒。传入时必须大于等于 `1`。
 </ParamField>
 
-<ParamField body="seconds" type="integer">
-视频时长（秒）。未传 `duration` 时使用。
-</ParamField>
-
-<ParamField body="size" type="string">
-OpenAI 兼容尺寸字段，仅支持固定映射值。
+<ParamField body="aspect_ratio" type="string">
+画幅比例。支持 `16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`21:9`、`adaptive`。
 </ParamField>
 
 <ParamField body="ratio" type="string">
-画幅比例。支持 `21:9`、`16:9`、`4:3`、`1:1`、`3:4`、`9:16`、`adaptive`。
+`aspect_ratio` 的兼容字段。未传 `aspect_ratio` 时使用。
 </ParamField>
 
-<ParamField body="resolution" type="string">
-输出分辨率。支持 `480p`、`720p`。
+<ParamField body="first_image" type="string">
+首帧图 URL。传入后按图生视频任务处理。
 </ParamField>
 
-<ParamField body="watermark" type="boolean">
-是否带水印。
-</ParamField>
-
-<ParamField body="generate_audio" type="boolean">
-是否生成音频。
-</ParamField>
-
-<ParamField body="input_reference" type="string">
-单参考图片 URL，默认映射为首帧图。
-</ParamField>
-
-<ParamField body="image" type="string">
-单参考图片 URL，默认映射为首帧图。
-</ParamField>
-
-<ParamField body="image_url" type="string">
-单参考图片 URL，默认映射为首帧图。
-</ParamField>
-
-<ParamField body="input_reference_role" type="string">
-当使用 `input_reference` / `image` / `image_url` 时指定角色。支持 `first_frame`、`reference_image`。
+<ParamField body="last_image" type="string">
+尾帧图 URL。通常与 `first_image` 一起使用，用于首尾帧过渡。
 </ParamField>
 
 <ParamField body="first_frame_url" type="string">
-首帧图 URL。
+`first_image` 的兼容字段。未传 `first_image` 时使用。
 </ParamField>
 
 <ParamField body="last_frame_url" type="string">
-尾帧图 URL。
+`last_image` 的兼容字段。未传 `last_image` 时使用。
+</ParamField>
+
+<ParamField body="reference_images" type="array<string>">
+参考图片 URL 数组。适合传入主体、风格或产品参考图。
 </ParamField>
 
 <ParamField body="reference_image_urls" type="array<string>">
-多张参考图 URL。
+`reference_images` 的兼容字段。未传 `reference_images` 时使用。
 </ParamField>
 
-<ParamField body="reference_video_url" type="string">
-单个参考视频 URL。
+<ParamField body="reference_videos" type="array<string>">
+参考视频 URL 数组。适合传入镜头运动或动作参考。
 </ParamField>
 
 <ParamField body="reference_video_urls" type="array<string>">
-多个参考视频 URL。
+`reference_videos` 的兼容字段。未传 `reference_videos` 时使用。
+</ParamField>
+
+<ParamField body="reference_audios" type="array<string>">
+参考音频 URL 数组。
 </ParamField>
 
 <ParamField body="audio_url" type="string">
-参考音频 URL。不能单独出现，至少要配合参考图或参考视频。
+单个参考音频 URL。未传 `reference_audios` 时会转换为 `reference_audios: [audio_url]`。
 </ParamField>
 
-<ParamField body="tools" type="array<object>">
-显式工具列表。当前仅支持 `[{\"type\":\"web_search\"}]`。
+<ParamField body="generate_audio" type="boolean">
+是否启用音频生成或音频参考。传 `true` 时必须同时提供 `reference_audios` 或 `audio_url`；不传表示省略该参数，传 `false` 表示显式关闭。
 </ParamField>
 
-<ParamField body="web_search" type="boolean">
-为 `true` 时桥接为 `tools=[{\"type\":\"web_search\"}]`。如果同时传 `tools`，优先使用 `tools`。
-</ParamField>
+## Response
 
-## 规则
+<ResponseField name="id" type="string">
+视频任务 ID。后续用 `GET /v1/videos/{id}` 查询结果。
+</ResponseField>
 
-- `prompt` 必填
-- `duration` 优先于 `seconds`
-- `audio_url` 不能单独出现，至少要配合参考图或参考视频
-- `input_reference` / `image` / `image_url` 默认映射为 `first_frame`
-- `tools` 与 `web_search` 同时传时，优先使用 `tools`
-- `size` 仅支持固定映射表，不支持任意像素值
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="created" type="integer">
+任务创建时间戳。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+本次任务使用的模型。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的公开视频 URL。提交阶段通常为空，查询完成任务时返回。
+</ResponseField>
+
+<ResponseField name="actualDuration" type="integer">
+实际生成的视频时长。上游返回该字段时透出。
+</ResponseField>
+
+<ResponseField name="totalTokens" type="integer">
+任务计费用量。上游返回该字段时透出。
+</ResponseField>
+
+<ResponseField name="error" type="string">
+任务失败原因。
+</ResponseField>
+
+## 使用场景
+
+### 文生视频
+
+只传 `model`、`prompt`、`duration` 和 `aspect_ratio`，适合从纯文本生成视频。
+
+```json
+{
+  "model": "seedance-2.0-fast",
+  "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾",
+  "duration": 5,
+  "aspect_ratio": "16:9"
+}
+```
+
+### 首帧生视频
+
+传入 `first_image`，让静态图中的主体动起来。
+
+```json
+{
+  "model": "seedance-2.0-pro",
+  "prompt": "让人物自然抬头，微笑，看向镜头",
+  "duration": 6,
+  "aspect_ratio": "9:16",
+  "first_image": "https://example.com/assets/person-first-frame.png"
+}
+```
+
+### 多参考素材生成
+
+同时传参考图、参考视频和参考音频，用于控制主体外观、镜头语言和声音风格。
+
+```json
+{
+  "model": "seedance-2.0-pro",
+  "prompt": "参考产品图和镜头运动生成一条广告感短视频",
+  "duration": 6,
+  "aspect_ratio": "adaptive",
+  "reference_images": ["https://example.com/assets/product.png"],
+  "reference_videos": ["https://example.com/assets/motion.mp4"],
+  "reference_audios": ["https://example.com/assets/music.mp3"],
+  "generate_audio": true
+}
+```
+
+## 注意事项
+
+- `prompt` 和 `model` 必填。
+- `duration` 传入时必须大于等于 `1`。
+- `aspect_ratio` 只支持枚举值：`16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`21:9`、`adaptive`。
+- `generate_audio` 不传表示省略；显式传 `false` 会作为关闭音频参数发送。
+- `multipart/form-data` 只支持 URL 字段，不支持直接上传二进制文件。
 
 ## 相关页面
 
 - [Seedance-2 概览](./overview)
 - [查询视频任务](./query)
+- [创建素材](./asset-create-media)
