@@ -12,7 +12,7 @@ api: "POST /v1/images/generations"
 - 通过 `model = "gpt-image-2"` 选择目标模型。
 - 支持 `url` 和 `b64_json` 两种返回格式。
 - 可在 JSON 中附带 `image` 作为参考图，是否生效取决于实际命中的图像渠道。
-- `n` 不传或显式传 `0` 时，统一层会回退为 `1`。
+- `n` 不传或显式传 `0` 时会按 `1` 处理。
 
 ## 方法与路径
 
@@ -126,7 +126,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="n" type="integer">
-生成数量。若不传或显式传 `0`，统一层回退为 `1`。
+生成数量。若不传或显式传 `0`，按 `1` 处理。
 </ParamField>
 
 <ParamField body="size" type="string">

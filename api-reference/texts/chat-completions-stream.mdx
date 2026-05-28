@@ -9,7 +9,7 @@ api: "POST /v1/chat/completions"
 使用统一对话格式调用 OpenAI、Claude、Gemini、DeepSeek、Qwen 等上游模型。本文档以流式输出为默认写法，适合需要边生成边展示的聊天、Agent 和长文本生成场景。
 
 <Info>
-本项目路由中 `stream` 未传时按非流式处理。若希望固定获得流式响应，请显式传入 `"stream": true`。
+如果未传 `stream`，接口默认按非流式返回。若希望固定获得流式响应，请显式传入 `"stream": true`。
 </Info>
 
 ## 请求体

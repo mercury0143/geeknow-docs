@@ -174,7 +174,7 @@ POST /mj/submit/describe
 ```
 
 <Warning>
-你给的 Apifox 使用 `base64` 字段；但当前项目 DTO 中显式接收的是 `base64Array`。如果上游渠道要求单图 `base64`，建议同时结合实际网关行为验证。文档这里保留 Apifox 的调用写法，但项目侧主要保证的是这条路由存在。
+接口使用 `base64Array` 接收图片数组。如果只上传一张图，也建议放入数组中提交。
 </Warning>
 
 ## 提交 Shorten 任务
@@ -203,7 +203,7 @@ POST /mj/insight-face/swap
 
 提交 `SwapFace` 换脸任务。
 
-项目当前代码实际按 JSON Base64 方式解析：
+SwapFace 接口使用 JSON Base64 请求体：
 
 ```json
 {
@@ -213,7 +213,7 @@ POST /mj/insight-face/swap
 ```
 
 <Warning>
-这和你给的 Apifox `multipart/form-data` 文件上传示例不一样。当前网关代码实际校验的是 `sourceBase64` 与 `targetBase64`，缺少时会返回 `sour_base64_and_target_base64_is_required`。
+该接口当前需要传入 `sourceBase64` 与 `targetBase64`。如果缺少任一字段，会返回 `sour_base64_and_target_base64_is_required`。
 </Warning>
 
 ## 提交 Video 任务

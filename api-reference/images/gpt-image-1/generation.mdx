@@ -11,8 +11,8 @@ api: "POST /v1/images/generations"
 - 统一的图像生成接口，通过 `model` 选择不同图像模型。
 - 保持 OpenAI Images 响应结构：`created` + `data[]`。
 - 支持 `url` 和 `b64_json` 两种返回格式。
-- `dall-e-2`、`dall-e-3` 的尺寸限制由统一层直接校验。
-- `n` 不传或显式传 `0` 时，统一层会自动补成 `1`。
+- `dall-e-2`、`dall-e-3` 会按各自支持的尺寸范围校验。
+- `n` 不传或显式传 `0` 时会按 `1` 处理。
 
 ## 方法与路径
 
@@ -176,15 +176,15 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。统一层直接要求该字段存在。
+模型名称。该字段必填。
 </ParamField>
 
 <ParamField body="prompt" type="string">
-生成提示词。对于图像生成语义应视为必填，最终是否拦截由统一层和上游共同决定。
+生成提示词。对于图像生成语义应视为必填；具体校验规则取决于目标模型和渠道能力。
 </ParamField>
 
 <ParamField body="n" type="integer">
-生成数量。若不传或显式传 `0`，统一层回退为 `1`。
+生成数量。若不传或显式传 `0`，按 `1` 处理。
 </ParamField>
 
 <ParamField body="size" type="string">
@@ -200,7 +200,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="response_format" type="string">
-返回格式，常见值为 `url`、`b64_json`。当请求 `b64_json` 或 `base64` 时，统一层返回 Base64 图像数据。
+返回格式，常见值为 `url`、`b64_json`。当请求 `b64_json` 或 `base64` 时，返回 Base64 图像数据。
 </ParamField>
 
 <ParamField body="style" type="string | object">

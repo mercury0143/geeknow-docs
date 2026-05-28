@@ -145,7 +145,7 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 </ParamField>
 
 <ParamField body="n" type="integer">
-生成数量。网关侧该字段可选；建议显式传 `1`，便于和常见上游行为保持一致。
+生成数量。该字段可选；建议显式传 `1`，便于获得稳定的返回结构。
 </ParamField>
 
 <ParamField body="size" type="string">
@@ -157,23 +157,23 @@ Doubao Seedream 模型名称。常见值包括 `doubao-seedream-4-0-250828`、`d
 </ParamField>
 
 <ParamField body="response_format" type="string">
-可选返回格式。常见值为 `url`、`b64_json`。若不传，最终返回格式取决于上游和网关兼容层。
+可选返回格式。常见值为 `url`、`b64_json`。若不传，最终返回格式取决于模型和渠道能力。
 </ParamField>
 
 <ParamField body="quality" type="string">
-质量字段。统一图像 DTO 支持接收，但 Doubao 是否实际消费该字段取决于最终上游。
+质量字段。接口可接收该字段，是否生效取决于具体 Doubao 模型和渠道能力。
 </ParamField>
 
 <ParamField body="style" type="string | object">
-风格字段。统一图像 DTO 支持接收，是否生效取决于具体 Doubao 渠道。
+风格字段。接口可接收该字段，是否生效取决于具体 Doubao 模型和渠道能力。
 </ParamField>
 
 <ParamField body="background" type="string | object">
-背景控制字段。统一图像 DTO 支持接收，是否生效取决于具体 Doubao 渠道。
+背景控制字段。接口可接收该字段，是否生效取决于具体 Doubao 模型和渠道能力。
 </ParamField>
 
 <ParamField body="watermark" type="boolean">
-显式水印开关。当前统一图像 DTO 中该字段使用指针类型，`false` 与不传语义不同。
+显式水印开关。`false` 与不传语义不同：显式传 `false` 表示关闭水印，不传则使用默认策略。
 </ParamField>
 
 ## 尺寸映射

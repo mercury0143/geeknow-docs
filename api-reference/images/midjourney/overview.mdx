@@ -70,8 +70,8 @@ Midjourney 提交接口常见返回结构为：
 
 | 字段 | 说明 |
 | --- | --- |
-| `mode` | 常见值为 `RELAX`、`FAST`，项目里还存在 `TURBO` 计费模式 |
-| `notifyHook` | 回调地址，项目当前代码使用驼峰写法 `notifyHook` |
+| `mode` | 常见值为 `RELAX`、`FAST`；是否支持 `TURBO` 以账户和渠道配置为准 |
+| `notifyHook` | 回调地址，字段名使用驼峰写法 `notifyHook` |
 | `taskId` | 原任务 ID，用于基于已有任务继续操作 |
 | `base64Array` | 多图 Base64 数组 |
 | `maskBase64` | 局部重绘蒙版 |

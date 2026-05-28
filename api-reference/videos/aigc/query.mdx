@@ -6,7 +6,7 @@ api: "GET /v1/videos/{task_id}"
 
 # 国产视频模型查询
 
-提交任务后，使用网关任务 ID 轮询查询。国产视频模型查询结果已对齐上游 `DescribeTaskDetail` 中的 `AigcVideoTask`，网关会把上游状态、进度、错误和视频地址整理成统一的视频任务响应。
+提交任务后，使用任务 ID 轮询查询。国产视频模型查询接口会返回统一的视频任务状态、进度、错误信息和结果地址。
 
 ## 查询任务
 
@@ -40,14 +40,14 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ## 状态映射
 
-| 上游状态 | 网关状态 | 说明 |
+| 任务阶段 | `status` | 说明 |
 | --- | --- | --- |
 | `WAITING` | `queued` | 任务排队中 |
 | `PROCESSING` | `processing` | 任务生成中 |
 | `FINISH` | `completed` | 任务完成 |
 | `ABORTED` | `failed` / `cancelled` | 任务失败或被中止 |
 
-进度读取 `AigcVideoTask.Progress`。错误信息读取 `ErrCode`、`ErrCodeExt`、`Message`。视频地址优先读取 `AigcVideoTask.Output.FileInfos[].FileUrl`。
+响应中的 `progress` 表示任务进度；失败时可从 `error.code` 和 `error.message` 查看错误原因。任务完成后，`video_url` 会返回生成结果地址。
 
 ## 响应字段
 
@@ -68,7 +68,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 </ResponseField>
 
 <ResponseField name="progress" type="integer">
-任务进度百分比。上游未返回进度时可能为空或为默认值。
+任务进度百分比。进度不可用时可能为空或为默认值。
 </ResponseField>
 
 <ResponseField name="created_at" type="integer">
@@ -80,7 +80,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 </ResponseField>
 
 <ResponseField name="expires_at" type="integer">
-结果过期时间戳。是否存在取决于上游返回和存储模式。
+结果过期时间戳。是否返回取决于任务配置和存储方式。
 </ResponseField>
 
 <ResponseField name="seconds" type="string">
@@ -92,7 +92,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-生成完成后的视频地址。网关优先从上游输出文件信息中读取。
+生成完成后的视频地址。
 </ResponseField>
 
 <ResponseField name="metadata" type="object">
@@ -100,7 +100,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 </ResponseField>
 
 <ResponseField name="error" type="object">
-错误信息。上游返回错误时，通常会包含错误码和错误消息。
+错误信息。任务失败时通常会包含错误码和错误消息。
 </ResponseField>
 
 ## 成功响应示例
@@ -139,7 +139,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 ## 排查建议
 
 - 如果动作控制任务失败并提示 `videoUrl must not be blank`，确认 `metadata.video_url` 或 `metadata.file_infos` 中是否提供了 `Category=Video` 的视频参考。
-- 如果任务完成但没有 `video_url`，优先检查上游任务详情中的 `AigcVideoTask.Output.FileInfos[].FileUrl` 是否为空。
+- 如果任务完成但没有 `video_url`，确认任务结果文件地址是否已生成并可访问。
 - 如果比例或分辨率不符合预期，生成时显式传 `metadata.output_config.resolution` 和 `metadata.output_config.aspect_ratio`。
 - 如果对口型计费时长和请求时长不一致，检查是否命中 `scene_type=lip_sync` 不足 5 秒按 5 秒计的规则。
 

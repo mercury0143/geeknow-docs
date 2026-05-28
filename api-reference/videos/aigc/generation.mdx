@@ -6,7 +6,7 @@ api: "POST /v1/videos"
 
 # 国产视频模型生成
 
-国产视频模型统一使用网关接口提交任务。请求时传入基础模型或组合计费模型，网关会负责转换上游 `ModelName` / `ModelVersion`，并按参数拼接内部计费模型键。
+国产视频模型统一使用 Geeknow 视频接口提交任务。请求时传入基础模型或组合计费模型，接口会根据模型、分辨率、场景和音频等参数应用对应生成配置与计费规则。
 
 ## 方法与路径
 
@@ -352,7 +352,7 @@ Future<void> main() async {
 </ParamField>
 
 <ParamField body="images" type="array<string>">
-多张参考图。网关会自动转换为 `FileInfos`，每张图默认按 `Type=Url`、`Category=Image` 处理；最多 3 张。
+多张参考图。每张图会作为图片素材处理；最多 3 张。
 </ParamField>
 
 <ParamField body="input_reference" type="string | array<string>">
@@ -390,7 +390,7 @@ Future<void> main() async {
 ## `size` 规则
 
 - 顶层 `size` 支持 `720P` / `1080P`，也支持 `WxH`。
-- 当只传 `size=WxH` 时，网关会推导分辨率和宽高比。
+- 当只传 `size=WxH` 时，接口会推导分辨率和宽高比。
 
 示例：
 
