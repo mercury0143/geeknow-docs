@@ -1,0 +1,28 @@
+services:
+  mintlify:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:24.13.0-bookworm-slim}
+        NPM_REGISTRY: ${NPM_REGISTRY:-}
+    image: geeknow-docs-mintlify:dev
+    container_name: ${MINTLIFY_CONTAINER_NAME:-geeknow-docs-mintlify}
+    working_dir: /app
+    command: sh -c "npx mintlify dev --no-open --port ${MINTLIFY_INTERNAL_PORT:-3000}"
+    environment:
+      HOME: /mintlify-home
+      MINTLIFY_INTERNAL_PORT: ${MINTLIFY_INTERNAL_PORT:-3000}
+      CHOKIDAR_USEPOLLING: ${CHOKIDAR_USEPOLLING:-true}
+      WATCHPACK_POLLING: ${WATCHPACK_POLLING:-true}
+    ports:
+      - "${MINTLIFY_HOST_PORT:-3000}:${MINTLIFY_INTERNAL_PORT:-3000}"
+    volumes:
+      - "${DOCS_DIR:-.}:/app"
+      - mintlify_node_modules:/app/node_modules
+      - mintlify_home:/mintlify-home
+    restart: unless-stopped
+
+volumes:
+  mintlify_node_modules:
+  mintlify_home:
