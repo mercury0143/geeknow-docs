@@ -25,7 +25,7 @@ POST /v1/images/generations
 <CodeGroup>
 
 ```bash
-curl -X POST https://www.geeknow.top/v1/images/generations \
+curl -X POST https://apidoc.geeknow.top/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -42,7 +42,7 @@ curl -X POST https://www.geeknow.top/v1/images/generations \
 import requests
 
 resp = requests.post(
-    "https://www.geeknow.top/v1/images/generations",
+    "https://apidoc.geeknow.top/v1/images/generations",
     headers={
         "Authorization": "Bearer YOUR_API_KEY",
         "Content-Type": "application/json",
@@ -61,7 +61,7 @@ print(resp.json())
 ```
 
 ```javascript
-const response = await fetch("https://www.geeknow.top/v1/images/generations", {
+const response = await fetch("https://apidoc.geeknow.top/v1/images/generations", {
   method: "POST",
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
@@ -242,7 +242,7 @@ Authorization: Bearer YOUR_API_KEY
 ### 基础生图
 
 ```bash
-curl -X POST https://www.geeknow.top/v1/images/generations \
+curl -X POST https://apidoc.geeknow.top/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -254,7 +254,7 @@ curl -X POST https://www.geeknow.top/v1/images/generations \
 ### 高质量 DALL·E 3
 
 ```bash
-curl -X POST https://www.geeknow.top/v1/images/generations \
+curl -X POST https://apidoc.geeknow.top/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type": "application/json" \
   -d '{
@@ -269,7 +269,7 @@ curl -X POST https://www.geeknow.top/v1/images/generations \
 ### Base64 输出
 
 ```bash
-curl -X POST https://www.geeknow.top/v1/images/generations \
+curl -X POST https://apidoc.geeknow.top/v1/images/generations \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type": "application/json" \
   -d '{

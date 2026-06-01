@@ -10,7 +10,7 @@
   "api": {
     "url": "full",
     "mdx": {
-      "server": "https://www.geeknow.top",
+      "server": "https://apidoc.geeknow.top",
       "auth": {
         "method": "bearer"
       }

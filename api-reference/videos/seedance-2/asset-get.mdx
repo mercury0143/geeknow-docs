@@ -22,7 +22,7 @@ GET /api/asset/get?id={asset_id}
 <RequestExample>
 
 ```bash 查询素材 cURL
-curl -X GET "https://www.geeknow.top/api/asset/get?id=asset-20260528143012-a8x7k" \
+curl -X GET "https://apidoc.geeknow.top/api/asset/get?id=asset-20260528143012-a8x7k" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -30,7 +30,7 @@ curl -X GET "https://www.geeknow.top/api/asset/get?id=asset-20260528143012-a8x7k
 import requests
 
 resp = requests.get(
-    "https://www.geeknow.top/api/asset/get",
+    "https://apidoc.geeknow.top/api/asset/get",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     params={"id": "asset-20260528143012-a8x7k"},
     timeout=30,
@@ -43,7 +43,7 @@ print(resp.json())
 const assetId = "asset-20260528143012-a8x7k";
 
 const response = await fetch(
-  `https://www.geeknow.top/api/asset/get?id=${encodeURIComponent(assetId)}`,
+  `https://apidoc.geeknow.top/api/asset/get?id=${encodeURIComponent(assetId)}`,
   {
     method: "GET",
     headers: {
