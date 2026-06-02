@@ -11,7 +11,7 @@ api: "GET /api/asset/get"
 - 根据素材 ID 查询素材详情
 - 返回素材 URL、类型和状态
 - 可用于确认素材是否已从 `Processing` 变为 `Active`
-- 素材可作为 Seedance-2 视频生成的首帧、尾帧、参考图、参考视频或参考音频
+- 查询接口使用裸素材 ID；视频生成接口使用 `asset://{asset_id}` 引用素材
 
 ## 方法与路径
 
@@ -56,6 +56,31 @@ console.log(await response.json());
 ```
 
 </RequestExample>
+
+## 从素材 ID 到视频生成引用
+
+`GET /api/asset/get` 的 `id` 参数只接收素材 ID 本身，例如 `asset-20260528143012-a8x7k`。不要在查询接口里加 `asset://` 前缀。
+
+当 `Result.Status` 为 `Active` 后，可以把同一个素材 ID 拼成 `asset://{asset_id}`，传给视频生成接口中的素材字段。
+
+| 目的 | 字段 | 示例 |
+| --- | --- | --- |
+| 首帧生视频 | `first_image` 或 `first_frame_url` | `"first_image": "asset://asset-20260528143012-a8x7k"` |
+| 尾帧约束 | `last_image` 或 `last_frame_url` | `"last_image": "asset://asset-20260528143351-b2n6q"` |
+| 参考图片 | `reference_images` 或 `reference_image_urls` | `"reference_images": ["asset://asset-20260528143012-a8x7k"]` |
+| 参考视频 | `reference_videos` 或 `reference_video_urls` | `"reference_videos": ["asset://asset-20260528143708-k9m2p"]` |
+| 参考音频 | `reference_audios` 或 `audio_url` | `"reference_audios": ["asset://asset-20260528144123-r4s6n"]` |
+
+```json
+{
+  "model": "seedance-2.0-pro",
+  "prompt": "参考素材中的产品外观和镜头运动，生成一条广告感短视频",
+  "duration": 6,
+  "aspect_ratio": "adaptive",
+  "reference_images": ["asset://asset-20260528143012-a8x7k"],
+  "reference_videos": ["asset://asset-20260528143708-k9m2p"]
+}
+```
 
 ## 响应示例
 
@@ -147,7 +172,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Query Parameters
 
 <ParamField query="id" type="string" required>
-素材 ID，例如 `asset-20260528143012-a8x7k`。
+素材 ID，例如 `asset-20260528143012-a8x7k`。这里使用裸 ID，不要传 `asset://asset-20260528143012-a8x7k`。
 </ParamField>
 
 ## Response
@@ -157,7 +182,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="Result.Id" type="string">
-素材 ID。
+素材 ID。用于查询时保持裸 ID；用于视频生成素材字段时拼成 `asset://{Result.Id}`。
 </ResponseField>
 
 <ResponseField name="Result.Name" type="string">
@@ -202,6 +227,7 @@ GET /api/asset/get?id=asset-20260528143012-a8x7k
 ## 注意事项
 
 - `id` 必须来自素材创建接口返回的 `Result.Id`。
+- `GET /api/asset/get` 的 `id` 参数不要带 `asset://` 前缀。
 - `Processing` 表示素材仍在处理，建议等待 `Active` 后再用于视频生成。
 - `Failed` 表示素材处理失败，需要重新检查原始 URL、文件格式或上游限制。
 

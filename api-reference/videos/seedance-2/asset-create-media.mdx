@@ -11,7 +11,7 @@ api: "POST /api/asset/createMedia"
 - 使用异步处理模式，创建后返回素材 ID 和 `Processing` 状态
 - 通过 `assetType` 区分图片、视频和音频素材
 - 创建成功后可用 `GET /api/asset/get` 查询素材是否变为 `Active`
-- 生成视频时可把素材 URL 或素材 ID 用在首帧、尾帧、参考图、参考视频、参考音频等字段
+- 生成视频时可把 `Result.Id` 拼成 `asset://{asset_id}`，用于首帧、尾帧、参考图、参考视频或参考音频字段
 
 ## 方法与路径
 
@@ -122,6 +122,39 @@ console.log(await response.json());
 
 同理，如果 `assetType` 是 `image`，同一个 `url` 会按图片素材处理；如果是 `audio`，同一个 `url` 会按音频素材处理。
 
+## 素材 ID 与引用 URI
+
+素材创建成功后，响应里的 `Result.Id` 是素材 ID，例如 `asset-20260528143012-a8x7k`。这个值有两种用法：
+
+| 场景 | 写法 | 示例 |
+| --- | --- | --- |
+| 查询素材状态 | 直接使用素材 ID | `GET /api/asset/get?id=asset-20260528143012-a8x7k` |
+| 在视频生成里引用素材 | 加上 `asset://` 前缀 | `"first_image": "asset://asset-20260528143012-a8x7k"` |
+
+`asset://asset-20260528143012-a8x7k` 表示“引用素材库中这个 ID 对应的素材”。它不是公网 URL，不能直接在浏览器中打开；如果需要查看素材原始地址或当前状态，使用 [查询素材](./asset-get)。
+
+常见写法：
+
+```json
+{
+  "model": "seedance-2.0-pro",
+  "prompt": "让首帧图中的人物自然转身，看向镜头",
+  "duration": 6,
+  "aspect_ratio": "9:16",
+  "first_image": "asset://asset-20260528143012-a8x7k"
+}
+```
+
+多参考素材也使用同样的 URI 写法：
+
+```json
+{
+  "reference_images": ["asset://asset-20260528143012-a8x7k"],
+  "reference_videos": ["asset://asset-20260528143708-k9m2p"],
+  "reference_audios": ["asset://asset-20260528144123-r4s6n"]
+}
+```
+
 ## 响应示例
 
 <ResponseExample>
@@ -215,7 +248,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="Result.Id" type="string">
-素材 ID，例如 `asset-20260528143012-a8x7k`。后续可以用 `GET /api/asset/get?id={asset_id}` 查询状态。
+素材 ID，例如 `asset-20260528143012-a8x7k`。查询素材时直接传这个 ID；在视频生成请求中引用素材时写成 `asset://asset-20260528143012-a8x7k`。
 </ResponseField>
 
 <ResponseField name="Result.Name" type="string">
@@ -277,6 +310,7 @@ Authorization: Bearer YOUR_API_KEY
 - `/api/asset/createMedia` 只接收一个 `url`；不要把 `imageUrls`、`videoUrls`、`audioUrls` 直接作为请求字段传入。
 - `assetType` 是大小写敏感的公开参数，推荐使用小写的 `image`、`video`、`audio`。
 - 创建成功只代表素材任务已提交。使用前建议调用 [查询素材](./asset-get) 确认 `Result.Status` 已变为 `Active`。
+- 查询素材时使用裸素材 ID，例如 `asset-20260528143012-a8x7k`；视频生成字段中引用素材时使用 `asset://asset-20260528143012-a8x7k`。
 - 如果素材 URL 无法访问、下载超时或格式不被上游接受，素材状态可能变为 `Failed`。
 
 ## 相关页面
