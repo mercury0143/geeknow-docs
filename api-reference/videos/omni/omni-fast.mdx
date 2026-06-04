@@ -1,0 +1,473 @@
+---
+title: omni-fast 视频生成
+description: 使用 `POST /v1/videos` 调用 `omni-fast` 生成文生视频、图生视频、首尾帧和多参考图视频。
+api: "POST /v1/videos"
+---
+
+# omni-fast
+
+`omni-fast` 使用 JSON 请求体提交异步视频任务，适合文生视频、首帧图生视频、首尾帧和多参考图视频。
+
+- 异步处理模式，提交后返回 `id` 或 `task_id`。
+- 文生视频只需要 `model`、`prompt`、`seconds` 和画面比例字段。
+- 首帧图生视频使用 `first_image_url`。
+- 首尾帧使用 `first_image_url` 和 `last_image_url`。
+- 多参考图使用 `images`，最多 5 张；参考视频请使用 `omni-fast-v2v`。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "omni-fast",
+    "prompt": "Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight",
+    "seconds": "8",
+    "aspect_ratio": "16:9",
+    "resolution": "720p"
+  }'
+```
+
+```bash 首帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "omni-fast",
+    "prompt": "The scene comes alive with gentle wind and drifting clouds",
+    "first_image_url": "https://example.com/first-frame.jpg",
+    "seconds": "8",
+    "aspect_ratio": "16:9",
+    "resolution": "720p"
+  }'
+```
+
+```bash 首尾帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "omni-fast",
+    "prompt": "Create a smooth transition from the first frame to the last frame.",
+    "first_image_url": "https://example.com/first-frame.jpg",
+    "last_image_url": "https://example.com/last-frame.jpg",
+    "seconds": "8",
+    "aspect_ratio": "16:9",
+    "resolution": "720p"
+  }'
+```
+
+```bash 参考生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "omni-fast",
+    "prompt": "Use the first image as the character reference and the second image as the visual style reference. Create a cozy cafe conversation scene.",
+    "images": [
+      "https://example.com/character.jpg",
+      "https://example.com/style.jpg"
+    ],
+    "seconds": "8",
+    "aspect_ratio": "16:9",
+    "resolution": "720p"
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "omni-fast",
+        "prompt": "Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight",
+        "seconds": "8",
+        "aspect_ratio": "16:9",
+        "resolution": "720p",
+    },
+    timeout=120,
+)
+print(resp.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "omni-fast",
+    prompt:
+      "Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight",
+    seconds: "8",
+    aspect_ratio: "16:9",
+    resolution: "720p",
+  }),
+});
+
+console.log(await response.json());
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	payload := map[string]any{
+		"model":        "omni-fast",
+		"prompt":       "Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight",
+		"seconds":      "8",
+		"aspect_ratio": "16:9",
+		"resolution":   "720p",
+	}
+	body, _ := json.Marshal(payload)
+
+	req, _ := http.NewRequest("POST", "https://www.geeknow.top/v1/videos", bytes.NewReader(body))
+	req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(respBody))
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String json = """
+        {
+          "model": "omni-fast",
+          "prompt": "Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight",
+          "seconds": "8",
+          "aspect_ratio": "16:9",
+          "resolution": "720p"
+        }
+        """;
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://www.geeknow.top/v1/videos"))
+            .header("Authorization", "Bearer YOUR_API_KEY")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json))
+            .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
+    }
+}
+```
+
+```php PHP
+<?php
+$payload = [
+    'model' => 'omni-fast',
+    'prompt' => 'Ocean waves gently rolling onto a sandy beach at golden hour, cinematic, warm sunlight',
+    'seconds' => '8',
+    'aspect_ratio' => '16:9',
+    'resolution' => '720p',
+];
+
+$ch = curl_init('https://www.geeknow.top/v1/videos');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer YOUR_API_KEY',
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 提交成功
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "omni-fast",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "video_url": ""
+}
+```
+
+```json 200 - 任务查询成功
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "omni-fast",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689900,
+  "video_url": "https://example.com/results/omni-fast.mp4"
+}
+```
+
+```json 200 - 任务失败
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "omni-fast",
+  "status": "failed",
+  "progress": 100,
+  "error": {
+    "message": "upstream task failed",
+    "code": "task_failed"
+  }
+}
+```
+
+```json 400 - 参数错误
+{
+  "error": {
+    "message": "field model is required",
+    "type": "invalid_request_error",
+    "param": "model",
+    "code": "invalid_request_error"
+  }
+}
+```
+
+```json 401 - 认证失败
+{
+  "error": {
+    "message": "invalid token",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 402 - 额度不足
+{
+  "error": {
+    "message": "insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+```json 429 - 请求过多
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+```json 500 - 服务端错误
+{
+  "error": {
+    "message": "internal server error",
+    "type": "server_error",
+    "code": "server_error"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+使用 Bearer Token 鉴权：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+所有请求示例都需要携带 `Authorization` Header。JSON 请求还需要携带：
+
+```http
+Content-Type: application/json
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+固定传 `omni-fast`。示例：`"omni-fast"`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+视频提示词。示例：`"Ocean waves gently rolling onto a sandy beach at golden hour"`。
+</ParamField>
+
+<ParamField body="seconds" type="string">
+视频时长。建议传字符串；推荐范围为 `4` 到 `30` 秒。示例：`"8"`。
+</ParamField>
+
+<ParamField body="duration" type="string">
+`seconds` 的别名。默认不传；如果和 `seconds` 同时传入，建议保持一致。示例：`"8"`。
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+画面比例。推荐 `16:9` 或 `9:16`。示例：`"16:9"`。
+</ParamField>
+
+<ParamField body="size" type="string">
+画面比例或尺寸的兼容字段。常见值包括 `landscape`、`portrait`、`1920x1080`、`1080x1920`。示例：`"landscape"`。
+</ParamField>
+
+<ParamField body="orientation" type="string">
+`aspect_ratio` 的兼容字段。常见值为 `landscape` 或 `portrait`。示例：`"portrait"`。
+</ParamField>
+
+<ParamField body="resolution" type="string">
+分辨率偏好。推荐 `720p`；更高档位是否生效取决于上游。示例：`"720p"`。
+</ParamField>
+
+<ParamField body="first_image_url" type="string">
+首帧图。传入后进入首帧图生视频模式。支持公网 URL 或 `data:image/...;base64,...`。示例：`"https://example.com/first-frame.jpg"`。
+</ParamField>
+
+<ParamField body="last_image_url" type="string">
+尾帧图。需要配合 `first_image_url` 使用。示例：`"https://example.com/last-frame.jpg"`。
+</ParamField>
+
+<ParamField body="images" type="array<string>">
+多参考图列表，最多 5 张。支持公网 URL 或 `data:image/...;base64,...`。示例：`["https://example.com/character.jpg"]`。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+视频任务 ID。后续可用于 `GET /v1/videos/{task_id}` 查询。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+视频任务 ID 的兼容字段。通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+本次任务使用的模型，例如 `omni-fast`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="number">
+任务进度，常见范围为 `0` 到 `100`。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+完成后的视频地址。兼容旧任务时，推荐使用 `GET /v1/videos/{task_id}/content` 下载。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败或接口错误时返回的错误对象，通常包含 `message` 和 `code`。
+</ResponseField>
+
+## 使用场景
+
+### 竖屏文生视频
+
+```json
+{
+  "model": "omni-fast",
+  "prompt": "A woman walking through a neon-lit Tokyo street at night, rain reflections, cinematic",
+  "seconds": "8",
+  "aspect_ratio": "9:16",
+  "resolution": "720p"
+}
+```
+
+### 首帧图生视频
+
+```json
+{
+  "model": "omni-fast",
+  "prompt": "The scene comes alive with gentle wind and drifting clouds",
+  "first_image_url": "https://example.com/first-frame.jpg",
+  "seconds": "8",
+  "aspect_ratio": "16:9",
+  "resolution": "720p"
+}
+```
+
+### 多参考图视频
+
+```json
+{
+  "model": "omni-fast",
+  "prompt": "Use the first image as the character reference and the second image as the visual style reference.",
+  "images": [
+    "https://example.com/character.jpg",
+    "https://example.com/style.jpg"
+  ],
+  "seconds": "8",
+  "aspect_ratio": "16:9",
+  "resolution": "720p"
+}
+```
+
+## 注意事项
+
+- `omni-fast` 不支持 `video`、`video_url`、`input_video` 参考视频字段。
+- `images` 最多 5 张。
+- 图片字段使用 JSON，不需要 multipart。
+- 建议轮询 `GET /v1/videos/{task_id}`，完成后用 `GET /v1/videos/{task_id}/content` 下载 MP4。
+- 参考视频编辑或延长必须使用 [`omni-fast-v2v`](./omni-fast-v2v)。
+
+## 相关接口
+
+- [omni-fast-v2v](./omni-fast-v2v)
+- [Omni 视频模型概览](./overview)
+- [OpenAI 视频兼容接口](/api-reference/videos/openai-videos)
+- [任务状态接口](/api-reference/tasks/task-status)

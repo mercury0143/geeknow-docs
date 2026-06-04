@@ -1,0 +1,81 @@
+---
+title: Omni 视频模型概览
+description: 按模型拆分整理 `omni-fast` 与 `omni-fast-v2v` 的视频生成接口。
+---
+
+# Omni 视频模型
+
+Omni 视频模型使用 `POST /v1/videos` 提交异步任务，通过 `GET /v1/videos/{task_id}` 查询状态，并通过 `GET /v1/videos/{task_id}/content` 下载 MP4。
+
+<CardGroup cols={2}>
+  <Card title="omni-fast" icon="bolt" href="/api-reference/videos/omni/omni-fast">
+    文生视频、首帧图生视频、首尾帧和多参考图视频。
+  </Card>
+  <Card title="omni-fast-v2v" icon="film" href="/api-reference/videos/omni/omni-fast-v2v">
+    参考视频编辑、延长和重生成。
+  </Card>
+</CardGroup>
+
+## 支持模型
+
+| 模型 | 说明 | 支持模式 | 参考素材限制 |
+| --- | --- | --- | --- |
+| `omni-fast` | 通用快速视频生成模型 | 文生视频、首帧图生视频、首尾帧、多参考图 | `images` 最多 5 张；不支持参考视频 |
+| `omni-fast-v2v` | 参考视频生成模型 | 参考视频编辑、延长、重生成；兼容部分 T2V / I2V 字段 | 参考视频最大 15MB |
+
+## 支持能力
+
+| 能力 | `omni-fast` | `omni-fast-v2v` | 关键字段 |
+| --- | --- | --- | --- |
+| 文生视频 | 支持 | 支持 | `model`、`prompt`、`seconds`、`aspect_ratio` |
+| 首帧图生视频 | 支持 | 支持 | `first_image_url` |
+| 首尾帧 | 支持 | 支持 | `first_image_url`、`last_image_url` |
+| 多参考图 | 支持 | 支持 | `images` |
+| 参考视频 | 不支持 | 支持 | `video` / `video_url` / `input_video` |
+
+## 统一入口
+
+```http
+POST /v1/videos
+```
+
+所有 Omni 视频任务都使用 JSON 请求体。提交成功后会返回 OpenAI 风格 `video` 对象，其中 `id` 或 `task_id` 用于后续查询。
+
+## 任务查询
+
+```http
+GET /v1/videos/{task_id}
+GET /v1/videos/{task_id}/content
+```
+
+`GET /v1/videos/{task_id}` 用于轮询状态。任务完成后，推荐使用 `/v1/videos/{task_id}/content` 下载 MP4。完成态中也可能返回 `data[0].url` 或 `video_url`，但为了兼容旧任务，下载时以 `/content` 为准。
+
+## 输出限制
+
+| 项目 | 规则 |
+| --- | --- |
+| 视频时长 | `seconds` / `duration` 建议传字符串，范围 `4` 到 `30` 秒 |
+| 分辨率 | 推荐传 `resolution: "720p"`；更高档位是否生效取决于上游 |
+| 比例 | 推荐 `aspect_ratio: "16:9"` 或 `aspect_ratio: "9:16"` |
+| 参考图 | 公网 URL 或 `data:image/...;base64,...`；`images` 最多 5 张 |
+| 参考视频 | 仅 `omni-fast-v2v` 支持，最大 15MB |
+
+## 子接口页面
+
+| 页面 | 内容 |
+| --- | --- |
+| [omni-fast](./omni-fast) | 文生视频、图生视频、首尾帧、多参考图 |
+| [omni-fast-v2v](./omni-fast-v2v) | 参考视频编辑、延长、重生成 |
+
+## 推荐阅读顺序
+
+1. [omni-fast](./omni-fast)
+2. [omni-fast-v2v](./omni-fast-v2v)
+3. [视频模型支持矩阵](/api-reference/videos/model-matrix)
+4. [任务状态接口](/api-reference/tasks/task-status)
+
+## 相关页面
+
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)
+- [OpenAI 视频兼容接口](/api-reference/videos/openai-videos)
+- [任务状态接口](/api-reference/tasks/task-status)

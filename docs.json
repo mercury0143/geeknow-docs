@@ -98,6 +98,15 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "Omni 视频",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/omni/overview",
+              "api-reference/videos/omni/omni-fast",
+              "api-reference/videos/omni/omni-fast-v2v"
+            ]
+          },
+          {
             "group": "Seedance-2",
             "expanded": true,
             "pages": [
