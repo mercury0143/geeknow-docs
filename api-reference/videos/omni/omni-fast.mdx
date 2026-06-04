@@ -348,24 +348,12 @@ Content-Type: application/json
 视频时长。建议传字符串；推荐范围为 `4` 到 `30` 秒。示例：`"8"`。
 </ParamField>
 
-<ParamField body="duration" type="string">
-`seconds` 的别名。默认不传；如果和 `seconds` 同时传入，建议保持一致。示例：`"8"`。
-</ParamField>
-
 <ParamField body="aspect_ratio" type="string">
-画面比例。推荐 `16:9` 或 `9:16`。示例：`"16:9"`。
-</ParamField>
-
-<ParamField body="size" type="string">
-画面比例或尺寸的兼容字段。常见值包括 `landscape`、`portrait`、`1920x1080`、`1080x1920`。示例：`"landscape"`。
-</ParamField>
-
-<ParamField body="orientation" type="string">
-`aspect_ratio` 的兼容字段。常见值为 `landscape` 或 `portrait`。示例：`"portrait"`。
+画面比例。示例值：`"16:9"`、`"9:16"`。
 </ParamField>
 
 <ParamField body="resolution" type="string">
-分辨率偏好。推荐 `720p`；更高档位是否生效取决于上游。示例：`"720p"`。
+分辨率字段。示例值：`"720p"`、`"1080p"`、`"2k"`、`"4k"`。
 </ParamField>
 
 <ParamField body="first_image_url" type="string">
@@ -407,7 +395,7 @@ Content-Type: application/json
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-完成后的视频地址。兼容旧任务时，推荐使用 `GET /v1/videos/{task_id}/content` 下载。
+完成后的视频地址。兼容旧任务时，也可以使用 `GET /v1/videos/{task_id}/content` 下载。
 </ResponseField>
 
 <ResponseField name="error" type="object">

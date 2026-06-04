@@ -48,15 +48,15 @@ GET /v1/videos/{task_id}
 GET /v1/videos/{task_id}/content
 ```
 
-`GET /v1/videos/{task_id}` 用于轮询状态。任务完成后，推荐使用 `/v1/videos/{task_id}/content` 下载 MP4。完成态中也可能返回 `data[0].url` 或 `video_url`，但为了兼容旧任务，下载时以 `/content` 为准。
+`GET /v1/videos/{task_id}` 用于轮询状态。任务完成后，可使用 `/v1/videos/{task_id}/content` 下载 MP4。完成态中也可能返回 `data[0].url` 或 `video_url`，但为了兼容旧任务，下载时以 `/content` 为准。
 
 ## 输出限制
 
 | 项目 | 规则 |
 | --- | --- |
-| 视频时长 | `seconds` / `duration` 建议传字符串，范围 `4` 到 `30` 秒 |
-| 分辨率 | 推荐传 `resolution: "720p"`；更高档位是否生效取决于上游 |
-| 比例 | 推荐 `aspect_ratio: "16:9"` 或 `aspect_ratio: "9:16"` |
+| 视频时长 | `seconds` 建议传字符串，范围 `4` 到 `30` 秒 |
+| 分辨率 | `resolution` 示例值：`720p`、`1080p`、`2k`、`4k` |
+| 比例 | `aspect_ratio` 示例值：`16:9`、`9:16` |
 | 参考图 | 公网 URL 或 `data:image/...;base64,...`；`images` 最多 5 张 |
 | 参考视频 | 仅 `omni-fast-v2v` 支持，最大 15MB |
 
