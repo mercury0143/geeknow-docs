@@ -9,7 +9,8 @@ api: "POST /v1/videos"
 Veo 系列用于提交异步视频生成任务，适合文生视频和带参考图的视频生成场景。
 
 - 通过 `model` 选择 `veo_3_1` 或 `veo_3_1-fast`
-- 支持 JSON 请求；带本地参考图时也支持 `multipart/form-data`
+- 请求体使用 JSON。
+- 参考图生视频使用 JSON 字段 `input_reference`。
 - 异步处理模式，提交成功后返回 `id` / `task_id`
 - 任务状态和结果通过 `GET /v1/videos/{task_id}` 查询
 
@@ -52,7 +53,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   }'
 ```
 
-```bash JSON 参考图生视频 cURL
+```bash 参考图生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
@@ -61,18 +62,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
     "prompt": "让画面中的人物自然转身，背景保持一致",
     "size": "1280x720",
     "duration": 8,
-    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    "input_reference": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
   }'
-```
-
-```bash 上传参考图生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=veo_3_1" \
-  -F "prompt=让参考图中的主体缓慢向镜头走来，保持服装和场景风格一致" \
-  -F "size=1280x720" \
-  -F "duration=8" \
-  -F "input_reference=@first-frame.png"
 ```
 
 ```python Python
@@ -415,16 +406,8 @@ Authorization: Bearer YOUR_API_KEY
 目标时长，单位为秒。不同模型可用时长可能不同，建议使用当前模型支持的常见值，例如 `8` 或 `10`。
 </ParamField>
 
-<ParamField body="image" type="string">
-JSON 请求中的单张参考图。支持 Data URL 或 base64 字符串，常用于首帧 / 参考图生视频。
-</ParamField>
-
-<ParamField body="images" type="array<string>">
-JSON 请求中的参考图数组。当前建议只传一张参考图；如果传入多张，实际效果取决于当前模型支持。
-</ParamField>
-
-<ParamField body="input_reference" type="file | string">
-参考图字段。使用 `multipart/form-data` 上传本地图片时，文件字段名为 `input_reference`；使用 JSON 时建议改用 `image` 或 `images`。
+<ParamField body="input_reference" type="string | array<string>">
+参考图字段。JSON 中可传图片 URL、base64 或 data URI；如果传入多张，实际效果取决于当前模型支持。
 </ParamField>
 
 ## Response
@@ -474,8 +457,7 @@ JSON 请求中的参考图数组。当前建议只传一张参考图；如果传
 | 场景 | 推荐参数 |
 | --- | --- |
 | 文生视频 | `model`、`prompt`、`size`、`duration` |
-| JSON 参考图生视频 | `model`、`prompt`、`size`、`duration`、`image` |
-| 上传参考图生视频 | `multipart/form-data`，并上传 `input_reference` 文件 |
+| 参考图生视频 | `model`、`prompt`、`size`、`duration`、`input_reference` |
 
 ## 注意事项
 

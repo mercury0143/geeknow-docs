@@ -8,7 +8,7 @@ description: 按模型系列整理 Veo 视频生成与任务查询接口。
 Veo 系列使用 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，请求为 JSON 格式。
 
 - 使用 `POST /v1/videos` 提交视频生成任务。
-- JSON 参考图建议使用 `image` 或 `images`；上传本地图片时使用 `input_reference`。
+- 参考图生视频使用 JSON 字段 `input_reference`。
 - 模型包括 `veo_3_1`、`veo_3_1-fast`。
 
 <CardGroup cols={2}>
@@ -30,8 +30,8 @@ Veo 系列使用 `POST /v1/videos` 和 `GET /v1/videos/{task_id}`，请求为 JS
 | 项目 | 当前行为 |
 | --- | --- |
 | 请求格式 | JSON |
-| 常见输入字段 | `model`、`prompt`、`size`、`duration`、`image`、`images` |
-| 上传参考图字段 | `input_reference` |
+| 常见输入字段 | `model`、`prompt`、`size`、`duration`、`input_reference` |
+| 参考图字段 | `input_reference` |
 | 参考生视频约束 | 实际效果取决于当前模型支持 |
 | 查询接口 | `GET /v1/videos/{task_id}` |
 

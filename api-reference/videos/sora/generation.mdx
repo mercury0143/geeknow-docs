@@ -10,7 +10,7 @@ Sora 当前通过 `POST /v1/videos` 提交异步视频任务。
 
 - 请求体推荐使用 JSON。
 - 文生视频只需要 `model`、`prompt`、`size`、`seconds`。
-- 首帧/参考图生视频使用 `input_reference`，也兼容 `image` / `images`。
+- 首帧/参考图生视频使用 `input_reference`。
 - 比例和分辨率使用顶层 `size`。
 
 ## 当前模型
@@ -270,15 +270,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="input_reference" type="string | array<string>">
-参考图输入。JSON 中可传图片 URL、base64 或 data URI；也兼容 multipart 的 `input_reference` 文件字段。
-</ParamField>
-
-<ParamField body="image" type="string">
-兼容参考图字段。存在时会被视为图生视频输入。
-</ParamField>
-
-<ParamField body="images" type="array<string>">
-兼容多参考图字段。存在时会被视为图生视频输入。
+参考图输入。JSON 中可传图片 URL、base64 或 data URI。
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -293,7 +285,7 @@ Authorization: Bearer YOUR_API_KEY
 | `sora-2` 尺寸校验 | `720x1280`、`1280x720` |
 | `sora-2-pro` 尺寸校验 | `720x1280`、`1280x720`、`1792x1024`、`1024x1792` |
 | 时长校验 | 部分 OAI 渠道限制为 `4`、`8`、`12` 秒 |
-| 参考图格式 | JSON 可用 URL、base64、data URI；multipart 仍兼容 |
+| 参考图格式 | JSON 可用 URL、base64、data URI |
 
 ## 相关接口
 
