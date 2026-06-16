@@ -1,20 +1,24 @@
 ---
 title: Grok 视频生成
-description: 使用 `POST /v1/videos` 调用 Grok 视频系列模型提交异步生成任务。
+description: 使用 `POST /v1/videos` 调用 `grok-video-1.5` 与 `grok-video-3` 系列模型提交异步生成任务。
 api: "POST /v1/videos"
 ---
 
 # Grok 视频生成
 
-Grok 视频生成接口使用 `multipart/form-data` 提交，请按这里的字段组织请求。
+本文档适用于 `grok-video-1.5` 与 `grok-video-3` 系列。请求体使用 `multipart/form-data`，参考图通过文件字段上传。
 
 - 接口路径是 `POST /v1/videos`。
 - `input_reference` 是参考图字段，支持重复上传多张图片文件（二进制）。
-- `grok-video-3-pro` 会自动固定为 `10` 秒，`grok-video-3-max` 会自动固定为 `15` 秒。
-- 基础版 `grok-video-3` 没有额外固定秒数逻辑，按实际传参处理。
+- `grok-video-1.5` 与 `grok-video-3` 支持 `10s` / `15s` 两种时长档位。
+- Pro 模型固定 `10s`，Max 模型固定 `15s`。
+- `grok-imagine-video-1.5-preview` 使用 JSON 请求体，见 [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)。
 
 ## 当前可用模型
 
+- `grok-video-1.5`
+- `grok-video-1.5-pro`
+- `grok-video-1.5-max`
 - `grok-video-3`
 - `grok-video-3-pro`
 - `grok-video-3-max`
@@ -30,19 +34,29 @@ POST /v1/videos
 ```bash 标准请求 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=grok-video-3" \
-  -F "prompt=猫咪听歌摇头晃脑，下大雨" \
+  -F "model=grok-video-1.5" \
+  -F "prompt=一只小猫在雨夜街头听音乐，镜头缓慢推进" \
   -F "aspect_ratio=2:3" \
-  -F "seconds=6" \
+  -F "seconds=10" \
   -F "size=720P" \
   -F "input_reference=@reference.png"
+```
+
+```bash Grok 1.5 Max cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=grok-video-1.5" \
+  -F "prompt=一辆复古跑车驶过雨夜街道，地面积水反射霓虹灯" \
+  -F "aspect_ratio=16:9" \
+  -F "seconds=15" \
+  -F "size=720P"
 ```
 
 ```bash 文生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=grok-video-3-pro" \
-  -F "prompt=多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格" \
+  -F "model=grok-video-3" \
+  -F "prompt=城市天台日落延时摄影，云层快速流动，暖色电影感" \
   -F "seconds=15" \
   -F "aspect_ratio=16:9" \
   -F "size=720P"
@@ -51,8 +65,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
 ```bash 首帧生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=grok-video-3-pro" \
-  -F "prompt=多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格" \
+  -F "model=grok-video-3" \
+  -F "prompt=让参考图中的人物转头看向镜头，背景保持自然景深" \
   -F "seconds=15" \
   -F "aspect_ratio=16:9" \
   -F "size=720P" \
@@ -62,8 +76,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
 ```bash 首尾帧生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=grok-video-3-pro" \
-  -F "prompt=多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格" \
+  -F "model=grok-video-3" \
+  -F "prompt=从首帧自然过渡到尾帧，保持主体一致和镜头连贯" \
   -F "seconds=15" \
   -F "aspect_ratio=16:9" \
   -F "size=720P" \
@@ -74,8 +88,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
 ```bash 参考生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=grok-video-3-pro" \
-  -F "prompt=多场景，多角度,60fps流畅动画,分镜节奏紧凑有力，不得出现字幕，中文对话,0-0.15秒为废帧处理 , 汽车飞速奔跑，然后展示足够一张图，代表价格" \
+  -F "model=grok-video-3" \
+  -F "prompt=参考多张图片的主体特征，生成一段连贯的产品展示视频" \
   -F "seconds=15" \
   -F "aspect_ratio=16:9" \
   -F "size=720P" \
@@ -93,9 +107,9 @@ with open("reference.png", "rb") as f:
         headers={"Authorization": "Bearer YOUR_API_KEY"},
         data={
             "model": "grok-video-3",
-            "prompt": "猫咪听歌摇头晃脑，下大雨",
+            "prompt": "一只小猫在雨夜街头听音乐，镜头缓慢推进",
             "aspect_ratio": "2:3",
-            "seconds": 6,
+            "seconds": 10,
             "size": "720P",
         },
         files={"input_reference": ("reference.png", f, "image/png")},
@@ -108,9 +122,9 @@ print(resp.json())
 ```javascript JavaScript
 const formData = new FormData();
 formData.append("model", "grok-video-3");
-formData.append("prompt", "猫咪听歌摇头晃脑，下大雨");
+formData.append("prompt", "一只小猫在雨夜街头听音乐，镜头缓慢推进");
 formData.append("aspect_ratio", "2:3");
-formData.append("seconds", "6");
+formData.append("seconds", "10");
 formData.append("size", "720P");
 formData.append("input_reference", fileInput.files[0]);
 
@@ -142,9 +156,9 @@ func main() {
 	writer := multipart.NewWriter(&body)
 
 	_ = writer.WriteField("model", "grok-video-3")
-	_ = writer.WriteField("prompt", "猫咪听歌摇头晃脑，下大雨")
+	_ = writer.WriteField("prompt", "一只小猫在雨夜街头听音乐，镜头缓慢推进")
 	_ = writer.WriteField("aspect_ratio", "2:3")
-	_ = writer.WriteField("seconds", "6")
+	_ = writer.WriteField("seconds", "10")
 	_ = writer.WriteField("size", "720P")
 
 	file, err := os.Open("reference.png")
@@ -202,9 +216,9 @@ public class Main {
         List<byte[]> parts = new ArrayList<>();
 
         addField(parts, boundary, "model", "grok-video-3");
-        addField(parts, boundary, "prompt", "猫咪听歌摇头晃脑，下大雨");
+        addField(parts, boundary, "prompt", "一只小猫在雨夜街头听音乐，镜头缓慢推进");
         addField(parts, boundary, "aspect_ratio", "2:3");
-        addField(parts, boundary, "seconds", "6");
+        addField(parts, boundary, "seconds", "10");
         addField(parts, boundary, "size", "720P");
         addFile(parts, boundary, "input_reference", "reference.png", "image/png");
         parts.add(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
@@ -246,9 +260,9 @@ $ch = curl_init('https://www.geeknow.top/v1/videos');
 
 $postFields = [
     'model' => 'grok-video-3',
-    'prompt' => '猫咪听歌摇头晃脑，下大雨',
+    'prompt' => '一只小猫在雨夜街头听音乐，镜头缓慢推进',
     'aspect_ratio' => '2:3',
-    'seconds' => '6',
+    'seconds' => '10',
     'size' => '720P',
     'input_reference' => new CURLFile(__DIR__ . '/reference.png', 'image/png', 'reference.png'),
 ];
@@ -279,9 +293,9 @@ request["Authorization"] = "Bearer YOUR_API_KEY"
 
 form = [
   ["model", "grok-video-3"],
-  ["prompt", "猫咪听歌摇头晃脑，下大雨"],
+  ["prompt", "一只小猫在雨夜街头听音乐，镜头缓慢推进"],
   ["aspect_ratio", "2:3"],
-  ["seconds", "6"],
+  ["seconds", "10"],
   ["size", "720P"],
   [
     "input_reference",
@@ -327,9 +341,9 @@ func appendFile(_ name: String, path: String, contentType: String) throws {
 }
 
 appendField("model", "grok-video-3")
-appendField("prompt", "猫咪听歌摇头晃脑，下大雨")
+appendField("prompt", "一只小猫在雨夜街头听音乐，镜头缓慢推进")
 appendField("aspect_ratio", "2:3")
-appendField("seconds", "6")
+appendField("seconds", "10")
 appendField("size", "720P")
 try appendFile("input_reference", path: "reference.png", contentType: "image/png")
 body.append("--\(boundary)--\r\n".data(using: .utf8)!)
@@ -357,9 +371,9 @@ using var client = new HttpClient();
 using var form = new MultipartFormDataContent();
 
 form.Add(new StringContent("grok-video-3"), "model");
-form.Add(new StringContent("猫咪听歌摇头晃脑，下大雨"), "prompt");
+form.Add(new StringContent("一只小猫在雨夜街头听音乐，镜头缓慢推进"), "prompt");
 form.Add(new StringContent("2:3"), "aspect_ratio");
-form.Add(new StringContent("6"), "seconds");
+form.Add(new StringContent("10"), "seconds");
 form.Add(new StringContent("720P"), "size");
 
 await using var file = File.OpenRead("reference.png");
@@ -387,9 +401,9 @@ Future<void> main() async {
   request.headers['Authorization'] = 'Bearer YOUR_API_KEY';
   request.fields.addAll({
     'model': 'grok-video-3',
-    'prompt': '猫咪听歌摇头晃脑，下大雨',
+    'prompt': '一只小猫在雨夜街头听音乐，镜头缓慢推进',
     'aspect_ratio': '2:3',
-    'seconds': '6',
+    'seconds': '10',
     'size': '720P',
   });
   request.files.add(
@@ -452,7 +466,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。当前 Grok 系列可用值为 `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max`。
+模型名称。可用值为 `grok-video-1.5`、`grok-video-1.5-pro`、`grok-video-1.5-max`、`grok-video-3`、`grok-video-3-pro`、`grok-video-3-max`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -460,15 +474,15 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
-尺寸比例。当前常见值为 `2:3`、`3:2`、`1:1`。
+尺寸比例。当前常见值为 `2:3`、`3:2`、`1:1`、`16:9`、`9:16`。
 </ParamField>
 
 <ParamField body="seconds" type="integer">
-目标秒数。对 `grok-video-3-pro` 和 `grok-video-3-max`，会自动纠正为固定值。
+目标秒数。`grok-video-1.5` 和 `grok-video-3` 支持 `10` 或 `15`；Pro 模型固定 `10` 秒，Max 模型固定 `15` 秒。
 </ParamField>
 
 <ParamField body="size" type="string">
-分辨率档位，常用值是 `720P` 或 `1080P`。
+分辨率档位，常用值是 `480P`、`540P`、`720P` 或 `1080P`。
 </ParamField>
 
 <ParamField body="input_reference" type="file">
@@ -513,13 +527,14 @@ Authorization: Bearer YOUR_API_KEY
 
 ### 图生视频
 
-在文生视频的基础上追加一个或多个 `input_reference` 文件。
+在文生视频的基础上追加一个或多个 `input_reference` 文件。`grok-video-1.5` 系列在参考生视频模式下仅支持 1 张参考图；`grok-video-3` 系列最多支持 6 张。
 
 ### 固定时长模型
 
-如果你传的是 `grok-video-3-pro` 或 `grok-video-3-max`，应预期服务端按固定秒数处理。
+`grok-video-1.5-pro` / `grok-video-3-pro` 固定为 `10s`，`grok-video-1.5-max` / `grok-video-3-max` 固定为 `15s`。使用 `grok-video-1.5` 或 `grok-video-3` 时，通过 `seconds=10` 或 `seconds=15` 选择对应时长档位。
 
 ## 相关接口
 
 - [Grok 视频概览](./overview)
+- [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
 - [Grok 任务查询](./query)

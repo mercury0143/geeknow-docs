@@ -15,10 +15,13 @@ description: 汇总按模型系列划分的视频接口文档。
     `omni-fast`、`omni-fast-v2v` 的分模型文档。
   </Card>
   <Card title="Grok 视频概览" icon="clapperboard" href="/api-reference/videos/grok/overview">
-    `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max` 的总览页。
+    `grok-video-1.5`、`grok-video-3` 与 `grok-imagine-video-1.5-preview` 的总览页。
   </Card>
   <Card title="Grok 视频生成" icon="film" href="/api-reference/videos/grok/generation">
-    `POST /v1/videos`，按 Grok 系列真实字段提交任务。
+    `grok-video-1.5` 与 `grok-video-3`，使用 multipart 字段提交任务。
+  </Card>
+  <Card title="Grok Imagine 1.5 Preview" icon="sparkles" href="/api-reference/videos/grok/grok-imagine-video-1-5-preview">
+    `grok-imagine-video-1.5-preview`，使用 JSON 字段提交任务。
   </Card>
   <Card title="Grok 任务查询" icon="hourglass" href="/api-reference/videos/grok/query">
     `GET /v1/videos/{task_id}`，轮询任务状态并获取结果。
@@ -42,7 +45,7 @@ description: 汇总按模型系列划分的视频接口文档。
 | 模型系列 | 页面 | 说明 |
 | --- | --- | --- |
 | Omni | [概览](/api-reference/videos/omni/overview) | `omni-fast`、`omni-fast-v2v` |
-| Grok | [概览](/api-reference/videos/grok/overview) | `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max` |
+| Grok | [概览](/api-reference/videos/grok/overview) | `grok-video-1.5`、`grok-video-1.5-pro`、`grok-video-1.5-max`、`grok-video-3`、`grok-video-3-pro`、`grok-video-3-max`、`grok-imagine-video-1.5-preview` |
 | Sora | [概览](/api-reference/videos/sora/overview) | `sora-2` |
 | Veo | [概览](/api-reference/videos/veo/overview) | `veo_3_1`、`veo_3_1-fast` |
 | 国产视频模型 | [概览](/api-reference/videos/aigc/overview) | `Vidu`、`Kling`、`Hunyuan`、`Mingmou`、`OS`、`GV`、`Hailuo`、`SV`、`JV` |

@@ -11,6 +11,7 @@ Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。
 - 接口路径是 `GET /v1/videos/{task_id}`。
 - 任务完成后通常可从 `video_url` 或 `output.url` 读取结果地址。
 - 如果直接下载 `video_url` 失败，可回退到 `GET /v1/videos/{task_id}/content`。
+- Grok 1.5 / 3 与 `grok-imagine-video-1.5-preview` 都使用同一组查询接口。
 
 ## 方法与路径
 
@@ -58,13 +59,13 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-video-3",
+  "model": "grok-video-3-pro",
   "status": "processing",
   "progress": 42,
   "created_at": 1735689600,
   "completed_at": 0,
   "expires_at": 1735776000,
-  "seconds": "6",
+  "seconds": "10",
   "size": "720P",
   "remixed_from_video_id": "",
   "error": {
@@ -79,13 +80,13 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-video-3",
+  "model": "grok-video-3-pro",
   "status": "completed",
   "progress": 100,
   "created_at": 1735689600,
   "completed_at": 1735689900,
   "expires_at": 1735776000,
-  "seconds": "6",
+  "seconds": "10",
   "size": "720P",
   "remixed_from_video_id": "",
   "error": {
@@ -100,13 +101,13 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-video-3",
+  "model": "grok-video-3-pro",
   "status": "failed",
   "progress": 100,
   "created_at": 1735689600,
   "completed_at": 1735689700,
   "expires_at": 1735776000,
-  "seconds": "6",
+  "seconds": "10",
   "size": "720P",
   "remixed_from_video_id": "",
   "error": {
@@ -171,7 +172,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 轮询建议
 
-实现会按以下顺序取结果地址：
+结果地址通常可按以下顺序读取：
 
 1. `output.url`
 2. `video_url`
@@ -188,3 +189,4 @@ GET /v1/videos/{task_id}/content
 
 - [Grok 视频概览](./overview)
 - [Grok 视频生成](./generation)
+- [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)

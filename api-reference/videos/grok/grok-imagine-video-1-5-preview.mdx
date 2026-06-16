@@ -1,0 +1,227 @@
+---
+title: Grok Imagine 1.5 Preview
+description: 使用 `POST /v1/videos` 调用 `grok-imagine-video-1.5-preview` 提交 JSON 视频生成任务。
+api: "POST /v1/videos"
+---
+
+# Grok Imagine 1.5 Preview
+
+`grok-imagine-video-1.5-preview` 是 Grok 1.5 系列的 JSON 视频生成模型。与 `grok-video-1.5` 系列不同，该模型通过 JSON 字段传递参考图。
+
+- 接口路径是 `POST /v1/videos`。
+- 请求格式是 `application/json`。
+- 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
+- 图生视频单图使用 `image`，多图使用 `images`。
+- `resolution` 支持 `480P` 和 `720P`。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+<RequestExample>
+
+```bash 文生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-imagine-video-1.5-preview",
+    "prompt": "雨夜霓虹街头，一辆复古跑车驶过湿润路面",
+    "seconds": "8",
+    "aspect_ratio": "16:9",
+    "resolution": "720P"
+  }'
+```
+
+```bash 单图生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-imagine-video-1.5-preview",
+    "prompt": "让参考图中的人物缓慢转身，背景光线自然流动",
+    "seconds": "6",
+    "aspect_ratio": "9:16",
+    "resolution": "720P",
+    "image": "data:image/png;base64,BASE64_IMAGE_DATA"
+  }'
+```
+
+```bash 多图参考 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "grok-imagine-video-1.5-preview",
+    "prompt": "保持主体一致，生成从第一张图过渡到第二张图的视频",
+    "seconds": "10",
+    "aspect_ratio": "16:9",
+    "resolution": "720P",
+    "images": [
+      "data:image/png;base64,FIRST_IMAGE_BASE64",
+      "data:image/png;base64,SECOND_IMAGE_BASE64"
+    ]
+  }'
+```
+
+```python Python
+import base64
+import requests
+
+def to_data_url(path, mime="image/png"):
+    with open(path, "rb") as f:
+        encoded = base64.b64encode(f.read()).decode("ascii")
+    return f"data:{mime};base64,{encoded}"
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "grok-imagine-video-1.5-preview",
+        "prompt": "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
+        "seconds": "6",
+        "aspect_ratio": "16:9",
+        "resolution": "720P",
+        "image": to_data_url("reference.png"),
+    },
+    timeout=60,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "grok-imagine-video-1.5-preview",
+    prompt: "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
+    seconds: "6",
+    aspect_ratio: "16:9",
+    resolution: "720P",
+    image: "data:image/png;base64,BASE64_IMAGE_DATA",
+  }),
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200
+{
+  "id": "video_abc123",
+  "object": "video",
+  "model": "grok-imagine-video-1.5-preview",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "seconds": "6",
+  "size": "720P",
+  "video_url": ""
+}
+```
+
+```json 400
+{
+  "error": {
+    "message": "prompt is required",
+    "type": "new_api_error",
+    "param": "prompt",
+    "code": "invalid_request"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+固定传 `grok-imagine-video-1.5-preview`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+视频生成提示词。
+</ParamField>
+
+<ParamField body="seconds" type="string">
+目标秒数。最小为 `1` 秒；建议按字符串传入，例如 `"6"`。
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+宽高比。支持常见预设 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`2:1`、`1:2`、`19.5:9`、`9:19.5`、`20:9`、`9:20`，也支持 `数字:数字` 的自定义比例。
+</ParamField>
+
+<ParamField body="resolution" type="string">
+输出清晰度。支持 `480P`、`720P`，也兼容 `480`、`720` 写法。
+</ParamField>
+
+<ParamField body="image" type="string">
+单张参考图。使用 `data:image/png;base64,...` 这类 data URI。
+</ParamField>
+
+<ParamField body="images" type="array<string>">
+多张参考图。数组成员使用 `data:image/png;base64,...` 这类 data URI。传多张图时不要同时传 `image`。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。后续用 `GET /v1/videos/{id}` 查询结果。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+实际提交的模型名。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态，常见值有 `queued`、`processing`、`completed`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度百分比。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的视频地址。也可以使用 `GET /v1/videos/{task_id}/content` 下载结果。
+</ResponseField>
+
+## 与 Grok 1.5 的区别
+
+| 项目 | `grok-imagine-video-1.5-preview` | `grok-video-1.5` / pro / max |
+| --- | --- | --- |
+| 请求格式 | JSON | `multipart/form-data` |
+| 图片字段 | `image` / `images` | `input_reference` |
+| 清晰度字段 | `resolution` | `size` |
+| 清晰度值 | `480P`、`720P` | `480P`、`540P`、`720P`、`1080P` |
+| 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro，`15s` 对应 Max |
+
+## 相关接口
+
+- [Grok 视频概览](./overview)
+- [Grok 视频生成](./generation)
+- [Grok 任务查询](./query)

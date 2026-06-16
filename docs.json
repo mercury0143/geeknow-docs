@@ -150,6 +150,7 @@
             "pages": [
               "api-reference/videos/grok/overview",
               "api-reference/videos/grok/generation",
+              "api-reference/videos/grok/grok-imagine-video-1-5-preview",
               "api-reference/videos/grok/query"
             ]
           }
