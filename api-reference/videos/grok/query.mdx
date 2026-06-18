@@ -11,7 +11,7 @@ Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。
 - 接口路径是 `GET /v1/videos/{task_id}`。
 - 任务完成后通常可从 `video_url` 或 `output.url` 读取结果地址。
 - 如果直接下载 `video_url` 失败，可回退到 `GET /v1/videos/{task_id}/content`。
-- Grok 1.5 / 3 与 `grok-imagine-video-1.5-preview` 都使用同一组查询接口。
+- Grok 1.5 / 3、`grok-imagine-video` 与 `grok-imagine-video-1.5-preview` 都使用同一组查询接口。
 
 ## 方法与路径
 
@@ -189,4 +189,5 @@ GET /v1/videos/{task_id}/content
 
 - [Grok 视频概览](./overview)
 - [Grok 视频生成](./generation)
+- [Grok Imagine Video](./grok-imagine-video)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)

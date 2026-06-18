@@ -1,18 +1,19 @@
 ---
-title: Grok Imagine 1.5 Preview
-description: 使用 `POST /v1/videos` 调用 `grok-imagine-video-1.5-preview` 提交 JSON 视频生成任务。
+title: Grok Imagine Video
+description: 使用 `POST /v1/videos` 调用 `grok-imagine-video` 提交 JSON 视频生成任务。
 api: "POST /v1/videos"
 ---
 
-# Grok Imagine 1.5 Preview
+# Grok Imagine Video
 
-`grok-imagine-video-1.5-preview` 是 Grok 1.5 系列的 JSON 视频生成模型。与 `grok-video-1.5` 系列不同，该模型通过 JSON 字段传递参考图。
+`grok-imagine-video` 是 Grok Imagine 系列的视频生成模型。该模型使用 JSON 请求体，支持文生视频和参考图视频生成。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
 - 图生视频单图使用 `image`，多图使用 `images`。
 - `resolution` 支持 `480P` 和 `720P`。
+- `prompt` 最多支持 `4096` 个字符。
 
 ## 方法与路径
 
@@ -27,8 +28,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-imagine-video-1.5-preview",
-    "prompt": "雨夜霓虹街头，一辆复古跑车驶过湿润路面",
+    "model": "grok-imagine-video",
+    "prompt": "清晨的城市街道，阳光穿过树叶，镜头缓慢向前移动",
     "seconds": "8",
     "aspect_ratio": "16:9",
     "resolution": "720P"
@@ -40,8 +41,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-imagine-video-1.5-preview",
-    "prompt": "让参考图中的人物缓慢转身，背景光线自然流动",
+    "model": "grok-imagine-video",
+    "prompt": "让参考图中的人物自然转身，背景保持柔和景深",
     "seconds": "6",
     "aspect_ratio": "9:16",
     "resolution": "720P",
@@ -54,8 +55,8 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "grok-imagine-video-1.5-preview",
-    "prompt": "保持主体一致，生成从第一张图过渡到第二张图的视频",
+    "model": "grok-imagine-video",
+    "prompt": "参考多张图片的主体特征，生成一段连贯的产品展示视频",
     "seconds": "10",
     "aspect_ratio": "16:9",
     "resolution": "720P",
@@ -82,7 +83,7 @@ resp = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "grok-imagine-video-1.5-preview",
+        "model": "grok-imagine-video",
         "prompt": "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
         "seconds": "6",
         "aspect_ratio": "16:9",
@@ -103,7 +104,7 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    model: "grok-imagine-video-1.5-preview",
+    model: "grok-imagine-video",
     prompt: "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
     seconds: "6",
     aspect_ratio: "16:9",
@@ -125,7 +126,7 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-imagine-video-1.5-preview",
+  "model": "grok-imagine-video",
   "status": "queued",
   "progress": 0,
   "created_at": 1735689600,
@@ -157,7 +158,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-固定传 `grok-imagine-video-1.5-preview`。
+固定传 `grok-imagine-video`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -210,19 +211,19 @@ Authorization: Bearer YOUR_API_KEY
 任务完成后的视频地址。也可以使用 `GET /v1/videos/{task_id}/content` 下载结果。
 </ResponseField>
 
-## 与 Grok 1.5 的区别
+## 与 Grok 1.5 / 3 的区别
 
-| 项目 | `grok-imagine-video-1.5-preview` | `grok-video-1.5` / pro / max |
+| 项目 | `grok-imagine-video` | `grok-video-1.5` / `grok-video-3` |
 | --- | --- | --- |
 | 请求格式 | JSON | `multipart/form-data` |
 | 图片字段 | `image` / `images` | `input_reference` |
 | 清晰度字段 | `resolution` | `size` |
 | 清晰度值 | `480P`、`720P` | `480P`、`540P`、`720P`、`1080P` |
-| 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro，`15s` 对应 Max |
+| 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro 档，`15s` 对应 Max 档 |
 
 ## 相关接口
 
 - [Grok 视频概览](./overview)
 - [Grok 视频生成](./generation)
-- [Grok Imagine Video](./grok-imagine-video)
+- [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
 - [Grok 任务查询](./query)
