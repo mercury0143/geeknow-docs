@@ -66,6 +66,13 @@
             ]
           },
           {
+            "group": "GPT Image 异步生成",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-async/generation"
+            ]
+          },
+          {
             "group": "Doubao Seedream",
             "expanded": true,
             "pages": [

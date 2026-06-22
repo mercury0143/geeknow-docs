@@ -1,0 +1,234 @@
+---
+title: GPT Image 异步生成图像 API
+description: 使用 `POST /v1/images/generations/async` 提交 GPT Image 异步生图任务，请求字段与同步生图接口保持一致。
+api: "POST /v1/images/generations/async"
+---
+
+# GPT Image 异步生成图像 API
+
+`/v1/images/generations/async` 是 GPT Image 的异步生图入口。请求体与同步的 `POST /v1/images/generations` 保持一致，返回的图像结果也沿用 OpenAI Images 风格的 `created` + `data[]` 结构。
+
+- 异步入口为 `POST /v1/images/generations/async`。
+- 请求格式为 `application/json`。
+- 常用模型为 `gpt-image-2` 和 `gpt-image-2-pro`。
+- 字段与同步生图一致，包括 `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format`。
+- 支持 `url` 和 `b64_json` 两种返回格式。
+- `prompt` 建议控制在 `1` 到 `4000` 个字符。
+- `n` 表示生成数量，常用范围为 `1` 到 `10`。
+
+## 方法与路径
+
+```http
+POST /v1/images/generations/async
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash 文生图 cURL
+curl -X POST https://www.geeknow.top/v1/images/generations/async \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2",
+    "prompt": "一张现代 API 平台首页插图，白底，青蓝色块，干净留白",
+    "n": 1,
+    "size": "1536x1024",
+    "quality": "auto",
+    "response_format": "url"
+  }'
+```
+
+```bash 高质量生成 cURL
+curl -X POST https://www.geeknow.top/v1/images/generations/async \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2-pro",
+    "prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+    "n": 1,
+    "size": "3840x2160",
+    "quality": "high",
+    "response_format": "url"
+  }'
+```
+
+```bash 参考图生成 cURL
+curl -X POST https://www.geeknow.top/v1/images/generations/async \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-image-2-pro",
+    "prompt": "参考图片中的商品，生成一张白底电商主图，保持材质和颜色一致",
+    "n": 1,
+    "size": "1536x1024",
+    "quality": "high",
+    "image": [
+      "data:image/png;base64,BASE64_IMAGE_DATA"
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/images/generations/async",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "gpt-image-2-pro",
+        "prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+        "n": 1,
+        "size": "3840x2160",
+        "quality": "high",
+        "response_format": "url",
+    },
+    timeout=60,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/images/generations/async", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "gpt-image-2-pro",
+    prompt: "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富",
+    n: 1,
+    size: "3840x2160",
+    quality: "high",
+    response_format: "url",
+  }),
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - URL
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "url": "https://.../images/img-abc123.png",
+      "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
+    }
+  ]
+}
+```
+
+```json 200 - Base64 结果
+{
+  "created": 1735689600,
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
+    }
+  ]
+}
+```
+
+```json 400
+{
+  "error": {
+    "message": "prompt is required",
+    "type": "invalid_request_error",
+    "param": "prompt",
+    "code": "invalid_request"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+模型名称。常用值为 `gpt-image-2` 或 `gpt-image-2-pro`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+文本提示词，用于描述想要生成的图片。建议控制在 `1` 到 `4000` 个字符。
+</ParamField>
+
+<ParamField body="n" type="integer">
+生成数量。常用范围为 `1` 到 `10`；未传时默认为 `1`。
+</ParamField>
+
+<ParamField body="size" type="string">
+输出尺寸。常见值包括 `1024x1024`、`1536x1024`、`1024x1536`、`2048x2048`、`2048x1152`、`3840x2160`、`2160x3840`、`1920x1080`、`1080x1920`。
+</ParamField>
+
+<ParamField body="image" type="array<string>">
+可选参考图输入。数组成员可以是图片 URL、Base64 字符串或 `data:image/...;base64,...` 形式的数据。
+</ParamField>
+
+<ParamField body="quality" type="string">
+质量等级。常见值为 `low`、`medium`、`high`、`auto`，默认 `auto`。
+</ParamField>
+
+<ParamField body="response_format" type="string">
+返回格式。常见值为 `url`、`b64_json`，默认 `url`。
+</ParamField>
+
+## Response
+
+<ResponseField name="created" type="integer">
+生成时间戳。
+</ResponseField>
+
+<ResponseField name="data[].url" type="string">
+`response_format = url` 时返回的图片 URL。
+</ResponseField>
+
+<ResponseField name="data[].b64_json" type="string">
+`response_format = b64_json` 时返回的图片 Base64 数据。
+</ResponseField>
+
+<ResponseField name="data[].revised_prompt" type="string">
+部分上游会改写提示词并返回在这个字段里。
+</ResponseField>
+
+## 与同步接口的区别
+
+| 项目 | 同步生图 | 异步生图 |
+| --- | --- | --- |
+| 路径 | `/v1/images/generations` | `/v1/images/generations/async` |
+| 请求字段 | `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format` | 与同步接口一致 |
+| 返回结构 | `created` + `data[]` | 与同步接口一致 |
+| 适用场景 | 响应时间较短的生图请求 | 高分辨率、参考图或耗时较长的生图请求 |
+
+## 使用建议
+
+- 如果调用方需要等待图片直接返回，优先使用同步接口 `/v1/images/generations`。
+- 如果任务耗时较长，或业务需要提交后异步处理，使用 `/v1/images/generations/async`。
+- `gpt-image-2-pro` 可以配合更高分辨率尺寸，例如 `2048x2048`、`3840x2160`、`2160x3840`。
+- 参考图建议使用公网 URL 或标准 Base64 / data URI，避免传入无法访问的本地路径。
+
+## 相关接口
+
+- [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+- [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [OpenAI Images 兼容图像生成](/api-reference/images/gpt-image-1/generation)
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
