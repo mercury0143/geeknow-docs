@@ -203,9 +203,19 @@ Authorization: Bearer YOUR_API_KEY
 部分上游会改写提示词并返回在这个字段里。
 </ResponseField>
 
+## 异步调用
+
+`gpt-image-2-pro` 也支持通过异步入口提交任务：
+
+```http
+POST /v1/images/generations/async
+```
+
+请求体字段与本页同步生图基本一致，`model` 固定传 `gpt-image-2-pro`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+
 ## 相关接口
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
-- [GPT Image 异步生成图像 API](/api-reference/images/gpt-image-async/generation)
-- [GPT Image 异步任务查询](/api-reference/images/gpt-image-async/query)
+- [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+- [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)

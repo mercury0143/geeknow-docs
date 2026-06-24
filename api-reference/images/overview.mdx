@@ -20,10 +20,10 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
   <Card title="gpt-image-2-pro" icon="sparkles" href="/api-reference/images/gpt-image-2-pro/generation">
     `POST /v1/images/generations`，补充 `2K`、`4K` 高分辨率档位。
   </Card>
-  <Card title="GPT Image 异步生成" icon="hourglass" href="/api-reference/images/gpt-image-async/generation">
-    `POST /v1/images/generations/async`，字段与同步生图一致，适合提交耗时较长的生图任务。
+  <Card title="图像异步生成" icon="hourglass" href="/api-reference/images/gpt-image-async/generation">
+    `POST /v1/images/generations/async`，支持 GPT Image、Doubao Seedream 和 Gemini 图像模型异步提交。
   </Card>
-  <Card title="GPT Image 任务查询" icon="list-checks" href="/api-reference/images/gpt-image-async/query">
+  <Card title="图像任务查询" icon="list-checks" href="/api-reference/images/gpt-image-async/query">
     `GET /v1/images/generations/async/{taskId}`，查询异步生图任务状态、进度和结果。
   </Card>
   <Card title="Doubao Seedream" icon="image-upscale" href="/api-reference/images/doubao-seedream/generation">
@@ -45,8 +45,8 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 | Method | Path | 说明 |
 | --- | --- | --- |
 | `POST` | `/v1/images/generations` | 统一图像生成入口 |
-| `POST` | `/v1/images/generations/async` | GPT Image 异步生成入口 |
-| `GET` | `/v1/images/generations/async/{taskId}` | GPT Image 异步任务查询 |
+| `POST` | `/v1/images/generations/async` | 图像异步生成入口 |
+| `GET` | `/v1/images/generations/async/{taskId}` | 图像异步任务查询 |
 | `POST` | `/v1/images/edits` | OpenAI Images 兼容编辑入口 |
 | `POST` | `/v1/edits` | 旧版编辑别名 |
 | `POST` | `/v1/images/variations` | 路由已保留，当前未实现 |
@@ -69,8 +69,8 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 2. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
 3. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 4. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
-5. [GPT Image 异步生成图像 API](/api-reference/images/gpt-image-async/generation)
-6. [GPT Image 异步任务查询](/api-reference/images/gpt-image-async/query)
+5. [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+6. [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 7. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
 8. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
 9. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)

@@ -1,12 +1,12 @@
 ---
-title: GPT Image 异步任务查询
-description: 使用 `GET /v1/images/generations/async/{taskId}` 查询 GPT Image 异步生图任务状态、进度和结果。
+title: 图像异步任务查询
+description: 使用 `GET /v1/images/generations/async/{taskId}` 查询图像异步生成任务状态、进度和结果。
 api: "GET /v1/images/generations/async/{taskId}"
 ---
 
-# GPT Image 异步任务查询
+# 图像异步任务查询
 
-`/v1/images/generations/async/{taskId}` 用于查询 GPT Image 异步生图任务。提交任务后保存返回的 `id`、`task_id` 或 `taskId`，再通过这个接口轮询任务状态。
+`/v1/images/generations/async/{taskId}` 用于查询图像异步生成任务。提交任务后保存返回的 `id`、`task_id` 或 `taskId`，再通过这个接口轮询任务状态。
 
 - 查询路径为 `GET /v1/images/generations/async/{taskId}`。
 - 这个接口只查询已有任务，不会重新提交生图请求。
@@ -198,7 +198,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务使用的图像模型，例如 `gpt-image-2` 或 `gpt-image-2-pro`。
+任务使用的图像模型，例如 `gpt-image-2`、`doubao-seedream-4-0-250828` 或 `gemini-3-pro-image-preview`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -260,7 +260,9 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 相关接口
 
-- [GPT Image 异步生成图像 API](/api-reference/images/gpt-image-async/generation)
+- [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+- [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
 - [图像模型支持矩阵](/api-reference/images/model-matrix)

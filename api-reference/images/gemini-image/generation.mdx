@@ -359,8 +359,20 @@ Base64 编码的图片内容。
 Token 统计信息。
 </ResponseField>
 
+## 异步调用
+
+Gemini 图像模型也支持通过统一图像异步入口提交任务：
+
+```http
+POST /v1/images/generations/async
+```
+
+异步入口使用 OpenAI Images 兼容 JSON，而不是本页的 Gemini 原生 `contents[].parts[]` 请求体。`model` 可以传 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview` 或 `gemini-3.1-flash-image-preview`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+
 ## 相关接口
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+- [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)

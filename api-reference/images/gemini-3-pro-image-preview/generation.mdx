@@ -331,8 +331,20 @@ Token 统计信息。
 `gemini-3-pro-image-preview` 会按请求里的 `imageSize` 下发，`2K` 会保留，不会被强制回落到 `1K`。
 </Info>
 
+## 异步调用
+
+`gemini-3-pro-image-preview` 也支持通过统一图像异步入口提交任务：
+
+```http
+POST /v1/images/generations/async
+```
+
+异步入口使用 OpenAI Images 兼容 JSON。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+
 ## 相关接口
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+- [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [gemini-2.5-flash-image-preview 生图 API](/api-reference/images/gemini-2.5-flash-image-preview/generation)
 - [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)

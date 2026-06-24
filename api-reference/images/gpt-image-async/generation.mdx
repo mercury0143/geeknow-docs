@@ -1,18 +1,18 @@
 ---
-title: GPT Image 异步生成图像 API
-description: 使用 `POST /v1/images/generations/async` 提交 GPT Image 异步生图任务，并通过任务查询接口获取最终结果。
+title: 图像异步生成 API
+description: 使用 `POST /v1/images/generations/async` 提交图像异步生成任务，并通过任务查询接口获取最终结果。
 api: "POST /v1/images/generations/async"
 ---
 
-# GPT Image 异步生成图像 API
+# 图像异步生成 API
 
-`/v1/images/generations/async` 是 GPT Image 的异步生图任务提交入口。请求体与同步的 `POST /v1/images/generations` 保持一致；提交成功后保存返回的任务 ID，并通过 `GET /v1/images/generations/async/{taskId}` 查询进度和结果。
+`/v1/images/generations/async` 是图像异步生成任务提交入口。请求体采用 OpenAI Images 兼容 JSON 风格；提交成功后保存返回的任务 ID，并通过 `GET /v1/images/generations/async/{taskId}` 查询进度和结果。
 
 - 异步入口为 `POST /v1/images/generations/async`。
 - 查询入口为 `GET /v1/images/generations/async/{taskId}`。
 - 请求格式为 `application/json`。
-- 常用模型为 `gpt-image-2` 和 `gpt-image-2-pro`。
-- 字段与同步生图一致，包括 `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format`。
+- 当前已验证可用模型包括 `gpt-image-2`、`gpt-image-2-pro`、Doubao Seedream 系列和 Gemini 图像模型。
+- 字段与统一生图入口基本一致，包括 `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format`。
 - 支持 `url` 和 `b64_json` 两种返回格式。
 - 成功提交后优先读取 `id`、`task_id` 或 `taskId` 作为后续查询 ID。
 - `prompt` 建议控制在 `1` 到 `4000` 个字符。
@@ -52,6 +52,34 @@ curl -X POST https://www.geeknow.top/v1/images/generations/async \
     "n": 1,
     "size": "3840x2160",
     "quality": "high",
+    "response_format": "url"
+  }'
+```
+
+```bash Doubao Seedream cURL
+curl -X POST https://www.geeknow.top/v1/images/generations/async \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "doubao-seedream-4-0-250828",
+    "prompt": "一张白底产品主图，干净布光，商业摄影风格",
+    "n": 1,
+    "size": "1024x1024",
+    "quality": "auto",
+    "response_format": "url"
+  }'
+```
+
+```bash Gemini 图像模型 cURL
+curl -X POST https://www.geeknow.top/v1/images/generations/async \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gemini-3-pro-image-preview",
+    "prompt": "一张极简 API 文档封面图，白色背景，清晰几何构图",
+    "n": 1,
+    "size": "1024x1024",
+    "quality": "auto",
     "response_format": "url"
   }'
 ```
@@ -178,7 +206,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。常用值为 `gpt-image-2` 或 `gpt-image-2-pro`。
+模型名称。当前已验证可用值包括 `gpt-image-2`、`gpt-image-2-pro`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -260,14 +288,17 @@ Authorization: Bearer YOUR_API_KEY
 
 - 如果调用方需要等待图片直接返回，优先使用同步接口 `/v1/images/generations`。
 - 如果任务耗时较长，或业务需要提交后异步处理，使用 `/v1/images/generations/async`。
+- Gemini 图像模型走异步入口时使用 OpenAI Images 兼容 JSON，不使用 `/v1beta/models/{model}:generateContent` 的 Gemini 原生请求体。
 - 提交成功后保存 `id`、`task_id` 或 `taskId`，并调用任务查询接口轮询最终结果。
 - `gpt-image-2-pro` 可以配合更高分辨率尺寸，例如 `2048x2048`、`3840x2160`、`2160x3840`。
 - 参考图建议使用公网 URL 或标准 Base64 / data URI，避免传入无法访问的本地路径。
 
 ## 相关接口
 
-- [GPT Image 异步任务查询](/api-reference/images/gpt-image-async/query)
+- [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+- [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
 - [OpenAI Images 兼容图像生成](/api-reference/images/gpt-image-1/generation)
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
