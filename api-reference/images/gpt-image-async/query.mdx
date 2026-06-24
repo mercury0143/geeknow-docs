@@ -1,0 +1,266 @@
+---
+title: GPT Image 异步任务查询
+description: 使用 `GET /v1/images/generations/async/{taskId}` 查询 GPT Image 异步生图任务状态、进度和结果。
+api: "GET /v1/images/generations/async/{taskId}"
+---
+
+# GPT Image 异步任务查询
+
+`/v1/images/generations/async/{taskId}` 用于查询 GPT Image 异步生图任务。提交任务后保存返回的 `id`、`task_id` 或 `taskId`，再通过这个接口轮询任务状态。
+
+- 查询路径为 `GET /v1/images/generations/async/{taskId}`。
+- 这个接口只查询已有任务，不会重新提交生图请求。
+- 任务未完成时重点读取 `status` 和 `progress`。
+- 任务完成后从 `data[].url` 或 `data[].b64_json` 读取图片结果。
+- 任务失败时读取 `error.message` 和 `error.code` 定位原因。
+
+## 方法与路径
+
+```http
+GET /v1/images/generations/async/{taskId}
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash cURL
+curl -X GET https://www.geeknow.top/v1/images/generations/async/task_img_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+task_id = "task_img_abc123"
+
+resp = requests.get(
+    f"https://www.geeknow.top/v1/images/generations/async/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const taskId = "task_img_abc123";
+
+const response = await fetch(
+  `https://www.geeknow.top/v1/images/generations/async/${taskId}`,
+  {
+    method: "GET",
+    headers: {
+      Authorization: "Bearer YOUR_API_KEY",
+    },
+  }
+);
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "task_img_abc123",
+  "object": "image_generation.task",
+  "model": "gpt-image-2-pro",
+  "status": "processing",
+  "progress": 42,
+  "created_at": 1735689600,
+  "completed_at": 0,
+  "expires_at": 1735776000,
+  "size": "1536x1024",
+  "data": [],
+  "error": {
+    "message": "",
+    "code": ""
+  }
+}
+```
+
+```json 200 - 已完成 URL
+{
+  "id": "task_img_abc123",
+  "object": "image_generation.task",
+  "model": "gpt-image-2-pro",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689720,
+  "expires_at": 1735776000,
+  "size": "1536x1024",
+  "data": [
+    {
+      "url": "https://example.com/images/task_img_abc123.png",
+      "revised_prompt": "A clean product hero image on a white background"
+    }
+  ],
+  "error": {
+    "message": "",
+    "code": ""
+  }
+}
+```
+
+```json 200 - 已完成 Base64
+{
+  "id": "task_img_abc123",
+  "object": "image_generation.task",
+  "model": "gpt-image-2-pro",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689720,
+  "expires_at": 1735776000,
+  "size": "1536x1024",
+  "data": [
+    {
+      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "revised_prompt": "A clean product hero image on a white background"
+    }
+  ],
+  "error": {
+    "message": "",
+    "code": ""
+  }
+}
+```
+
+```json 200 - 失败
+{
+  "id": "task_img_abc123",
+  "object": "image_generation.task",
+  "model": "gpt-image-2-pro",
+  "status": "failed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689660,
+  "expires_at": 1735776000,
+  "size": "1536x1024",
+  "data": [],
+  "error": {
+    "message": "Image generation failed",
+    "code": "generation_failed"
+  }
+}
+```
+
+```json 401
+{
+  "error": {
+    "message": "Invalid API key provided",
+    "type": "invalid_request_error",
+    "param": "",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 404
+{
+  "error": {
+    "message": "Task not found",
+    "type": "invalid_request_error",
+    "param": "taskId",
+    "code": "task_not_found"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField path="taskId" type="string" required>
+异步生图任务 ID。使用 `POST /v1/images/generations/async` 返回的 `id`、`task_id` 或 `taskId`。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `image_generation.task` 或同类任务对象标识。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+任务使用的图像模型，例如 `gpt-image-2` 或 `gpt-image-2-pro`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值包括 `queued`、`processing`、`in_progress`、`completed`、`succeeded`、`failed`、`cancelled`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度百分比。未完成时可用于展示轮询进度。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+任务创建时间戳。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+任务完成时间戳。任务未完成时通常为 `0` 或不存在。
+</ResponseField>
+
+<ResponseField name="expires_at" type="integer">
+结果过期时间戳。仅在服务端返回时出现。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+输出尺寸，例如 `1024x1024`、`1536x1024`、`3840x2160`。
+</ResponseField>
+
+<ResponseField name="data[].url" type="string">
+`response_format = url` 时返回的图片 URL。通常只在任务完成后出现。
+</ResponseField>
+
+<ResponseField name="data[].b64_json" type="string">
+`response_format = b64_json` 时返回的图片 Base64 数据。通常只在任务完成后出现。
+</ResponseField>
+
+<ResponseField name="data[].revised_prompt" type="string">
+上游改写后的提示词。是否返回取决于实际模型和通道。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+失败原因对象。任务失败时读取 `error.message` 与 `error.code`。
+</ResponseField>
+
+## 状态处理
+
+| 状态 | 含义 | 建议处理 |
+| --- | --- | --- |
+| `queued` | 已提交，等待调度 | 继续轮询 |
+| `processing` / `in_progress` | 正在生成 | 继续轮询并展示 `progress` |
+| `completed` / `succeeded` | 已完成 | 读取 `data[]` 中的图片结果 |
+| `failed` | 任务失败 | 读取 `error` 并停止轮询 |
+| `cancelled` | 任务已取消 | 停止轮询 |
+
+## 轮询建议
+
+- 创建任务后先等待 `2` 到 `5` 秒再开始查询。
+- 常规轮询间隔建议为 `3` 到 `5` 秒；长任务可以逐步退避到 `10` 秒。
+- 业务侧应设置最大等待时间，避免无限轮询。
+- 同一个 `taskId` 可以重复查询，查询本身不会重新消耗一次生图任务。
+
+## 相关接口
+
+- [GPT Image 异步生成图像 API](/api-reference/images/gpt-image-async/generation)
+- [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+- [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [图像模型支持矩阵](/api-reference/images/model-matrix)

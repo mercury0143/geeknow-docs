@@ -21,7 +21,10 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
     `POST /v1/images/generations`，补充 `2K`、`4K` 高分辨率档位。
   </Card>
   <Card title="GPT Image 异步生成" icon="hourglass" href="/api-reference/images/gpt-image-async/generation">
-    `POST /v1/images/generations/async`，字段与同步生图一致，适合提交后异步获取结果。
+    `POST /v1/images/generations/async`，字段与同步生图一致，适合提交耗时较长的生图任务。
+  </Card>
+  <Card title="GPT Image 任务查询" icon="list-checks" href="/api-reference/images/gpt-image-async/query">
+    `GET /v1/images/generations/async/{taskId}`，查询异步生图任务状态、进度和结果。
   </Card>
   <Card title="Doubao Seedream" icon="image-upscale" href="/api-reference/images/doubao-seedream/generation">
     `POST /v1/images/generations`，支持 Seedream 文生图与 `image` 数组图生图。
@@ -43,6 +46,7 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 | --- | --- | --- |
 | `POST` | `/v1/images/generations` | 统一图像生成入口 |
 | `POST` | `/v1/images/generations/async` | GPT Image 异步生成入口 |
+| `GET` | `/v1/images/generations/async/{taskId}` | GPT Image 异步任务查询 |
 | `POST` | `/v1/images/edits` | OpenAI Images 兼容编辑入口 |
 | `POST` | `/v1/edits` | 旧版编辑别名 |
 | `POST` | `/v1/images/variations` | 路由已保留，当前未实现 |
@@ -66,11 +70,12 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 3. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 4. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
 5. [GPT Image 异步生成图像 API](/api-reference/images/gpt-image-async/generation)
-6. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
-7. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-8. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-9. [上传图片](/api-reference/uploads/image-upload)
-10. [Midjourney 概览](/api-reference/images/midjourney/overview)
+6. [GPT Image 异步任务查询](/api-reference/images/gpt-image-async/query)
+7. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+8. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+9. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
+10. [上传图片](/api-reference/uploads/image-upload)
+11. [Midjourney 概览](/api-reference/images/midjourney/overview)
 
 ## 相关页面
 
