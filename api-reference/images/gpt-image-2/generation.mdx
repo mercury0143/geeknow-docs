@@ -1,17 +1,19 @@
 ---
 title: gpt-image-2 生成图像 API
-description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2` 的统一生图入口。
+description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2` 生成图像。
 api: "POST /v1/images/generations"
 ---
 
 # gpt-image-2 生成图像 API
 
-`gpt-image-2` 使用统一图像生成入口，适合按基础比例和尺寸档位发起文生图请求。
+`gpt-image-2` 用于提交图像生成请求。请求体使用 JSON 格式，按模型名、提示词、输出尺寸和返回格式描述本次生成任务。
 
-- 统一入口为 `POST /v1/images/generations`。
+- 请求路径为 `POST /v1/images/generations`。
 - 通过 `model = "gpt-image-2"` 选择目标模型。
+- `prompt` 描述要生成的图像内容。
+- `size` 传实际输出尺寸，例如 `1024x1024`、`1536x1024`、`1920x1080`。
 - 支持 `url` 和 `b64_json` 两种返回格式。
-- 可在 JSON 中附带 `image` 作为参考图，是否生效取决于实际命中的图像渠道。
+- 可在 JSON 中附带 `image` 作为参考图。
 - `n` 不传或显式传 `0` 时会按 `1` 处理。
 
 ## 方法与路径
@@ -121,8 +123,8 @@ Authorization: Bearer YOUR_API_KEY
 固定传 `gpt-image-2`。
 </ParamField>
 
-<ParamField body="prompt" type="string">
-生成提示词。对于文生图语义应视为必填。
+<ParamField body="prompt" type="string" required>
+生成提示词，用于描述想要生成的图片。
 </ParamField>
 
 <ParamField body="n" type="integer">
@@ -130,11 +132,11 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="size" type="string">
-输出尺寸。常见基础档位为 `1024x1024`、`1536x1152`、`1536x1024`、`1024x1536`、`1920x1080`、`1080x1920`。
+输出尺寸。常见值为 `1024x1024`、`1536x1152`、`1536x1024`、`1024x1536`、`1920x1080`、`1080x1920`。
 </ParamField>
 
 <ParamField body="image" type="string | array<string> | object">
-可选参考图输入。常见写法是 Base64 字符串或 Base64 数组，适合需要图像风格参考的渠道。
+可选参考图输入。常见写法是 Base64 字符串或 Base64 数组。
 </ParamField>
 
 <ParamField body="response_format" type="string">
@@ -157,7 +159,7 @@ Authorization: Bearer YOUR_API_KEY
 显式水印开关。`false` 与不传语义不同。
 </ParamField>
 
-## 基础比例与尺寸档位
+## 尺寸表
 
 | 预设 | 实际目标尺寸 |
 | --- | --- |
@@ -169,7 +171,7 @@ Authorization: Bearer YOUR_API_KEY
 | `9:16` | `1080x1920` |
 
 <Info>
-如果实际渠道不原生接受目标尺寸，网关会回退到更接近的官方尺寸，并把比例意图附加到 prompt。
+请求体中的 `size` 传“实际目标尺寸”这一列。
 </Info>
 
 ## Response
@@ -192,18 +194,17 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 异步调用
 
-`gpt-image-2` 也支持通过异步入口提交任务：
+如需提交后异步查询结果，可以使用图像异步生成入口：
 
 ```http
 POST /v1/images/generations/async
 ```
 
-请求体字段与本页同步生图基本一致，`model` 固定传 `gpt-image-2`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+异步请求仍传 `model = "gpt-image-2"`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
 
-## 相关接口
+## 相关页面
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
 - [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
 - [图像异步任务查询](/api-reference/images/gpt-image-async/query)
-- [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
 - [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)

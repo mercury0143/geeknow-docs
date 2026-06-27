@@ -1,11 +1,11 @@
 ---
 title: 图像系列概览
-description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenAI Images 兼容路由、Midjourney 路由和 Gemini 原生图像能力入口。
+description: 汇总图像生成、图像编辑、异步任务、素材上传和 Midjourney 相关接口。
 ---
 
 # 图像系列
 
-图像能力目前主要分成五类：按模型分组的 Gemini 官方生图入口、按模型分组的 GPT Image 生成入口、Doubao Seedream 统一生图入口、OpenAI Images 兼容生成/编辑入口，以及 Midjourney 专用任务接口。
+图像能力按接口和模型分别组织。每个模型页面都独立说明请求路径、模型名、参数、尺寸表和返回结构；接入时可以直接进入目标模型页面，不需要先阅读其它模型文档。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
@@ -15,10 +15,13 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
     `POST /v1beta/models/{model}:generateContent`，统一覆盖 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`。
   </Card>
   <Card title="gpt-image-2" icon="image-plus" href="/api-reference/images/gpt-image-2/generation">
-    `POST /v1/images/generations`，按基础比例和尺寸档位调用 `gpt-image-2`。
+    `POST /v1/images/generations`，使用 `gpt-image-2` 生成图像。
   </Card>
   <Card title="gpt-image-2-pro" icon="sparkles" href="/api-reference/images/gpt-image-2-pro/generation">
-    `POST /v1/images/generations`，补充 `2K`、`4K` 高分辨率档位。
+    `POST /v1/images/generations`，使用 `gpt-image-2-pro` 生成高分辨率图像。
+  </Card>
+  <Card title="gpt-image-2-vip" icon="sparkles" href="/api-reference/images/gpt-image-2-vip/generation">
+    `POST /v1/images/generations`，使用 `gpt-image-2-vip` 的 `1K`、`2K`、`4K` 尺寸表。
   </Card>
   <Card title="图像异步生成" icon="hourglass" href="/api-reference/images/gpt-image-async/generation">
     `POST /v1/images/generations/async`，支持 GPT Image、Doubao Seedream 和 Gemini 图像模型异步提交。
@@ -44,7 +47,7 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 
 | Method | Path | 说明 |
 | --- | --- | --- |
-| `POST` | `/v1/images/generations` | 统一图像生成入口 |
+| `POST` | `/v1/images/generations` | 图像生成入口 |
 | `POST` | `/v1/images/generations/async` | 图像异步生成入口 |
 | `GET` | `/v1/images/generations/async/{taskId}` | 图像异步任务查询 |
 | `POST` | `/v1/images/edits` | OpenAI Images 兼容编辑入口 |
@@ -63,19 +66,20 @@ description: 汇总按模型分组的 GPT Image 文档、Doubao Seedream、OpenA
 `/v1/images/variations`、`/v1/files*` 和 `fine-tunes*` 这类 OpenAI 兼容路径虽然在路由中占位，但当前会返回未实现错误，不能直接用于生产。
 </Warning>
 
-## 推荐阅读顺序
+## 推荐阅读
 
 1. [图像模型支持矩阵](/api-reference/images/model-matrix)
-2. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
-3. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
-4. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
-5. [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
-6. [图像异步任务查询](/api-reference/images/gpt-image-async/query)
-7. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
-8. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-9. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-10. [上传图片](/api-reference/uploads/image-upload)
-11. [Midjourney 概览](/api-reference/images/midjourney/overview)
+2. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
+3. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+4. [gpt-image-2-vip 生成图像 API](/api-reference/images/gpt-image-2-vip/generation)
+5. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
+6. [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+7. [图像异步任务查询](/api-reference/images/gpt-image-async/query)
+8. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+9. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+10. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
+11. [上传图片](/api-reference/uploads/image-upload)
+12. [Midjourney 概览](/api-reference/images/midjourney/overview)
 
 ## 相关页面
 

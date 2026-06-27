@@ -198,7 +198,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务使用的图像模型，例如 `gpt-image-2`、`doubao-seedream-4-0-250828` 或 `gemini-3-pro-image-preview`。
+任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828` 或 `gemini-3-pro-image-preview`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -222,7 +222,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="size" type="string">
-输出尺寸，例如 `1024x1024`、`1536x1024`、`3840x2160`。
+输出尺寸，例如 `1024x1024`、`1536x1024`、`3840x2160`、`3808x1632`。
 </ResponseField>
 
 <ResponseField name="data[].url" type="string">
@@ -258,11 +258,12 @@ Authorization: Bearer YOUR_API_KEY
 - 业务侧应设置最大等待时间，避免无限轮询。
 - 同一个 `taskId` 可以重复查询，查询本身不会重新消耗一次生图任务。
 
-## 相关接口
+## 相关页面
 
 - [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [gpt-image-2-vip 生成图像 API](/api-reference/images/gpt-image-2-vip/generation)
 - [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
 - [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
 - [图像模型支持矩阵](/api-reference/images/model-matrix)

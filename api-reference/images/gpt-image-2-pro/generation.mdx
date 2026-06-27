@@ -1,18 +1,19 @@
 ---
 title: gpt-image-2-pro 生成图像 API
-description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2-pro` 的高分辨率生图入口。
+description: 使用 `POST /v1/images/generations` 调用 `gpt-image-2-pro` 生成高分辨率图像。
 api: "POST /v1/images/generations"
 ---
 
 # gpt-image-2-pro 生成图像 API
 
-`gpt-image-2-pro` 与 `gpt-image-2` 共用统一图像生成入口，但额外开放了 `2K`、`4K` 高分辨率档位，适合需要更大画幅和更高输出尺寸的场景。
+`gpt-image-2-pro` 用于提交高分辨率图像生成请求。请求体使用 JSON 格式，按模型名、提示词、输出尺寸和返回格式描述本次生成任务。
 
-- 统一入口为 `POST /v1/images/generations`。
+- 请求路径为 `POST /v1/images/generations`。
 - 通过 `model = "gpt-image-2-pro"` 选择目标模型。
-- 除基础尺寸外，还补充 `2K`、`4K` 高分档位。
+- `prompt` 描述要生成的图像内容。
+- `size` 传实际输出尺寸，例如 `2048x2048`、`2560x1712`、`3840x2160`。
 - 支持 `url` 和 `b64_json` 两种返回格式。
-- 可在 JSON 中附带 `image` 作为参考图，是否生效取决于实际命中的图像渠道。
+- 可在 JSON 中附带 `image` 作为参考图。
 
 ## 方法与路径
 
@@ -121,8 +122,8 @@ Authorization: Bearer YOUR_API_KEY
 固定传 `gpt-image-2-pro`。
 </ParamField>
 
-<ParamField body="prompt" type="string">
-生成提示词。对于文生图语义应视为必填。
+<ParamField body="prompt" type="string" required>
+生成提示词，用于描述想要生成的图片。
 </ParamField>
 
 <ParamField body="n" type="integer">
@@ -130,7 +131,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="size" type="string">
-输出尺寸。除基础档位外，还支持高分辨率扩展档位。
+输出尺寸。常见值为 `2048x2048`、`2048x1536`、`2560x1712`、`1712x2560`、`3840x2160`、`2160x3840`。
 </ParamField>
 
 <ParamField body="image" type="string | array<string> | object">
@@ -157,9 +158,9 @@ Authorization: Bearer YOUR_API_KEY
 显式水印开关。`false` 与不传语义不同。
 </ParamField>
 
-## 高分辨率档位
+## 尺寸表
 
-### `2K` 扩展档位
+### `2K` 档位
 
 | 预设 | 实际目标尺寸 |
 | --- | --- |
@@ -170,7 +171,7 @@ Authorization: Bearer YOUR_API_KEY
 | `16:9(2K)` | `2048x1152` |
 | `9:16(2K)` | `1152x2048` |
 
-### `4K` 扩展档位
+### `4K` 档位
 
 | 预设 | 实际目标尺寸 |
 | --- | --- |
@@ -182,7 +183,7 @@ Authorization: Bearer YOUR_API_KEY
 | `9:16(4K)` | `2160x3840` |
 
 <Info>
-这些高分档位表示可请求的目标尺寸。若上游不原生接受对应尺寸，网关可能回退到更接近的官方尺寸，并把比例意图附加到 prompt。
+请求体中的 `size` 传“实际目标尺寸”这一列。
 </Info>
 
 ## Response
@@ -205,15 +206,15 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 异步调用
 
-`gpt-image-2-pro` 也支持通过异步入口提交任务：
+如需提交后异步查询结果，可以使用图像异步生成入口：
 
 ```http
 POST /v1/images/generations/async
 ```
 
-请求体字段与本页同步生图基本一致，`model` 固定传 `gpt-image-2-pro`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+异步请求仍传 `model = "gpt-image-2-pro"`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
 
-## 相关接口
+## 相关页面
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
 - [图像异步生成 API](/api-reference/images/gpt-image-async/generation)

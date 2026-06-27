@@ -66,6 +66,13 @@
             ]
           },
           {
+            "group": "gpt-image-2-vip",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-2-vip/generation"
+            ]
+          },
+          {
             "group": "图像异步生成",
             "expanded": true,
             "pages": [
