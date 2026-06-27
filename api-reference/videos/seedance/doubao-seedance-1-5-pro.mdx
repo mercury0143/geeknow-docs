@@ -1,0 +1,319 @@
+---
+title: 豆包 Seedance 1.5 Pro 视频生成
+description: 使用 `POST /v1/videos` 调用豆包 Seedance 1.5 Pro 的 480p、720p、1080p 模型。
+api: "POST /v1/videos"
+---
+
+# 豆包 Seedance 1.5 Pro
+
+豆包 Seedance 1.5 Pro 使用 `multipart/form-data` 请求提交异步视频任务。模型名中的 `480p`、`720p`、`1080p` 表示输出清晰度档位。
+
+- 接口路径是 `POST /v1/videos`。
+- 请求格式是 `multipart/form-data`。
+- 可用模型为 `doubao-seedance-1-5-pro_480p`、`doubao-seedance-1-5-pro_720p`、`doubao-seedance-1-5-pro_1080p`。
+- `seconds` 支持 `4` 到 `11` 秒。
+- `size` 传宽高比，例如 `16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`21:9`。
+- 首帧图使用 `first_frame_image`，尾帧图使用 `last_frame_image`。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash 文生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=doubao-seedance-1-5-pro_720p" \
+  -F "prompt=雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影" \
+  -F "seconds=8" \
+  -F "size=16:9"
+```
+
+```bash 首帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=doubao-seedance-1-5-pro_720p" \
+  -F "prompt=让图片中的人物自然抬头，微笑，看向镜头" \
+  -F "seconds=8" \
+  -F "size=9:16" \
+  -F "first_frame_image=@/path/to/first-frame.png"
+```
+
+```bash 首尾帧 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -F "model=doubao-seedance-1-5-pro_1080p" \
+  -F "prompt=从首帧自然过渡到尾帧，保持主体一致，动作连贯" \
+  -F "seconds=8" \
+  -F "size=16:9" \
+  -F "first_frame_image=@/path/to/opening-frame.png" \
+  -F "last_frame_image=@/path/to/ending-frame.png"
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    data={
+        "model": "doubao-seedance-1-5-pro_720p",
+        "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+        "seconds": "8",
+        "size": "16:9",
+    },
+    timeout=120,
+)
+
+print(resp.json())
+```
+
+```python Python - 首帧生视频
+import requests
+
+with open("first-frame.png", "rb") as image_file:
+    resp = requests.post(
+        "https://www.geeknow.top/v1/videos",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+        data={
+            "model": "doubao-seedance-1-5-pro_720p",
+            "prompt": "让图片中的人物自然抬头，微笑，看向镜头",
+            "seconds": "8",
+            "size": "9:16",
+        },
+        files={
+            "first_frame_image": ("first-frame.png", image_file, "image/png"),
+        },
+        timeout=120,
+    )
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const form = new FormData();
+form.append("model", "doubao-seedance-1-5-pro_720p");
+form.append("prompt", "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影");
+form.append("seconds", "8");
+form.append("size", "16:9");
+
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+  body: form,
+});
+
+console.log(await response.json());
+```
+
+```javascript JavaScript - 首帧生视频
+const form = new FormData();
+form.append("model", "doubao-seedance-1-5-pro_720p");
+form.append("prompt", "让图片中的人物自然抬头，微笑，看向镜头");
+form.append("seconds", "8");
+form.append("size", "9:16");
+form.append("first_frame_image", fileInput.files[0]);
+
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+  body: form,
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 提交成功
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "doubao-seedance-1-5-pro_720p",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "video_url": ""
+}
+```
+
+```json 400 - 参数错误
+{
+  "error": {
+    "message": "prompt is required",
+    "type": "invalid_request_error",
+    "param": "prompt",
+    "code": "invalid_request_error"
+  }
+}
+```
+
+```json 401 - 认证失败
+{
+  "error": {
+    "message": "invalid token",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 402 - 额度不足
+{
+  "error": {
+    "message": "insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+```json 429 - 请求过多
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+使用 Bearer Token 鉴权：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Form Fields
+
+<ParamField body="model" type="string" required>
+模型名称。可选 `doubao-seedance-1-5-pro_480p`、`doubao-seedance-1-5-pro_720p`、`doubao-seedance-1-5-pro_1080p`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+视频生成提示词。
+</ParamField>
+
+<ParamField body="seconds" type="string">
+视频时长。支持 `4` 到 `11` 秒，建议按字符串传入，例如 `"8"`。
+</ParamField>
+
+<ParamField body="size" type="string">
+宽高比。常用值包括 `16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`21:9`、`keep_ratio`、`adaptive`。
+</ParamField>
+
+<ParamField body="first_frame_image" type="file">
+首帧图片文件。用于首帧生视频或首尾帧模式。
+</ParamField>
+
+<ParamField body="last_frame_image" type="file">
+尾帧图片文件。通常与 `first_frame_image` 一起用于首尾帧模式。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+视频任务 ID。后续可用于 `GET /v1/videos/{id}` 查询。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+视频任务 ID 的兼容字段。通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+本次任务使用的模型，例如 `doubao-seedance-1-5-pro_720p`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="number">
+任务进度，常见范围为 `0` 到 `100`。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的视频地址。也可以使用 `GET /v1/videos/{id}/content` 下载结果。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败或接口错误时返回的错误对象，通常包含 `message` 和 `code`。
+</ResponseField>
+
+## 模型选择
+
+| 模型 | 清晰度 |
+| --- | --- |
+| `doubao-seedance-1-5-pro_480p` | 480p |
+| `doubao-seedance-1-5-pro_720p` | 720p |
+| `doubao-seedance-1-5-pro_1080p` | 1080p |
+
+## 使用场景
+
+### 720p 文生视频
+
+```json
+{
+  "model": "doubao-seedance-1-5-pro_720p",
+  "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
+  "seconds": "8",
+  "size": "16:9"
+}
+```
+
+### 竖屏首帧生视频
+
+```text
+model=doubao-seedance-1-5-pro_720p
+prompt=让图片中的人物自然抬头，微笑，看向镜头
+seconds=8
+size=9:16
+first_frame_image=@first-frame.png
+```
+
+### 首尾帧过渡
+
+```text
+model=doubao-seedance-1-5-pro_1080p
+prompt=从首帧自然过渡到尾帧，保持主体一致，动作连贯
+seconds=8
+size=16:9
+first_frame_image=@opening-frame.png
+last_frame_image=@ending-frame.png
+```
+
+## 注意事项
+
+- 请求格式为 `multipart/form-data`。
+- 图片通过 `first_frame_image`、`last_frame_image` 文件字段上传。
+- `seconds` 支持 `4` 到 `11` 秒。
+- 模型名里的 `480p`、`720p`、`1080p` 决定输出清晰度。
+- 不推荐用于“参考生视频”模式；需要图片约束时优先使用首帧或首尾帧。
+
+## 相关接口
+
+- [Seedance 概览](./overview)
+- [seedance2 视频生成](./generation)
+- [Seedance 任务查询](./query)

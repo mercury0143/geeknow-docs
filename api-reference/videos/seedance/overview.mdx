@@ -1,0 +1,63 @@
+---
+title: Seedance 概览
+description: 汇总 Seedance 视频模型的创建任务、查询任务和字段约束。
+---
+
+# Seedance
+
+Seedance 视频模型通过 `/v1/videos` 创建异步任务，通过 `/v1/videos/{id}` 查询任务状态和结果。每个模型的请求格式、时长范围、清晰度和图片字段以对应接口页为准。
+
+<CardGroup cols={2}>
+  <Card title="seedance2 创建任务" icon="clapperboard" href="/api-reference/videos/seedance/generation">
+    使用 JSON 请求，支持 480P / 720P 与 4-15 秒。
+  </Card>
+  <Card title="豆包 Seedance 1.5 Pro" icon="film" href="/api-reference/videos/seedance/doubao-seedance-1-5-pro">
+    三个清晰度模型，使用 multipart 文件字段上传首帧和尾帧图片。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/seedance/query">
+    使用任务 ID 查询状态、失败原因和结果地址。
+  </Card>
+</CardGroup>
+
+## 模型
+
+| 模型 | 可用 `model` | 请求格式 | 时长 | 清晰度 | 参考图 |
+| --- | --- | --- | --- | --- | --- |
+| seedance2 | `seedance2` | JSON | `4` 到 `15` 秒 | `480P`、`720P` | 图片 URL 放入 `content[].image_url.url` |
+| 豆包 Seedance 1.5 Pro | `doubao-seedance-1-5-pro_480p`、`doubao-seedance-1-5-pro_720p`、`doubao-seedance-1-5-pro_1080p` | multipart/form-data | `4` 到 `11` 秒 | 由模型名决定 | 图片以二进制文件字段上传 |
+
+## seedance2 请求特点
+
+- `model` 固定传 `seedance2`。
+- 使用 `application/json` 提交。
+- 时长支持 `4` 到 `15` 秒。
+- 清晰度支持 `480P`、`720P`。
+- 支持 `16:9`、`9:16`、`1:1`、`3:4`、`4:3`、`21:9`。
+- 参考图不接收 Base64 data URI，应传入服务端可访问的公网图片 URL。
+- 参考图在 `content` 中使用 `image_url` 项，并通过 `role` 区分 `first_frame`、`last_frame`、`reference_image`。
+
+## 豆包 Seedance 1.5 Pro 请求特点
+
+- `model` 必须从三个清晰度档位中选择一个。
+- 使用 `multipart/form-data` 提交。
+- `prompt`、`model`、`seconds` 放在普通表单字段中。
+- 宽高比通过 `size` 字段传入，例如 `16:9`、`9:16`、`4:3`、`1:1`、`3:4`、`21:9`。
+- 时长限制为 `4` 到 `11` 秒；低于 `4` 会修正为 `4`，大于等于 `12` 会修正为 `11`。
+- 首帧图使用 `first_frame_image` 文件字段，尾帧图使用 `last_frame_image` 文件字段。
+- 参考生视频模式不作为该模型的推荐用法；需要图片约束时建议使用首帧或首尾帧。
+
+## 查询任务
+
+任务提交成功后会返回任务 ID。后续使用同一个查询接口：
+
+```http
+GET /v1/videos/{id}
+```
+
+任务完成后读取 `video_url`；如果接口没有直接返回公开视频地址，可使用 `GET /v1/videos/{id}/content` 下载视频内容。
+
+## 相关页面
+
+- [创建视频任务](./generation)
+- [豆包 Seedance 1.5 Pro](./doubao-seedance-1-5-pro)
+- [查询视频任务](./query)

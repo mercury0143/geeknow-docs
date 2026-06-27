@@ -122,14 +122,13 @@
             ]
           },
           {
-            "group": "Seedance-2",
+            "group": "Seedance",
             "expanded": true,
             "pages": [
-              "api-reference/videos/seedance-2/overview",
-              "api-reference/videos/seedance-2/generation",
-              "api-reference/videos/seedance-2/query",
-              "api-reference/videos/seedance-2/asset-create-media",
-              "api-reference/videos/seedance-2/asset-get"
+              "api-reference/videos/seedance/overview",
+              "api-reference/videos/seedance/generation",
+              "api-reference/videos/seedance/doubao-seedance-1-5-pro",
+              "api-reference/videos/seedance/query"
             ]
           },
           {

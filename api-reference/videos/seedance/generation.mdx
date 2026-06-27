@@ -1,0 +1,518 @@
+---
+title: seedance2 视频生成
+description: 使用 `POST /v1/videos` 调用 `seedance2` 提交 JSON 视频生成任务。
+api: "POST /v1/videos"
+---
+
+# seedance2
+
+`seedance2` 使用 JSON 请求体提交异步视频任务，支持文生视频、首帧生视频、首尾帧和多参考图生成。
+
+- 接口路径是 `POST /v1/videos`。
+- 请求格式是 `application/json`。
+- `seconds` 支持 `4` 到 `15` 秒。
+- `resolution` 支持 `480P` 和 `720P`。
+- 文生视频只需要 `model`、`prompt`、`seconds`、`ratio`、`resolution`。
+- 参考图使用 `content` 数组中的 `image_url` 项，图片地址需要是公网 URL。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash 文生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance2",
+    "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+    "seconds": "8",
+    "ratio": "16:9",
+    "resolution": "720P",
+    "generate_audio": false
+  }'
+```
+
+```bash 首帧生视频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance2",
+    "prompt": "@image1；让画面中的人物自然转身，看向镜头并微笑",
+    "seconds": "6",
+    "ratio": "9:16",
+    "resolution": "720P",
+    "generate_audio": false,
+    "content": [
+      {
+        "type": "text",
+        "text": "@image1；让画面中的人物自然转身，看向镜头并微笑"
+      },
+      {
+        "type": "image_url",
+        "role": "first_frame",
+        "image_url": {
+          "url": "https://example.com/assets/first-frame.png"
+        }
+      }
+    ]
+  }'
+```
+
+```bash 首尾帧 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance2",
+    "prompt": "@image1；@image2；从首帧自然过渡到尾帧，保持人物服装和场景一致",
+    "seconds": "10",
+    "ratio": "16:9",
+    "resolution": "720P",
+    "generate_audio": false,
+    "content": [
+      {
+        "type": "text",
+        "text": "@image1；@image2；从首帧自然过渡到尾帧，保持人物服装和场景一致"
+      },
+      {
+        "type": "image_url",
+        "role": "first_frame",
+        "image_url": {
+          "url": "https://example.com/assets/opening-frame.png"
+        }
+      },
+      {
+        "type": "image_url",
+        "role": "last_frame",
+        "image_url": {
+          "url": "https://example.com/assets/ending-frame.png"
+        }
+      }
+    ]
+  }'
+```
+
+```bash 多参考图 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "seedance2",
+    "prompt": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片",
+    "seconds": "12",
+    "ratio": "16:9",
+    "resolution": "480P",
+    "generate_audio": false,
+    "content": [
+      {
+        "type": "text",
+        "text": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片"
+      },
+      {
+        "type": "image_url",
+        "role": "reference_image",
+        "image_url": {
+          "url": "https://example.com/assets/character.png"
+        }
+      },
+      {
+        "type": "image_url",
+        "role": "reference_image",
+        "image_url": {
+          "url": "https://example.com/assets/scene.png"
+        }
+      }
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+resp = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "seedance2",
+        "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+        "seconds": "8",
+        "ratio": "16:9",
+        "resolution": "720P",
+        "generate_audio": False,
+    },
+    timeout=120,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "seedance2",
+    prompt: "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+    seconds: "8",
+    ratio: "16:9",
+    resolution: "720P",
+    generate_audio: false,
+  }),
+});
+
+console.log(await response.json());
+```
+
+```go Go
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+)
+
+func main() {
+	payload := map[string]any{
+		"model":          "seedance2",
+		"prompt":         "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+		"seconds":        "8",
+		"ratio":          "16:9",
+		"resolution":     "720P",
+		"generate_audio": false,
+	}
+	body, _ := json.Marshal(payload)
+
+	req, _ := http.NewRequest("POST", "https://www.geeknow.top/v1/videos", bytes.NewReader(body))
+	req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(respBody))
+}
+```
+
+```java Java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        String json = """
+        {
+          "model": "seedance2",
+          "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+          "seconds": "8",
+          "ratio": "16:9",
+          "resolution": "720P",
+          "generate_audio": false
+        }
+        """;
+
+        HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create("https://www.geeknow.top/v1/videos"))
+            .header("Authorization", "Bearer YOUR_API_KEY")
+            .header("Content-Type", "application/json")
+            .POST(HttpRequest.BodyPublishers.ofString(json))
+            .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient()
+            .send(request, HttpResponse.BodyHandlers.ofString());
+
+        System.out.println(response.body());
+    }
+}
+```
+
+```php PHP
+<?php
+$payload = [
+    'model' => 'seedance2',
+    'prompt' => '清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感',
+    'seconds' => '8',
+    'ratio' => '16:9',
+    'resolution' => '720P',
+    'generate_audio' => false,
+];
+
+$ch = curl_init('https://www.geeknow.top/v1/videos');
+curl_setopt_array($ch, [
+    CURLOPT_POST => true,
+    CURLOPT_HTTPHEADER => [
+        'Authorization: Bearer YOUR_API_KEY',
+        'Content-Type: application/json',
+    ],
+    CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+    CURLOPT_RETURNTRANSFER => true,
+]);
+
+$response = curl_exec($ch);
+curl_close($ch);
+echo $response;
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 提交成功
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "seedance2",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1735689600,
+  "video_url": ""
+}
+```
+
+```json 400 - 参数错误
+{
+  "error": {
+    "message": "prompt is required",
+    "type": "invalid_request_error",
+    "param": "prompt",
+    "code": "invalid_request_error"
+  }
+}
+```
+
+```json 401 - 认证失败
+{
+  "error": {
+    "message": "invalid token",
+    "type": "invalid_request_error",
+    "code": "invalid_api_key"
+  }
+}
+```
+
+```json 402 - 额度不足
+{
+  "error": {
+    "message": "insufficient quota",
+    "type": "insufficient_quota",
+    "code": "insufficient_quota"
+  }
+}
+```
+
+```json 429 - 请求过多
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_error",
+    "code": "rate_limit_exceeded"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+使用 Bearer Token 鉴权：
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+JSON 请求还需要携带：
+
+```http
+Content-Type: application/json
+```
+
+## Body
+
+<ParamField body="model" type="string" required>
+固定传 `seedance2`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+视频生成提示词。使用参考图时，建议在提示词中加入 `@image1`、`@image2` 等引用标记。
+</ParamField>
+
+<ParamField body="seconds" type="string">
+视频时长。支持 `4` 到 `15` 秒，建议按字符串传入，例如 `"8"`。
+</ParamField>
+
+<ParamField body="ratio" type="string">
+画幅比例。支持 `16:9`、`9:16`、`1:1`、`3:4`、`4:3`、`21:9`。
+</ParamField>
+
+<ParamField body="resolution" type="string">
+输出清晰度。支持 `480P`、`720P`，也兼容 `480p`、`720p` 写法。
+</ParamField>
+
+<ParamField body="generate_audio" type="boolean">
+是否生成音频。
+</ParamField>
+
+<ParamField body="content" type="array<object>">
+图生视频或参考图视频使用的内容数组。第一项通常为文本，图片项使用 `type: "image_url"`。
+</ParamField>
+
+<ParamField body="content[].type" type="string">
+内容类型。文本项为 `text`，图片项为 `image_url`。
+</ParamField>
+
+<ParamField body="content[].text" type="string">
+文本项内容。通常与顶层 `prompt` 保持一致。
+</ParamField>
+
+<ParamField body="content[].role" type="string">
+图片角色。常用值为 `first_frame`、`last_frame`、`reference_image`。
+</ParamField>
+
+<ParamField body="content[].image_url.url" type="string">
+公网图片 URL。`seedance2` 不接收 Base64 data URI。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+视频任务 ID。后续可用于 `GET /v1/videos/{id}` 查询。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+视频任务 ID 的兼容字段。通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+本次任务使用的模型，例如 `seedance2`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="number">
+任务进度，常见范围为 `0` 到 `100`。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的视频地址。也可以使用 `GET /v1/videos/{id}/content` 下载结果。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败或接口错误时返回的错误对象，通常包含 `message` 和 `code`。
+</ResponseField>
+
+## 使用场景
+
+### 480P 文生视频
+
+```json
+{
+  "model": "seedance2",
+  "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
+  "seconds": "6",
+  "ratio": "16:9",
+  "resolution": "480P",
+  "generate_audio": false
+}
+```
+
+### 首帧生视频
+
+```json
+{
+  "model": "seedance2",
+  "prompt": "@image1；让画面中的人物自然转身，看向镜头并微笑",
+  "seconds": "8",
+  "ratio": "9:16",
+  "resolution": "720P",
+  "content": [
+    {
+      "type": "text",
+      "text": "@image1；让画面中的人物自然转身，看向镜头并微笑"
+    },
+    {
+      "type": "image_url",
+      "role": "first_frame",
+      "image_url": {
+        "url": "https://example.com/assets/first-frame.png"
+      }
+    }
+  ]
+}
+```
+
+### 多参考图视频
+
+```json
+{
+  "model": "seedance2",
+  "prompt": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片",
+  "seconds": "12",
+  "ratio": "16:9",
+  "resolution": "720P",
+  "content": [
+    {
+      "type": "text",
+      "text": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片"
+    },
+    {
+      "type": "image_url",
+      "role": "reference_image",
+      "image_url": {
+        "url": "https://example.com/assets/character.png"
+      }
+    },
+    {
+      "type": "image_url",
+      "role": "reference_image",
+      "image_url": {
+        "url": "https://example.com/assets/scene.png"
+      }
+    }
+  ]
+}
+```
+
+## 注意事项
+
+- 请求格式为 `application/json`。
+- `seconds` 支持 `4` 到 `15` 秒。
+- `resolution` 支持 `480P` 和 `720P`。
+- 图片字段接收公网 URL；Base64 data URI 不属于该字段的推荐输入格式。
+- 豆包 Seedance 1.5 Pro 的请求格式为 `multipart/form-data`。
+
+## 相关接口
+
+- [Seedance 概览](./overview)
+- [豆包 Seedance 1.5 Pro](./doubao-seedance-1-5-pro)
+- [Seedance 任务查询](./query)
