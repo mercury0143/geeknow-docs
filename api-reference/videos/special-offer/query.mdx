@@ -1,12 +1,12 @@
 ---
-title: manxue-2 查询视频任务
-description: 使用 `GET /v1/videos/{id}` 查询 manxue-2 视频任务状态。
+title: manxue-2.0.0 查询视频任务
+description: 使用 `GET /v1/videos/{id}` 查询 manxue-2.0.0 视频任务状态。
 api: "GET /v1/videos/{id}"
 ---
 
-# manxue-2 查询视频任务
+# manxue-2.0.0 查询视频任务
 
-这个接口用于查询 `manxue-2` 异步视频任务状态。创建任务接口返回 `id` 后，可通过该接口轮询状态并读取结果地址。
+这个接口用于查询 `manxue-2.0.0` 异步视频任务状态。创建任务接口返回 `id` 后，可通过该接口轮询状态并读取结果地址。
 
 - 根据创建任务返回的 `id` 查询。
 - 任务完成后读取 `video_url`。
@@ -64,7 +64,7 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "manxue-2",
+  "model": "manxue-2.0.0",
   "status": "in_progress"
 }
 ```
@@ -74,7 +74,7 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "manxue-2",
+  "model": "manxue-2.0.0",
   "status": "completed",
   "video_url": "https://example.com/results/manxue-video.mp4",
   "actualDuration": 8,
@@ -87,7 +87,7 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "manxue-2",
+  "model": "manxue-2.0.0",
   "status": "failed",
   "error": "task failed"
 }
@@ -180,4 +180,4 @@ GET /v1/videos/{id}/content
 ## 相关页面
 
 - [特惠渠道系列概览](./overview)
-- [manxue-2 创建视频任务](./generation)
+- [manxue-2.0.0 创建视频任务](./generation)
