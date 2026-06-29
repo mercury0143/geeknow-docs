@@ -122,11 +122,30 @@
             ]
           },
           {
-            "group": "Seedance",
+            "group": "Seedance-2",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/seedance-2/overview",
+              "api-reference/videos/seedance-2/generation",
+              "api-reference/videos/seedance-2/query",
+              "api-reference/videos/seedance-2/asset-create-media",
+              "api-reference/videos/seedance-2/asset-get"
+            ]
+          },
+          {
+            "group": "特惠渠道系列",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/special-offer/overview",
+              "api-reference/videos/special-offer/generation",
+              "api-reference/videos/special-offer/query"
+            ]
+          },
+          {
+            "group": "豆包 Seedance 1.5 Pro",
             "expanded": true,
             "pages": [
               "api-reference/videos/seedance/overview",
-              "api-reference/videos/seedance/generation",
               "api-reference/videos/seedance/doubao-seedance-1-5-pro",
               "api-reference/videos/seedance/query"
             ]

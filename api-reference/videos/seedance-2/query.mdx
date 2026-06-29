@@ -1,17 +1,17 @@
 ---
-title: 豆包 Seedance 1.5 Pro 查询视频任务
-description: 使用 `GET /v1/videos/{id}` 查询豆包 Seedance 1.5 Pro 视频任务状态。
+title: Seedance-2 查询视频任务
+description: 使用 `GET /v1/videos/{id}` 查询 Seedance-2 视频任务状态、进度和结果地址。
 api: "GET /v1/videos/{id}"
 ---
 
-# 豆包 Seedance 1.5 Pro 查询视频任务
+# Seedance-2 查询视频任务
 
-这个接口用于查询豆包 Seedance 1.5 Pro 异步视频任务状态。创建任务接口返回 `id` 后，可通过该接口轮询状态并读取结果地址。
+这个接口用于查询 Seedance-2 异步视频任务的最新状态。
 
-- 根据创建任务返回的 `id` 查询。
-- 任务完成后读取 `video_url`。
-- 任务失败时读取 `error`。
-- 常见状态为 `queued`、`in_progress`、`completed`、`failed`。
+- 根据创建任务返回的 `id` 查询
+- 任务完成后返回 `video_url`
+- 失败任务会返回 `error`
+- 状态统一为 `queued`、`in_progress`、`completed`、`failed`
 
 ## 方法与路径
 
@@ -21,7 +21,7 @@ GET /v1/videos/{id}
 
 <RequestExample>
 
-```bash cURL
+```bash 查询任务 cURL
 curl -X GET https://www.geeknow.top/v1/videos/task_01jz8s3dbke8p9vq2m8r9a7gk4 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
@@ -64,7 +64,7 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "doubao-seedance-1-5-pro_720p",
+  "model": "seedance-2.0-pro",
   "status": "in_progress"
 }
 ```
@@ -74,10 +74,10 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "doubao-seedance-1-5-pro_720p",
+  "model": "seedance-2.0-pro",
   "status": "completed",
   "video_url": "https://example.com/results/seedance-video.mp4",
-  "actualDuration": 8,
+  "actualDuration": 6,
   "totalTokens": 1200
 }
 ```
@@ -87,9 +87,27 @@ console.log(await response.json());
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "doubao-seedance-1-5-pro_720p",
+  "model": "seedance-2.0-pro",
   "status": "failed",
   "error": "task failed"
+}
+```
+
+```json 400 - 无效任务 ID
+{
+  "error": {
+    "message": "task_id is required",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+```json 401 - 未提供有效 API Key
+{
+  "error": {
+    "message": "无效的令牌",
+    "type": "invalid_request_error"
+  }
 }
 ```
 
@@ -98,6 +116,24 @@ console.log(await response.json());
   "error": {
     "message": "Task not found",
     "type": "invalid_request_error"
+  }
+}
+```
+
+```json 429 - 请求过于频繁
+{
+  "error": {
+    "message": "rate limit exceeded",
+    "type": "rate_limit_exceeded"
+  }
+}
+```
+
+```json 500 - 服务端处理失败
+{
+  "error": {
+    "message": "Failed to query task",
+    "type": "server_error"
   }
 }
 ```
@@ -163,21 +199,35 @@ Authorization: Bearer YOUR_API_KEY
 | `succeeded`、`completed` | `completed` |
 | `failed`、`cancelled` | `failed` |
 
-## 下载视频内容
+## 使用场景
 
-如果查询结果没有直接返回可访问的 `video_url`，可以使用内容下载端点：
+### 轮询到任务完成
+
+创建任务后保存返回的 `id`，每隔数秒调用一次查询接口。`status` 为 `completed` 时读取 `video_url`。
 
 ```http
-GET /v1/videos/{id}/content
+GET /v1/videos/task_01jz8s3dbke8p9vq2m8r9a7gk4
+```
+
+### 获取失败原因
+
+当 `status` 为 `failed` 时，读取 `error` 字段定位失败原因。
+
+```json
+{
+  "status": "failed",
+  "error": "task failed"
+}
 ```
 
 ## 注意事项
 
 - 查询接口只读取任务状态，不会重新提交生成任务。
 - `video_url` 只在任务完成且上游返回结果地址后出现。
-- 轮询间隔建议保持数秒以上，避免过于频繁地查询同一个任务。
+- 如果需要代理下载视频内容，可使用 `GET /v1/videos/{id}/content`。
 
 ## 相关页面
 
-- [豆包 Seedance 1.5 Pro 概览](./overview)
-- [豆包 Seedance 1.5 Pro 创建视频任务](./doubao-seedance-1-5-pro)
+- [Seedance-2 概览](./overview)
+- [创建视频任务](./generation)
+- [创建素材](./asset-create-media)

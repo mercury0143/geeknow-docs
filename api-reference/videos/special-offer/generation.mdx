@@ -1,12 +1,12 @@
----
-title: seedance2 视频生成
-description: 使用 `POST /v1/videos` 调用 `seedance2` 提交 JSON 视频生成任务。
+﻿---
+title: manxue-2 视频生成
+description: 使用 `POST /v1/videos` 调用 `manxue-2` 提交 JSON 视频生成任务。
 api: "POST /v1/videos"
 ---
 
-# seedance2
+# manxue-2
 
-`seedance2` 使用 JSON 请求体提交异步视频任务，支持文生视频、首帧生视频、首尾帧和多参考图生成。
+`manxue-2` 使用 JSON 请求体提交异步视频任务，支持文生视频、首帧生视频、首尾帧和多参考图生成。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
@@ -30,7 +30,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance2",
+    "model": "manxue-2",
     "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
     "seconds": "8",
     "ratio": "16:9",
@@ -44,7 +44,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance2",
+    "model": "manxue-2",
     "prompt": "@image1；让画面中的人物自然转身，看向镜头并微笑",
     "seconds": "6",
     "ratio": "9:16",
@@ -71,7 +71,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance2",
+    "model": "manxue-2",
     "prompt": "@image1；@image2；从首帧自然过渡到尾帧，保持人物服装和场景一致",
     "seconds": "10",
     "ratio": "16:9",
@@ -105,7 +105,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance2",
+    "model": "manxue-2",
     "prompt": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片",
     "seconds": "12",
     "ratio": "16:9",
@@ -144,7 +144,7 @@ resp = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "seedance2",
+        "model": "manxue-2",
         "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
         "seconds": "8",
         "ratio": "16:9",
@@ -165,7 +165,7 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    model: "seedance2",
+    model: "manxue-2",
     prompt: "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
     seconds: "8",
     ratio: "16:9",
@@ -190,7 +190,7 @@ import (
 
 func main() {
 	payload := map[string]any{
-		"model":          "seedance2",
+		"model":          "manxue-2",
 		"prompt":         "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
 		"seconds":        "8",
 		"ratio":          "16:9",
@@ -224,7 +224,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         String json = """
         {
-          "model": "seedance2",
+          "model": "manxue-2",
           "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
           "seconds": "8",
           "ratio": "16:9",
@@ -251,7 +251,7 @@ public class Main {
 ```php PHP
 <?php
 $payload = [
-    'model' => 'seedance2',
+    'model' => 'manxue-2',
     'prompt' => '清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感',
     'seconds' => '8',
     'ratio' => '16:9',
@@ -286,7 +286,7 @@ echo $response;
   "id": "video_abc123",
   "task_id": "video_abc123",
   "object": "video",
-  "model": "seedance2",
+  "model": "manxue-2",
   "status": "queued",
   "progress": 0,
   "created_at": 1735689600,
@@ -354,7 +354,7 @@ Content-Type: application/json
 ## Body
 
 <ParamField body="model" type="string" required>
-固定传 `seedance2`。
+固定传 `manxue-2`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -394,7 +394,7 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="content[].image_url.url" type="string">
-公网图片 URL。`seedance2` 不接收 Base64 data URI。
+公网图片 URL。`manxue-2` 不接收 Base64 data URI。
 </ParamField>
 
 ## Response
@@ -412,7 +412,7 @@ Content-Type: application/json
 </ResponseField>
 
 <ResponseField name="model" type="string">
-本次任务使用的模型，例如 `seedance2`。
+本次任务使用的模型，例如 `manxue-2`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -437,7 +437,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "seedance2",
+  "model": "manxue-2",
   "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾，电影感",
   "seconds": "6",
   "ratio": "16:9",
@@ -450,7 +450,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "seedance2",
+  "model": "manxue-2",
   "prompt": "@image1；让画面中的人物自然转身，看向镜头并微笑",
   "seconds": "8",
   "ratio": "9:16",
@@ -475,7 +475,7 @@ Content-Type: application/json
 
 ```json
 {
-  "model": "seedance2",
+  "model": "manxue-2",
   "prompt": "@image1；@image2；参考角色外观和场景氛围，生成一段慢镜头短片",
   "seconds": "12",
   "ratio": "16:9",
@@ -509,10 +509,9 @@ Content-Type: application/json
 - `seconds` 支持 `4` 到 `15` 秒。
 - `resolution` 支持 `480P` 和 `720P`。
 - 图片字段接收公网 URL；Base64 data URI 不属于该字段的推荐输入格式。
-- 豆包 Seedance 1.5 Pro 的请求格式为 `multipart/form-data`。
+- 该模型归属特惠渠道系列，模型名固定使用 `manxue-2`。
 
 ## 相关接口
 
-- [Seedance 概览](./overview)
-- [豆包 Seedance 1.5 Pro](./doubao-seedance-1-5-pro)
-- [Seedance 任务查询](./query)
+- [特惠渠道系列概览](./overview)
+- [manxue-2 任务查询](./query)
