@@ -6,7 +6,7 @@ api: "POST /v1/videos"
 
 # manxue-2.0.0
 
-`manxue-2.0.0` 使用 JSON 请求体提交异步视频任务，支持文生视频、首帧生视频、首尾帧和多参考图生成。
+`manxue-2.0.0` 使用 JSON 请求体提交异步视频任务，支持文生视频、首帧生视频、首尾帧、多参考图和参考音频生成。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
@@ -14,6 +14,7 @@ api: "POST /v1/videos"
 - `resolution` 支持 `480P` 和 `720P`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`ratio`、`resolution`。
 - 参考图使用 `content` 数组中的 `image_url` 项，图片地址需要是公网 URL。
+- 参考音频使用 `content` 数组中的 `audio_url` 项，并通过 `role: "reference_audio"` 标记。
 
 ## 方法与路径
 
@@ -128,6 +129,40 @@ curl -X POST https://www.geeknow.top/v1/videos \
         "role": "reference_image",
         "image_url": {
           "url": "https://example.com/assets/scene.png"
+        }
+      }
+    ]
+  }'
+```
+
+```bash 参考图 + 参考音频 cURL
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "manxue-2.0.0",
+    "prompt": "@image1；根据音频内容自动拆分场景，生成连贯的视频镜头，镜头节奏跟随语气和情绪变化。",
+    "seconds": "15",
+    "ratio": "16:9",
+    "resolution": "720P",
+    "generate_audio": true,
+    "content": [
+      {
+        "type": "text",
+        "text": "@image1；请根据音频内容生成分镜、场景、动作和镜头变化，整体偏自然真实。"
+      },
+      {
+        "type": "image_url",
+        "role": "reference_image",
+        "image_url": {
+          "url": "https://example.com/assets/reference-image.png"
+        }
+      },
+      {
+        "type": "audio_url",
+        "role": "reference_audio",
+        "audio_url": {
+          "url": "https://example.com/assets/reference-audio.mp3"
         }
       }
     ]
@@ -374,15 +409,15 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="generate_audio" type="boolean">
-是否生成音频。
+是否生成音频或启用参考音频。使用 `content[].audio_url` 作为参考音频时，建议传 `true`。
 </ParamField>
 
 <ParamField body="content" type="array<object>">
-图生视频或参考图视频使用的内容数组。第一项通常为文本，图片项使用 `type: "image_url"`。
+图生视频、参考图视频或参考音频视频使用的内容数组。第一项通常为文本，图片项使用 `type: "image_url"`，音频项使用 `type: "audio_url"`。
 </ParamField>
 
 <ParamField body="content[].type" type="string">
-内容类型。文本项为 `text`，图片项为 `image_url`。
+内容类型。文本项为 `text`，图片项为 `image_url`，音频项为 `audio_url`。
 </ParamField>
 
 <ParamField body="content[].text" type="string">
@@ -390,11 +425,15 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="content[].role" type="string">
-图片角色。常用值为 `first_frame`、`last_frame`、`reference_image`。
+素材角色。图片常用值为 `first_frame`、`last_frame`、`reference_image`；参考音频使用 `reference_audio`。
 </ParamField>
 
 <ParamField body="content[].image_url.url" type="string">
 公网图片 URL。`manxue-2.0.0` 不接收 Base64 data URI。
+</ParamField>
+
+<ParamField body="content[].audio_url.url" type="string">
+公网音频 URL。使用参考音频时，`content[].type` 传 `audio_url`，`content[].role` 传 `reference_audio`。
 </ParamField>
 
 ## Response
@@ -503,12 +542,48 @@ Content-Type: application/json
 }
 ```
 
+### 参考图 + 参考音频视频
+
+参考音频放在 `content` 数组中，使用 `type: "audio_url"` 和 `role: "reference_audio"`。提示词可以说明“根据音频内容拆分场景、节奏跟随语气和情绪变化”等要求。
+
+```json
+{
+  "model": "manxue-2.0.0",
+  "prompt": "@image1；根据音频内容自动拆分场景，生成连贯的视频镜头，镜头节奏跟随语气和情绪变化。",
+  "seconds": "15",
+  "ratio": "16:9",
+  "resolution": "720P",
+  "generate_audio": true,
+  "content": [
+    {
+      "type": "text",
+      "text": "@image1；请根据音频内容生成分镜、场景、动作和镜头变化，整体偏自然真实。"
+    },
+    {
+      "type": "image_url",
+      "role": "reference_image",
+      "image_url": {
+        "url": "https://example.com/assets/reference-image.png"
+      }
+    },
+    {
+      "type": "audio_url",
+      "role": "reference_audio",
+      "audio_url": {
+        "url": "https://example.com/assets/reference-audio.mp3"
+      }
+    }
+  ]
+}
+```
+
 ## 注意事项
 
 - 请求格式为 `application/json`。
 - `seconds` 支持 `4` 到 `15` 秒。
 - `resolution` 支持 `480P` 和 `720P`。
 - 图片字段接收公网 URL；Base64 data URI 不属于该字段的推荐输入格式。
+- 音频参考通过 `content[].audio_url.url` 传入公网音频 URL，并使用 `role: "reference_audio"` 标记。
 - 该模型归属特惠渠道系列，模型名固定使用 `manxue-2.0.0`。
 
 ## 相关接口
