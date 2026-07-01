@@ -1,15 +1,15 @@
 ---
-title: gemini-3.1-flash-image-preview 生图 API
-description: 使用 `POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent` 调用 Gemini 官方格式生图接口。
+title: gemini-3.1-flash-lite-image 生图 API
+description: 使用 `POST /v1beta/models/gemini-3.1-flash-lite-image:generateContent` 调用 Gemini 官方格式生图接口。
 api: "POST /v1beta/models/{model}:generateContent"
 ---
 
-# gemini-3.1-flash-image-preview 生图 API
+# gemini-3.1-flash-lite-image 生图 API
 
 这个模型使用 Gemini 官方 `generateContent` 格式生图，适合直接复用 `contents` / `parts` 结构。
 
 - 路径为 `POST /v1beta/models/{model}:generateContent`。
-- `model` 固定传 `gemini-3.1-flash-image-preview`。
+- `model` 固定传 `gemini-3.1-flash-lite-image`。
 - 文生图和图生图都使用同一套 `contents[].parts[]`。
 - 这个模型会实际回落为 `1K`；即使请求中传 `2K`，最终也会按 `1K` 处理。
 - 返回里既可能直接给 `inlineData.data` Base64，也可能给图片 URL。
@@ -31,7 +31,7 @@ Gemini 这里的图生图，不是换一条 API，而是继续用 `generateConte
     {
       "role": "user",
       "parts": [
-        { "text": "根据参考图做一张同主题但更简洁的信息海报" },
+        { "text": "根据参考图做一张轻量快速版本的产品宣传图" },
         {
           "inlineData": {
             "mimeType": "image/png",
@@ -54,13 +54,13 @@ Gemini 这里的图生图，不是换一条 API，而是继续用 `generateConte
 ## 方法与路径
 
 ```http
-POST /v1beta/models/gemini-3.1-flash-image-preview:generateContent
+POST /v1beta/models/gemini-3.1-flash-lite-image:generateContent
 ```
 
 ## 请求示例
 
 ```bash
-curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-image-preview:generateContent \
+curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-lite-image:generateContent \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
@@ -69,7 +69,7 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-image-previe
       {
         "role": "user",
         "parts": [
-          { "text": "一张极简科技海报，白底，蓝黑线条，信息图风格" }
+          { "text": "一张轻量快速生成的极简科技海报，白底，蓝黑线条，信息图风格" }
         ]
       }
     ],
@@ -148,7 +148,7 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.1-flash-image-previe
 
 ## 异步调用
 
-`gemini-3.1-flash-image-preview` 也支持通过统一图像异步入口提交任务：
+`gemini-3.1-flash-lite-image` 也支持通过统一图像异步入口提交任务：
 
 ```http
 POST /v1/images/generations/async
@@ -159,8 +159,9 @@ POST /v1/images/generations/async
 ## 相关接口
 
 - [图像模型支持矩阵](/api-reference/images/model-matrix)
+- [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
 - [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
 - [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [gemini-3-pro-image-preview 生图 API](/api-reference/images/gemini-3-pro-image-preview/generation)
 - [gemini-2.5-flash-image-preview 生图 API](/api-reference/images/gemini-2.5-flash-image-preview/generation)
-- [gemini-3.1-flash-lite-image 生图 API](/api-reference/images/gemini-3.1-flash-lite-image/generation)
+- [gemini-3.1-flash-image-preview 生图 API](/api-reference/images/gemini-3.1-flash-image-preview/generation)

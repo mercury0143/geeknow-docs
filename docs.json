@@ -48,7 +48,8 @@
             "group": "Gemini 图像生成",
             "expanded": true,
             "pages": [
-              "api-reference/images/gemini-image/generation"
+              "api-reference/images/gemini-image/generation",
+              "api-reference/images/gemini-3.1-flash-lite-image/generation"
             ]
           },
           {

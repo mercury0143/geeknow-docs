@@ -1,6 +1,6 @@
 ---
 title: Gemini 图像生成 API
-description: 使用 `POST /v1beta/models/{model}:generateContent` 调用 Gemini 图像生成接口，统一覆盖 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview` 和 `gemini-3.1-flash-image-preview`。
+description: 使用 `POST /v1beta/models/{model}:generateContent` 调用 Gemini 图像生成接口，统一覆盖 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 和 `gemini-3.1-flash-lite-image`。
 api: "POST /v1beta/models/{model}:generateContent"
 ---
 
@@ -19,6 +19,7 @@ Gemini 图像模型统一使用官方 `generateContent` 格式生图，适合直
 - `gemini-3-pro-image-preview`
 - `gemini-2.5-flash-image-preview`
 - `gemini-3.1-flash-image-preview`
+- `gemini-3.1-flash-lite-image`
 
 ## 模型差异
 
@@ -27,6 +28,7 @@ Gemini 图像模型统一使用官方 `generateContent` 格式生图，适合直
 | `gemini-3-pro-image-preview` | 支持 `1K`、`2K` | 会按请求里的 `imageSize` 真实下发 |
 | `gemini-2.5-flash-image-preview` | 实际回落为 `1K` | 即使请求中传 `2K`，最终也会按 `1K` 处理 |
 | `gemini-3.1-flash-image-preview` | 实际回落为 `1K` | 即使请求中传 `2K`，最终也会按 `1K` 处理 |
+| `gemini-3.1-flash-lite-image` | 实际回落为 `1K` | 即使请求中传 `2K`，最终也会按 `1K` 处理 |
 
 ## 先看懂图生图
 
@@ -303,7 +305,7 @@ Base64 编码的图片内容。
 </ParamField>
 
 <ParamField body="generationConfig.imageConfig.imageSize" type="string">
-图片清晰度。`gemini-3-pro-image-preview` 支持 `1K` 和 `2K`；`gemini-2.5-flash-image-preview` 与 `gemini-3.1-flash-image-preview` 会实际回落为 `1K`。
+图片清晰度。`gemini-3-pro-image-preview` 支持 `1K` 和 `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
 </ParamField>
 
 <ParamField body="safetySettings" type="array<object>">
@@ -367,7 +369,7 @@ Gemini 图像模型也支持通过统一图像异步入口提交任务：
 POST /v1/images/generations/async
 ```
 
-异步入口使用 OpenAI Images 兼容 JSON，而不是本页的 Gemini 原生 `contents[].parts[]` 请求体。`model` 可以传 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview` 或 `gemini-3.1-flash-image-preview`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
+异步入口使用 OpenAI Images 兼容 JSON，而不是本页的 Gemini 原生 `contents[].parts[]` 请求体。`model` 可以传 `gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 或 `gemini-3.1-flash-lite-image`。提交成功后读取返回的 `id` / `task_id`，再通过 `GET /v1/images/generations/async/{taskId}` 查询状态和结果。
 
 ## 相关接口
 
