@@ -1,18 +1,18 @@
 ---
-title: Seedance-2 概览
-description: 汇总 Seedance-2 视频任务与素材接口。
+title: Seedance 2.0 概览
+description: 汇总 Seedance 2.0 视频任务与素材接口。
 ---
 
-# Seedance-2
+# Seedance 2.0
 
-Seedance-2 相关能力当前包含两类接口：
+Seedance 2.0 相关能力当前包含两类接口：
 
 - 视频任务接口：`POST /v1/videos`、`GET /v1/videos/{task_id}`、`GET /v1/videos/{task_id}/content`
 - 素材接口：`POST /api/asset/createMedia`、`GET /api/asset/get`
 
 <CardGroup cols={2}>
   <Card title="创建视频任务" icon="clapperboard" href="/api-reference/videos/seedance-2/generation">
-    提交 Seedance-2 视频任务，支持 JSON 和 multipart URL 字段。
+    提交 Seedance 2.0 视频任务，使用 JSON URL 字段。
   </Card>
   <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/seedance-2/query">
     查询任务状态、进度、时长、尺寸与结果地址。
@@ -41,15 +41,16 @@ Seedance-2 相关能力当前包含两类接口：
 
 ## 请求特点
 
-- `application/json` 与 `multipart/form-data` 都支持。
-- `multipart/form-data` 只支持 URL 字段，不支持真实文件上传。
+- `application/json` 支持。
+- 素材字段只接收 URL 字符串或 `asset://{asset_id}`。
 - `prompt` 必填。
-- `duration` 优先于 `seconds`。
-- `input_reference` / `image` / `image_url` 默认映射为首帧图。
+- 推荐使用 `duration` 传入视频时长。
+- `first_image` 与 `last_image` 分别对应首帧图与尾帧图，且 `last_image` 必须搭配 `first_image`。
+- `reference_image_urls`、`reference_video_url`、`reference_video_urls`、`reference_audios`、`reference_audio_urls`、`audio_url` 都支持素材 URL。
 
 ## 素材 ID 使用方式
 
-Seedance-2 素材接口返回的 `Result.Id` 是裸素材 ID，例如 `asset-20260528143012-a8x7k`。
+Seedance 2.0 素材接口返回的 `Result.Id` 是裸素材 ID，例如 `asset-20260528143012-a8x7k`。
 
 | 步骤 | 调用 | 素材 ID 写法 |
 | --- | --- | --- |
@@ -57,7 +58,7 @@ Seedance-2 素材接口返回的 `Result.Id` 是裸素材 ID，例如 `asset-202
 | 查询素材 | `GET /api/asset/get?id=asset-20260528143012-a8x7k` | 查询参数使用裸 ID |
 | 创建视频 | `POST /v1/videos` | 素材字段使用 `asset://asset-20260528143012-a8x7k` |
 
-`asset://{asset_id}` 可以用于 `first_image`、`last_image`、`reference_images`、`reference_videos`、`reference_audios` 及其兼容字段。建议在 `Result.Status` 为 `Active` 后再把素材用于视频生成。
+`asset://{asset_id}` 可以用于 `first_image`、`last_image`、`reference_image_urls`、`reference_video_url`、`reference_video_urls`、`reference_audios`、`reference_audio_urls`、`audio_url`。建议在 `Result.Status` 为 `Active` 后再把素材用于视频生成。
 
 ## 相关页面
 

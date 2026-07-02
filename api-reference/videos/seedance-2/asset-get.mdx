@@ -1,10 +1,10 @@
 ---
-title: Seedance-2 查询素材
-description: 使用 `GET /api/asset/get` 查询 Seedance-2 素材详情和处理状态。
+title: Seedance 2.0 查询素材
+description: 使用 `GET /api/asset/get` 查询 Seedance 2.0 素材详情和处理状态。
 api: "GET /api/asset/get"
 ---
 
-# Seedance-2 查询素材
+# Seedance 2.0 查询素材
 
 这个接口用于查询通过 `POST /api/asset/createMedia` 创建的素材。
 
@@ -65,20 +65,20 @@ console.log(await response.json());
 
 | 目的 | 字段 | 示例 |
 | --- | --- | --- |
-| 首帧生视频 | `first_image` 或 `first_frame_url` | `"first_image": "asset://asset-20260528143012-a8x7k"` |
-| 尾帧约束 | `last_image` 或 `last_frame_url` | `"last_image": "asset://asset-20260528143351-b2n6q"` |
-| 参考图片 | `reference_images` 或 `reference_image_urls` | `"reference_images": ["asset://asset-20260528143012-a8x7k"]` |
-| 参考视频 | `reference_videos` 或 `reference_video_urls` | `"reference_videos": ["asset://asset-20260528143708-k9m2p"]` |
-| 参考音频 | `reference_audios` 或 `audio_url` | `"reference_audios": ["asset://asset-20260528144123-r4s6n"]` |
+| 首帧生视频 | `first_image` | `"first_image": "asset://asset-20260528143012-a8x7k"` |
+| 尾帧约束 | `last_image` | `"last_image": "asset://asset-20260528143351-b2n6q"` |
+| 参考图片 | `reference_image_urls` | `"reference_image_urls": ["asset://asset-20260528143012-a8x7k"]` |
+| 参考视频 | `reference_video_url` 或 `reference_video_urls` | `"reference_video_urls": ["asset://asset-20260528143708-k9m2p"]` |
+| 参考音频 | `reference_audios`、`reference_audio_urls` 或 `audio_url` | `"reference_audio_urls": ["asset://asset-20260528144123-r4s6n"]` |
 
 ```json
 {
   "model": "seedance-2.0-pro",
   "prompt": "参考素材中的产品外观和镜头运动，生成一条广告感短视频",
   "duration": 6,
-  "aspect_ratio": "adaptive",
-  "reference_images": ["asset://asset-20260528143012-a8x7k"],
-  "reference_videos": ["asset://asset-20260528143708-k9m2p"]
+  "aspect_ratio": "16:9",
+  "reference_image_urls": ["asset://asset-20260528143012-a8x7k"],
+  "reference_video_urls": ["asset://asset-20260528143708-k9m2p"]
 }
 ```
 
@@ -233,6 +233,6 @@ GET /api/asset/get?id=asset-20260528143012-a8x7k
 
 ## 相关页面
 
-- [Seedance-2 概览](./overview)
+- [Seedance 2.0 概览](./overview)
 - [创建素材](./asset-create-media)
 - [创建视频任务](./generation)

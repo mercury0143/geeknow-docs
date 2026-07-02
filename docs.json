@@ -123,7 +123,7 @@
             ]
           },
           {
-            "group": "Seedance-2",
+            "group": "Seedance 2.0",
             "expanded": true,
             "pages": [
               "api-reference/videos/seedance-2/overview",
@@ -143,7 +143,7 @@
             ]
           },
           {
-            "group": "豆包 Seedance 1.5 Pro",
+            "group": "Seedance 1.5",
             "expanded": true,
             "pages": [
               "api-reference/videos/seedance/overview",
