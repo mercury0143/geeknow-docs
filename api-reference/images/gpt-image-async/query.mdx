@@ -10,8 +10,8 @@ api: "GET /v1/images/generations/async/{taskId}"
 
 - 查询路径为 `GET /v1/images/generations/async/{taskId}`。
 - 这个接口只查询已有任务，不会重新提交生图请求。
-- 任务未完成时重点读取 `status` 和 `progress`。
-- 任务完成后从 `data[].url` 或 `data[].b64_json` 读取图片结果。
+- 任务未完成时重点读取 `status` 和 `progress`，其中 `progress` 在当前通道里常见为字符串百分比。
+- 任务完成后返回结果对象，从 `data[].url` 或 `data[].b64_json` 读取图片结果。
 - 任务失败时读取 `error.message` 和 `error.code` 定位原因。
 
 ## 方法与路径
@@ -68,66 +68,33 @@ console.log(await response.json());
 ```json 200 - 处理中
 {
   "id": "task_img_abc123",
-  "object": "image_generation.task",
-  "model": "gpt-image-2-pro",
-  "status": "processing",
-  "progress": 42,
-  "created_at": 1735689600,
-  "completed_at": 0,
-  "expires_at": 1735776000,
-  "size": "1536x1024",
-  "data": [],
-  "error": {
-    "message": "",
-    "code": ""
-  }
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "gpt-image-2-vip",
+  "status": "in_progress",
+  "progress": "10%",
+  "created_at": 1735689600
 }
 ```
 
 ```json 200 - 已完成 URL
 {
-  "id": "task_img_abc123",
-  "object": "image_generation.task",
-  "model": "gpt-image-2-pro",
-  "status": "completed",
-  "progress": 100,
-  "created_at": 1735689600,
-  "completed_at": 1735689720,
-  "expires_at": 1735776000,
-  "size": "1536x1024",
   "data": [
     {
-      "url": "https://example.com/images/task_img_abc123.png",
-      "revised_prompt": "A clean product hero image on a white background"
+      "url": "https://geekm.oss-cn-shanghai.aliyuncs.com/image-generation-1783176295522148587.png"
     }
   ],
-  "error": {
-    "message": "",
-    "code": ""
-  }
-}
-```
-
-```json 200 - 已完成 Base64
-{
-  "id": "task_img_abc123",
-  "object": "image_generation.task",
-  "model": "gpt-image-2-pro",
-  "status": "completed",
-  "progress": 100,
-  "created_at": 1735689600,
-  "completed_at": 1735689720,
-  "expires_at": 1735776000,
-  "size": "1536x1024",
-  "data": [
-    {
-      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
-      "revised_prompt": "A clean product hero image on a white background"
+  "size": "1024x1024",
+  "usage": {
+    "input_tokens": 15,
+    "total_tokens": 211,
+    "output_tokens": 196,
+    "input_tokens_details": {
+      "text_tokens": 15
+    },
+    "output_tokens_details": {
+      "image_tokens": 196
     }
-  ],
-  "error": {
-    "message": "",
-    "code": ""
   }
 }
 ```
@@ -135,15 +102,12 @@ console.log(await response.json());
 ```json 200 - 失败
 {
   "id": "task_img_abc123",
-  "object": "image_generation.task",
-  "model": "gpt-image-2-pro",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "gpt-image-2-vip",
   "status": "failed",
-  "progress": 100,
+  "progress": "10%",
   "created_at": 1735689600,
-  "completed_at": 1735689660,
-  "expires_at": 1735776000,
-  "size": "1536x1024",
-  "data": [],
   "error": {
     "message": "Image generation failed",
     "code": "generation_failed"
@@ -193,8 +157,12 @@ Authorization: Bearer YOUR_API_KEY
 任务 ID。
 </ResponseField>
 
+<ResponseField name="task_id" type="string">
+任务 ID 的兼容字段。
+</ResponseField>
+
 <ResponseField name="object" type="string">
-对象类型，通常为 `image_generation.task` 或同类任务对象标识。
+对象类型，通常为 `image.generation.task`。
 </ResponseField>
 
 <ResponseField name="model" type="string">
@@ -205,20 +173,12 @@ Authorization: Bearer YOUR_API_KEY
 任务状态。常见值包括 `queued`、`processing`、`in_progress`、`completed`、`succeeded`、`failed`、`cancelled`。
 </ResponseField>
 
-<ResponseField name="progress" type="integer">
-任务进度百分比。未完成时可用于展示轮询进度。
+<ResponseField name="progress" type="string">
+任务进度百分比。当前通道实测常见格式为字符串百分比，例如 `10%`。
 </ResponseField>
 
 <ResponseField name="created_at" type="integer">
 任务创建时间戳。
-</ResponseField>
-
-<ResponseField name="completed_at" type="integer">
-任务完成时间戳。任务未完成时通常为 `0` 或不存在。
-</ResponseField>
-
-<ResponseField name="expires_at" type="integer">
-结果过期时间戳。仅在服务端返回时出现。
 </ResponseField>
 
 <ResponseField name="size" type="string">
@@ -226,11 +186,11 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="data[].url" type="string">
-`response_format = url` 时返回的图片 URL。通常只在任务完成后出现。
+任务完成后返回的图片 URL。
 </ResponseField>
 
 <ResponseField name="data[].b64_json" type="string">
-`response_format = b64_json` 时返回的图片 Base64 数据。通常只在任务完成后出现。
+任务完成后返回的图片 Base64 数据。
 </ResponseField>
 
 <ResponseField name="data[].revised_prompt" type="string">

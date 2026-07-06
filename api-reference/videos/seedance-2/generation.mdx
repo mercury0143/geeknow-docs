@@ -9,7 +9,7 @@ api: "POST /v1/videos"
 Seedance 2.0 视频生成接口用于提交文生视频、首帧生视频、首尾帧生视频和参考素材生成任务。
 
 - 异步处理模式，提交成功后返回视频任务 ID。
-- 支持 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`。
+- 支持 `doubao-seedance-2-0-260128`、`doubao-seedance-2-0-fast-260128`。
 - 使用 `application/json` 提交；素材字段传公网 URL 或 `asset://{asset_id}`。
 - 支持首帧图、尾帧图、参考图、参考视频和参考音频 URL。
 - `last_image` 必须和 `first_image` 同时传入。
@@ -27,7 +27,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance-2.0-pro",
+    "model": "doubao-seedance-2-0-260128",
     "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
     "duration": 6,
     "aspect_ratio": "16:9",
@@ -41,7 +41,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance-2.0-fast",
+    "model": "doubao-seedance-2-0-fast-260128",
     "prompt": "让画面中的人物自然转身，看向镜头并微笑，背景灯光轻微闪烁",
     "duration": 5,
     "aspect_ratio": "9:16",
@@ -54,7 +54,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance-2.0-pro",
+    "model": "doubao-seedance-2-0-260128",
     "prompt": "从首帧自然过渡到尾帧，保持人物服装和场景一致，动作连贯",
     "duration": 6,
     "aspect_ratio": "16:9",
@@ -68,7 +68,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance-2.0-pro",
+    "model": "doubao-seedance-2-0-260128",
     "prompt": "参考图片中的产品外观、参考视频的镜头运动，并使用参考音频作为背景音乐，生成广告感短视频",
     "duration": 6,
     "aspect_ratio": "16:9",
@@ -91,7 +91,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "seedance-2.0-pro",
+    "model": "doubao-seedance-2-0-260128",
     "prompt": "参考视频的运动节奏和音频情绪，生成一段自然真实的短片",
     "duration": 8,
     "aspect_ratio": "16:9",
@@ -111,7 +111,7 @@ resp = requests.post(
         "Content-Type": "application/json",
     },
     json={
-        "model": "seedance-2.0-pro",
+        "model": "doubao-seedance-2-0-260128",
         "prompt": "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
         "duration": 6,
         "aspect_ratio": "16:9",
@@ -132,7 +132,7 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
     "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    model: "seedance-2.0-pro",
+    model: "doubao-seedance-2-0-260128",
     prompt: "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
     duration: 6,
     aspect_ratio: "16:9",
@@ -157,7 +157,7 @@ import (
 
 func main() {
 	payload := map[string]any{
-		"model":        "seedance-2.0-pro",
+		"model":        "doubao-seedance-2-0-260128",
 		"prompt":       "雨夜街头，一位穿红色雨衣的女孩慢跑，镜头缓慢跟拍，电影感光影",
 		"duration":     6,
 		"aspect_ratio": "16:9",
@@ -235,7 +235,7 @@ GET /api/asset/get?id=asset-20260528143012-a8x7k
   "id": "task_01jz8s3dbke8p9vq2m8r9a7gk4",
   "object": "video",
   "created": 1790557800,
-  "model": "seedance-2.0-pro",
+  "model": "doubao-seedance-2-0-260128",
   "status": "queued"
 }
 ```
@@ -292,7 +292,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。支持 `seedance-2.0-lite`、`seedance-2.0-pro`、`seedance-2.0-fast`。
+模型名称。支持标准档 `doubao-seedance-2-0-260128` 和 fast 档 `doubao-seedance-2-0-fast-260128`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -401,7 +401,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```json
 {
-  "model": "seedance-2.0-fast",
+  "model": "doubao-seedance-2-0-fast-260128",
   "prompt": "清晨海边，航拍镜头掠过浪花，阳光穿过薄雾",
   "duration": 5,
   "aspect_ratio": "16:9"
@@ -414,7 +414,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```json
 {
-  "model": "seedance-2.0-pro",
+  "model": "doubao-seedance-2-0-260128",
   "prompt": "让人物自然抬头，微笑，看向镜头",
   "duration": 6,
   "aspect_ratio": "9:16",
@@ -428,7 +428,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```json
 {
-  "model": "seedance-2.0-pro",
+  "model": "doubao-seedance-2-0-260128",
   "prompt": "从首帧自然过渡到尾帧，保持人物身份和场景连续",
   "duration": 6,
   "aspect_ratio": "16:9",
@@ -443,7 +443,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```json
 {
-  "model": "seedance-2.0-pro",
+  "model": "doubao-seedance-2-0-260128",
   "prompt": "参考素材中的产品外观和镜头运动，生成一条广告感短视频",
   "duration": 6,
   "aspect_ratio": "16:9",
@@ -460,7 +460,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ```json
 {
-  "model": "seedance-2.0-pro",
+  "model": "doubao-seedance-2-0-260128",
   "prompt": "参考产品图和镜头运动生成一条广告感短视频",
   "duration": 6,
   "aspect_ratio": "16:9",

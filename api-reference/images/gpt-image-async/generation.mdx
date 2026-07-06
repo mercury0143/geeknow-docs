@@ -6,14 +6,12 @@ api: "POST /v1/images/generations/async"
 
 # 图像异步生成 API
 
-`/v1/images/generations/async` 用于提交图像异步生成任务。请求体采用 JSON 格式；提交成功后保存返回的任务 ID，并通过 `GET /v1/images/generations/async/{taskId}` 查询进度和结果。
+`/v1/images/generations/async` 用于提交图像异步生成任务。请求体采用 JSON 格式；提交成功后保存返回的任务 ID，并通过 `GET /v1/images/generations/async/{taskId}` 查询进度和最终结果。
 
 - 异步入口为 `POST /v1/images/generations/async`。
 - 查询入口为 `GET /v1/images/generations/async/{taskId}`。
-- 请求格式为 `application/json`。
 - 当前已验证可用模型包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream 系列和 Gemini 图像模型。
-- 按目标模型填写 `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format` 等字段。
-- 支持 `url` 和 `b64_json` 两种返回格式。
+- 异步任务的 `image` 目前只接受公网 `http(s)` 图片 URL，不支持 Base64 或 `data:` URI。
 - 成功提交后优先读取 `id`、`task_id` 或 `taskId` 作为后续查询 ID。
 - `prompt` 建议控制在 `1` 到 `4000` 个字符。
 - `n` 表示生成数量，常用范围为 `1` 到 `10`。
@@ -108,7 +106,7 @@ curl -X POST https://www.geeknow.top/v1/images/generations/async \
     "size": "1536x1024",
     "quality": "high",
     "image": [
-      "data:image/png;base64,BASE64_IMAGE_DATA"
+      "https://example.com/input.png"
     ]
   }'
 ```
@@ -165,35 +163,38 @@ console.log(await response.json());
 ```json 200 - 任务已提交
 {
   "id": "task_img_abc123",
-  "object": "image_generation.task",
-  "model": "gpt-image-2-pro",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "gpt-image-2-vip",
   "status": "queued",
-  "progress": 0,
   "created_at": 1735689600
 }
 ```
 
-```json 200 - 兼容直接返回 URL
+```json 200 - 已完成
 {
   "created": 1735689600,
   "data": [
     {
-      "url": "https://.../images/img-abc123.png",
+      "url": "https://example.com/images/task_img_abc123.png",
       "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
     }
-  ]
-}
-```
-
-```json 200 - 兼容直接返回 Base64
-{
-  "created": 1735689600,
-  "data": [
-    {
-      "b64_json": "iVBORw0KGgoAAAANSUhEUgAA...",
-      "revised_prompt": "一张电影级科技城市全景海报，清晨雾气，纵深透视，细节丰富"
+  ],
+  "size": "3840x2160",
+  "quality": "high",
+  "background": "opaque",
+  "output_format": "png",
+  "usage": {
+    "input_tokens": 15,
+    "total_tokens": 211,
+    "output_tokens": 196,
+    "input_tokens_details": {
+      "text_tokens": 15
+    },
+    "output_tokens_details": {
+      "image_tokens": 196
     }
-  ]
+  }
 }
 ```
 
@@ -219,7 +220,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。当前已验证可用值包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-3.1-flash-lite-image`。
+模型名称。当前已验证可用值包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-3.1-flash-lite-image`。VIP 模型名请使用 `gpt-image-2-vip`，不要传 `gpt-image-vip`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -235,7 +236,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="image" type="array<string>">
-可选参考图输入。数组成员可以是图片 URL、Base64 字符串或 `data:image/...;base64,...` 形式的数据。
+可选参考图输入。数组成员当前只接受公网可访问的 `http(s)` 图片 URL。
 </ParamField>
 
 <ParamField body="quality" type="string">
@@ -260,12 +261,16 @@ Authorization: Bearer YOUR_API_KEY
 异步任务 ID 的兼容字段。部分响应会使用驼峰命名。
 </ResponseField>
 
-<ResponseField name="status" type="string">
-任务状态。常见值包括 `queued`、`processing`、`in_progress`、`completed`、`succeeded`、`failed`。
+<ResponseField name="object" type="string">
+任务对象类型，通常为 `image.generation.task`。
 </ResponseField>
 
-<ResponseField name="progress" type="integer">
-任务进度百分比。任务未完成时可用于展示进度。
+<ResponseField name="model" type="string">
+任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`gemini-3-pro-image-preview` 或 `gemini-3.1-flash-lite-image`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。提交后通常为 `queued`，轮询中可能出现 `processing` / `in_progress`。
 </ResponseField>
 
 <ResponseField name="created_at" type="integer">
@@ -273,15 +278,35 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="created" type="integer">
-兼容直接返回图像结果时的生成时间戳。
+最终结果对象的生成时间戳。
+</ResponseField>
+
+<ResponseField name="size" type="string">
+最终结果对象的输出尺寸，例如 `1024x1024`、`1536x1024` 或 `3840x2160`。
+</ResponseField>
+
+<ResponseField name="quality" type="string">
+最终结果对象的质量等级，例如 `low`。
+</ResponseField>
+
+<ResponseField name="background" type="string">
+最终结果对象的背景信息，例如 `opaque`。
+</ResponseField>
+
+<ResponseField name="output_format" type="string">
+最终结果对象的图片格式，例如 `png`。
+</ResponseField>
+
+<ResponseField name="usage" type="object">
+最终结果对象里的 token 统计信息。
 </ResponseField>
 
 <ResponseField name="data[].url" type="string">
-任务已完成或兼容直接返回时，`response_format = url` 对应的图片 URL。
+最终结果对象中 `response_format = url` 时返回的图片 URL。
 </ResponseField>
 
 <ResponseField name="data[].b64_json" type="string">
-任务已完成或兼容直接返回时，`response_format = b64_json` 对应的图片 Base64 数据。
+最终结果对象中 `response_format = b64_json` 时返回的图片 Base64 数据。
 </ResponseField>
 
 <ResponseField name="data[].revised_prompt" type="string">
@@ -293,8 +318,8 @@ Authorization: Bearer YOUR_API_KEY
 | 项目 | 同步生图 | 异步生图 |
 | --- | --- | --- |
 | 路径 | `/v1/images/generations` | `/v1/images/generations/async` |
-| 请求字段 | `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format` | 按目标模型填写 |
-| 返回结构 | `created` + `data[]` | 优先返回任务 ID；部分通道可能兼容直接返回 `created` + `data[]` |
+| 请求字段 | `model`、`prompt`、`n`、`size`、`image`、`quality`、`response_format` | 按目标模型填写；异步 `image` 目前只接受公网 `http(s)` URL |
+| 返回结构 | `created` + `data[]` | 先返回任务对象；任务完成后查询接口直接返回结果对象 |
 | 适用场景 | 响应时间较短的生图请求 | 高分辨率、参考图或耗时较长的生图请求 |
 
 ## 使用建议
@@ -305,7 +330,7 @@ Authorization: Bearer YOUR_API_KEY
 - 提交成功后保存 `id`、`task_id` 或 `taskId`，并调用任务查询接口轮询最终结果。
 - `gpt-image-2-pro` 的常见高分辨率尺寸包括 `2048x2048`、`3840x2160`、`2160x3840`。
 - `gpt-image-2-vip` 的 `size` 必须满足：每条边是 `16px` 倍数，最长边不超过 `3840px`，长短边比例不超过 `3:1`，总像素数在 `655,360` 到 `8,294,400` 之间。
-- 参考图建议使用公网 URL 或标准 Base64 / data URI，避免传入无法访问的本地路径。
+- 异步参考图请使用公网 `http(s)` URL，不能传 Base64 / data URI。
 
 ## 相关页面
 

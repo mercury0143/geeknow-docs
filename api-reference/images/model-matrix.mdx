@@ -19,7 +19,7 @@ description: 汇总当前图像相关接口支持的模型家族、入口路由�
 | gpt-image-2 | `gpt-image-2` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
 | gpt-image-2-pro | `gpt-image-2-pro` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
 | gpt-image-2-vip | `gpt-image-2-vip` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
-| 图像异步生成 | `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream、Gemini 图像模型 | `/v1/images/generations/async` + 查询接口 | JSON `image`，按目标模型填写字段 | 任务 ID，完成后返回 `url` 或 `b64_json` |
+| 图像异步生成 | `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream、Gemini 图像模型 | `/v1/images/generations/async` + 查询接口 | JSON `image`，异步通道目前只接受公网 `http(s)` URL | 先返回任务对象，完成后查询返回结果对象 |
 | 豆包 Seedream | `doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128` | `/v1/images/generations` 或 `/v1/images/generations/async` | JSON `image`，通常为 Base64 数组 | `url`、`b64_json` 或异步任务 ID |
 | Grok Image | `grok-4-2-image` | `/v1/images/generations` | JSON `image`，通常为 Base64 数组 | 主要是 `url` |
 | OpenAI Images 兼容 | `gpt-image-1`、`dall-e-3`、`dall-e-2` | `/v1/images/generations`、`/v1/images/edits` | `image` / `mask` | `url` 或 `b64_json` |
@@ -90,8 +90,8 @@ description: 汇总当前图像相关接口支持的模型家族、入口路由�
 | 推荐接口 | `POST /v1/images/generations/async` |
 | 模型示例 | `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-3.1-flash-lite-image` |
 | 请求风格 | OpenAI Images 兼容 JSON |
-| 参考图 | `image: ["<url-or-base64>", ...]` |
-| 字段范围 | 按目标模型填写 `model`、`prompt`、`n`、`size`、`image`、`quality` 等字段 |
+| 参考图 | `image: ["<url>", ...]` |
+| 字段范围 | 按目标模型填写 `model`、`prompt`、`n`、`size`、`image`、`quality` 等字段；异步通道只接受公网 `http(s)` URL |
 | 查询接口 | `GET /v1/images/generations/async/{taskId}` |
 | 结果获取 | 提交后保存任务 ID，查询完成后读取 `data[].url` 或 `data[].b64_json` |
 | 适用场景 | 高分辨率、参考图或耗时较长的图像生成任务 |

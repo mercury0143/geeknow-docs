@@ -30,16 +30,70 @@ Gemini 图像模型统一使用官方 `generateContent` 格式生图，适合直
 | `gemini-3.1-flash-image-preview` | 实际回落为 `1K` | 即使请求中传 `2K`，最终也会按 `1K` 处理 |
 | `gemini-3.1-flash-lite-image` | 实际回落为 `1K` | 即使请求中传 `2K`，最终也会按 `1K` 处理 |
 
-## 先看懂图生图
+## Body
 
-Gemini 这里没有单独的“编辑接口”。图生图就是把参考图直接作为输入拼进 `contents[].parts[]`。
+<ParamField body="contents" type="array<object>" required>
+输入内容列表。每项通常包含 `role` 和 `parts`。
+</ParamField>
 
-最简单的理解是：
+<ParamField body="contents[].role" type="string">
+角色字段，常用值为 `user`。
+</ParamField>
 
-- 文生图：`parts[]` 里只有文字
-- 图生图：`parts[]` 里有文字，也有图片
+<ParamField body="contents[].parts" type="array<object>" required>
+内容片段数组。提示词和参考图都在这里构造。
+</ParamField>
 
-也就是说，提示词和参考图是一起发给模型的。
+<ParamField body="contents[].parts[].text" type="string">
+文本提示词。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData" type="object">
+参考图输入。包含 `mimeType` 和 `data` 两个字段。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.mimeType" type="string">
+图片 MIME 类型，常见值为 `image/jpeg`、`image/png`、`image/webp`。
+</ParamField>
+
+<ParamField body="contents[].parts[].inlineData.data" type="string">
+Base64 编码的图片内容。
+</ParamField>
+
+<ParamField body="generationConfig" type="object" required>
+生成配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.responseModalities" type="array<string>">
+返回模态列表。建议同时请求 `IMAGE` 和 `TEXT`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig" type="object" required>
+图像配置对象。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.aspectRatio" type="string">
+图片比例。常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
+</ParamField>
+
+<ParamField body="generationConfig.imageConfig.imageSize" type="string">
+图片清晰度。`gemini-3-pro-image-preview` 支持 `1K` 和 `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
+</ParamField>
+
+<ParamField body="safetySettings" type="array<object>">
+安全设置。可不传。
+</ParamField>
+
+## 图生图请求结构
+
+Gemini 不提供单独的编辑接口。图生图请求会将参考图直接作为输入内容写入 `contents[].parts[]`。
+
+可简化理解为：
+
+- 文生图：`parts[]` 里只有文本。
+- 图生图：`parts[]` 里同时包含文本和图片。
+
+也就是说，提示词与参考图会在同一次请求中一并提交给模型。
 
 ## 文生图 vs 图生图
 
@@ -48,16 +102,16 @@ Gemini 这里没有单独的“编辑接口”。图生图就是把参考图直�
 | 文生图 | 只有 `text` | 纯提示词生成 |
 | 图生图 | `text` + 一个或多个 `inlineData` | 让模型参考已有图片风格、主体或构图 |
 
-## 图生图怎么传
+## 图生图字段构造
 
-你只需要记住一个规则：
+请求构造可遵循以下规则：
 
 - 第一类内容是提示词：`{ "text": "..." }`
 - 第二类内容是参考图：`{ "inlineData": { "mimeType": "...", "data": "BASE64..." } }`
 
-构造请求时通常先放文本提示词，再把每一张参考图转成 Base64，按顺序追加到同一个 `parts[]`。
+构造请求时通常先放文本提示词，再将每一张参考图转成 Base64，按顺序追加到同一个 `parts[]`。
 
-## 图生图最小示例
+## 图生图示例
 
 ```json
 {
@@ -237,7 +291,7 @@ console.log(await response.json());
 | `imageConfig.aspectRatio` | 约束最终出图比例 |
 | `imageConfig.imageSize` | 约束最终出图清晰度 |
 
-## 能传几张参考图
+## 参考图数量
 
 多参考图可以按顺序追加多个 `inlineData`：
 
@@ -245,7 +299,7 @@ console.log(await response.json());
 - 也支持多张参考图
 - 多张时就是连续放多个 `inlineData`
 
-## 返回后怎么看结果
+## 返回值说明
 
 Gemini 生图返回的图片通常在：
 
@@ -257,60 +311,6 @@ Gemini 生图返回的图片通常在：
 2. 直接是图片 URL
 
 因此文档示例中用 `BASE64_OR_URL` 表示这两种可能的返回形式。
-
-## Body
-
-<ParamField body="contents" type="array<object>" required>
-输入内容列表。每项通常包含 `role` 和 `parts`。
-</ParamField>
-
-<ParamField body="contents[].role" type="string">
-角色字段，常用值为 `user`。
-</ParamField>
-
-<ParamField body="contents[].parts" type="array<object>" required>
-内容片段数组。提示词和参考图都在这里构造。
-</ParamField>
-
-<ParamField body="contents[].parts[].text" type="string">
-文本提示词。
-</ParamField>
-
-<ParamField body="contents[].parts[].inlineData" type="object">
-参考图输入。包含 `mimeType` 和 `data` 两个字段。
-</ParamField>
-
-<ParamField body="contents[].parts[].inlineData.mimeType" type="string">
-图片 MIME 类型，常见值为 `image/jpeg`、`image/png`、`image/webp`。
-</ParamField>
-
-<ParamField body="contents[].parts[].inlineData.data" type="string">
-Base64 编码的图片内容。
-</ParamField>
-
-<ParamField body="generationConfig" type="object" required>
-生成配置对象。
-</ParamField>
-
-<ParamField body="generationConfig.responseModalities" type="array<string>">
-返回模态列表。建议使用 `["IMAGE", "TEXT"]`。
-</ParamField>
-
-<ParamField body="generationConfig.imageConfig" type="object" required>
-图像配置对象。
-</ParamField>
-
-<ParamField body="generationConfig.imageConfig.aspectRatio" type="string">
-图片比例。常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
-</ParamField>
-
-<ParamField body="generationConfig.imageConfig.imageSize" type="string">
-图片清晰度。`gemini-3-pro-image-preview` 支持 `1K` 和 `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
-</ParamField>
-
-<ParamField body="safetySettings" type="array<object>">
-安全设置。可不传。
-</ParamField>
 
 ## 响应示例
 
