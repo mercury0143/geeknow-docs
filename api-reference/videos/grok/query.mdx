@@ -6,12 +6,12 @@ api: "GET /v1/videos/{task_id}"
 
 # Grok 任务查询
 
-Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。
+Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。`grok-video-1.5` / `grok-video-3` 与 Grok Imagine 系列共用同一组查询与下载接口。
 
 - 接口路径是 `GET /v1/videos/{task_id}`。
-- 任务完成后通常可从 `video_url` 或 `output.url` 读取结果地址。
-- 如果直接下载 `video_url` 失败，可回退到 `GET /v1/videos/{task_id}/content`。
-- Grok 1.5 / 3、`grok-imagine-video` 与 `grok-imagine-video-1.5-preview` 都使用同一组查询接口。
+- 任务完成后，优先从响应中的视频 URL 字段读取结果地址。
+- 如果响应没有公开 URL，或直接下载公开 URL 失败，可回退到 `GET /v1/videos/{task_id}/content`。
+- `/content` 端点需要携带同一个 `Authorization: Bearer YOUR_API_KEY`。
 
 ## 方法与路径
 
@@ -78,9 +78,9 @@ console.log(await response.json());
 
 ```json 200 - 已完成
 {
-  "id": "video_abc123",
+  "id": "task_abc123",
   "object": "video",
-  "model": "grok-video-3-pro",
+  "model": "grok-imagine-video-1.5",
   "status": "completed",
   "progress": 100,
   "created_at": 1735689600,
@@ -142,6 +142,10 @@ Authorization: Bearer YOUR_API_KEY
 任务状态。常见值有 `processing`、`failed`、`completed`。
 </ResponseField>
 
+<ResponseField name="model" type="string">
+任务对应的模型名。部分 Grok 任务会返回渠道侧归一化后的模型名，例如提交 `grok-imagine-video-1.5-preview`，完成响应里返回 `grok-imagine-video-1.5`。
+</ResponseField>
+
 <ResponseField name="progress" type="integer">
 进度百分比。
 </ResponseField>
@@ -163,7 +167,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="video_url" type="string">
-视频地址。完成时会优先尝试读取这个字段，或兼容读取 `output.url`。
+视频地址。完成时通常可直接下载；如果为空或不可下载，按下方兼容顺序读取其他字段，或回退到 `/content`。
 </ResponseField>
 
 <ResponseField name="error" type="object">
@@ -172,22 +176,40 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 轮询建议
 
-结果地址通常可按以下顺序读取：
+建议客户端将以下状态视为处理中并继续轮询：`queued`、`pending`、`processing`、`in_progress`、`running`、`generating`。
 
-1. `output.url`
-2. `video_url`
-3. `url`
-4. `detail.url`
+建议将以下状态视为完成：`completed`、`succeeded`、`success`。
 
-如果直接下载返回的视频地址失败，再回退请求：
+建议将以下状态视为失败或终止：`failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted`。
+
+任务完成后，结果地址可按以下兼容顺序读取：
+
+1. `content.video_url`
+2. `content.url`
+3. `output.url`
+4. `video_url`
+5. `url`
+6. `detail.url`
+7. `data[0].url`
+
+如果这些字段都为空，或下载返回的地址失败，再回退请求：
 
 ```http
 GET /v1/videos/{task_id}/content
 ```
 
+下载 `/content` 时需要继续携带鉴权头：
+
+```bash
+curl https://www.geeknow.top/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --output result.mp4
+```
+
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok 视频生成](./generation)
+- [Grok Video 1.5](./grok-video-1-5)
+- [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)

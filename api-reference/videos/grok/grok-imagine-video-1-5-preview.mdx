@@ -6,13 +6,15 @@ api: "POST /v1/videos"
 
 # Grok Imagine 1.5 Preview
 
-`grok-imagine-video-1.5-preview` 是 Grok 1.5 系列的 JSON 视频生成模型。与 `grok-video-1.5` 系列不同，该模型通过 JSON 字段传递参考图。
+`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。它与 `grok-video-1.5` / Pro / Max 不同：本模型使用 `application/json` 请求体，参考图通过 JSON 字段传递。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
-- 图生视频单图使用 `image`，多图使用 `images`。
-- `resolution` 支持 `480P` 和 `720P`。
+- 图生视频使用单张 `image`。
+- 当前 1.5 Preview 规范仅支持 1 张参考图；不要传多图 `images` 数组。
+- `resolution` 支持 `480P` 和 `720P`，也兼容 `480` / `720`。
+- `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
 ## 方法与路径
 
@@ -46,23 +48,6 @@ curl -X POST https://www.geeknow.top/v1/videos \
     "aspect_ratio": "9:16",
     "resolution": "720P",
     "image": "data:image/png;base64,BASE64_IMAGE_DATA"
-  }'
-```
-
-```bash 多图参考 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "grok-imagine-video-1.5-preview",
-    "prompt": "保持主体一致，生成从第一张图过渡到第二张图的视频",
-    "seconds": "10",
-    "aspect_ratio": "16:9",
-    "resolution": "720P",
-    "images": [
-      "data:image/png;base64,FIRST_IMAGE_BASE64",
-      "data:image/png;base64,SECOND_IMAGE_BASE64"
-    ]
   }'
 ```
 
@@ -123,15 +108,15 @@ console.log(await response.json());
 
 ```json 200
 {
-  "id": "video_abc123",
+  "id": "task_abc123",
+  "task_id": "task_abc123",
   "object": "video",
   "model": "grok-imagine-video-1.5-preview",
   "status": "queued",
   "progress": 0,
   "created_at": 1735689600,
   "seconds": "6",
-  "size": "720P",
-  "video_url": ""
+  "size": "720x1280"
 }
 ```
 
@@ -181,8 +166,17 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="images" type="array<string>">
-多张参考图。数组成员使用 `data:image/png;base64,...` 这类 data URI。传多张图时不要同时传 `image`。
+不建议使用。当前 `grok-imagine-video-1.5-preview` 规范仅接受 1 张参考图，客户端应使用 `image` 字段。
 </ParamField>
+
+## 请求构造规则
+
+| 场景 | 字段组合 |
+| --- | --- |
+| 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
+| 单图生视频 | 在文生字段基础上追加 `image` |
+
+客户端如从本地文件构造 JSON 请求，应先读取图片二进制并转为 Base64 data URI，再写入 `image`。不要把本地文件路径直接作为 JSON 图片字段提交。
 
 ## Response
 
@@ -190,12 +184,16 @@ Authorization: Bearer YOUR_API_KEY
 任务 ID。后续用 `GET /v1/videos/{id}` 查询结果。
 </ResponseField>
 
+<ResponseField name="task_id" type="string">
+任务 ID。部分响应会同时返回 `id` 与 `task_id`，两者可指向同一个任务。
+</ResponseField>
+
 <ResponseField name="object" type="string">
 对象类型，通常为 `video`。
 </ResponseField>
 
 <ResponseField name="model" type="string">
-实际提交的模型名。
+任务对应的模型名。查询完成时可能返回归一化后的模型名，例如 `grok-imagine-video-1.5`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -215,14 +213,20 @@ Authorization: Bearer YOUR_API_KEY
 | 项目 | `grok-imagine-video-1.5-preview` | `grok-video-1.5` / pro / max |
 | --- | --- | --- |
 | 请求格式 | JSON | `multipart/form-data` |
-| 图片字段 | `image` / `images` | `input_reference` |
+| 图片字段 | `image` | `input_reference` |
 | 清晰度字段 | `resolution` | `size` |
 | 清晰度值 | `480P`、`720P` | `480P`、`540P`、`720P`、`1080P` |
 | 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro，`15s` 对应 Max |
+| 参考图数量 | 当前仅 1 张 | 参考生视频/多图参考场景最多 1 张；首尾帧场景按首帧、尾帧传入 |
+
+## 错误处理建议
+
+如果创建任务返回 `5xx`，且错误信息包含 `task_id is empty`，通常表示上游没有接受本次任务。常见触发原因包括提示词过长、分镜描述过密或上游临时拒绝创建任务。建议客户端记录当前 `prompt` 的字符数与字节数，并在重试前压缩提示词。
 
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok 视频生成](./generation)
+- [Grok Video 1.5](./grok-video-1-5)
+- [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok 任务查询](./query)

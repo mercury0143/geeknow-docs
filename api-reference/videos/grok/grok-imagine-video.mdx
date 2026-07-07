@@ -6,14 +6,14 @@ api: "POST /v1/videos"
 
 # Grok Imagine Video
 
-`grok-imagine-video` 是 Grok Imagine 系列的视频生成模型。该模型使用 JSON 请求体，支持文生视频和参考图视频生成。
+`grok-imagine-video` 是 Grok Imagine 线路的视频生成模型。该模型使用 `application/json` 创建任务，适合不希望使用 multipart 上传文件的接入方。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
 - 图生视频单图使用 `image`，多图使用 `images`。
-- `resolution` 支持 `480P` 和 `720P`。
-- `prompt` 最多支持 `4096` 个字符。
+- `resolution` 支持 `480P` 和 `720P`，也兼容 `480` / `720`。
+- `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
 ## 方法与路径
 
@@ -124,15 +124,15 @@ console.log(await response.json());
 
 ```json 200
 {
-  "id": "video_abc123",
+  "id": "task_abc123",
+  "task_id": "task_abc123",
   "object": "video",
   "model": "grok-imagine-video",
   "status": "queued",
   "progress": 0,
   "created_at": 1735689600,
   "seconds": "6",
-  "size": "720P",
-  "video_url": ""
+  "size": "720x1280"
 }
 ```
 
@@ -178,17 +178,31 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="image" type="string">
-单张参考图。使用 `data:image/png;base64,...` 这类 data URI。
+单张参考图。使用 `data:image/png;base64,...` 这类 data URI。传入 `image` 时不要同时传 `images`。
 </ParamField>
 
 <ParamField body="images" type="array<string>">
 多张参考图。数组成员使用 `data:image/png;base64,...` 这类 data URI。传多张图时不要同时传 `image`。
 </ParamField>
 
+## 请求构造规则
+
+| 场景 | 字段组合 |
+| --- | --- |
+| 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
+| 单图生视频 | 在文生字段基础上追加 `image` |
+| 多图参考 | 在文生字段基础上追加 `images`，数组内每一项为 data URI |
+
+客户端如从本地文件构造 JSON 请求，应先读取图片二进制并转为 Base64 data URI，再写入 `image` 或 `images`。不要把本地文件路径直接作为 JSON 图片字段提交。
+
 ## Response
 
 <ResponseField name="id" type="string">
 任务 ID。后续用 `GET /v1/videos/{id}` 查询结果。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+任务 ID。部分响应会同时返回 `id` 与 `task_id`，两者可指向同一个任务。
 </ResponseField>
 
 <ResponseField name="object" type="string">
@@ -221,9 +235,14 @@ Authorization: Bearer YOUR_API_KEY
 | 清晰度值 | `480P`、`720P` | `480P`、`540P`、`720P`、`1080P` |
 | 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro 档，`15s` 对应 Max 档 |
 
+## 错误处理建议
+
+如果创建任务返回 `5xx`，且错误信息包含 `task_id is empty`，通常表示上游没有接受本次任务。常见触发原因包括提示词过长、分镜描述过密或上游临时拒绝创建任务。建议客户端记录当前 `prompt` 的字符数与字节数，并在重试前压缩提示词。
+
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok 视频生成](./generation)
+- [Grok Video 1.5](./grok-video-1-5)
+- [Grok Video 3](./grok-video-3)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
 - [Grok 任务查询](./query)

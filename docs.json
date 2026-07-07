@@ -183,7 +183,8 @@
             "expanded": true,
             "pages": [
               "api-reference/videos/grok/overview",
-              "api-reference/videos/grok/generation",
+              "api-reference/videos/grok/grok-video-1-5",
+              "api-reference/videos/grok/grok-video-3",
               "api-reference/videos/grok/grok-imagine-video",
               "api-reference/videos/grok/grok-imagine-video-1-5-preview",
               "api-reference/videos/grok/query"
