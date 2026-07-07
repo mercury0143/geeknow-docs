@@ -1,19 +1,16 @@
 ---
 title: Grok Video 生成入口
-description: Grok Video multipart 生成接口的兼容入口，按 `grok-video-1.5` 与 `grok-video-3` 两个系列分流。
+description: Grok Video multipart 生成接口的兼容入口。
 api: "POST /v1/videos"
 ---
 
 # Grok Video 生成入口
 
-Grok Video multipart 接口按模型系列拆分维护。请选择目标系列查看具体模型、时长、参考图规则和请求示例。
+Grok Video multipart 接口当前提供 `grok-video-3-pro` 与 `grok-video-3-max`。请选择目标页面查看具体模型、时长、参考图规则和请求示例。
 
 <CardGroup cols={2}>
-  <Card title="Grok Video 1.5" icon="film" href="/api-reference/videos/grok/grok-video-1-5">
-    `grok-video-1.5`、`grok-video-1.5-pro`、`grok-video-1.5-max`。
-  </Card>
   <Card title="Grok Video 3" icon="clapperboard" href="/api-reference/videos/grok/grok-video-3">
-    `grok-video-3`、`grok-video-3-pro`、`grok-video-3-max`。
+    `grok-video-3-pro`、`grok-video-3-max`。
   </Card>
 </CardGroup>
 
@@ -23,12 +20,11 @@ Grok Video multipart 接口按模型系列拆分维护。请选择目标系列�
 POST /v1/videos
 ```
 
-两个系列都使用 `multipart/form-data`，参考图文件字段为 `input_reference`。直接调用 API 时，建议使用具体 Pro / Max 档位模型；基础模型名更适合在客户端兼容层中映射。
+该接口使用 `multipart/form-data`，参考图文件字段为 `input_reference`。
 
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok Video 1.5](./grok-video-1-5)
 - [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)

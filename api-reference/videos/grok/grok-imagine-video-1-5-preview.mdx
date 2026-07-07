@@ -6,7 +6,7 @@ api: "POST /v1/videos"
 
 # Grok Imagine 1.5 Preview
 
-`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。它与 `grok-video-1.5` / Pro / Max 不同：本模型使用 `application/json` 请求体，参考图通过 JSON 字段传递。
+`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。本模型使用 `application/json` 请求体，参考图通过 JSON 字段传递。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
@@ -193,7 +193,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务对应的模型名。查询完成时可能返回归一化后的模型名，例如 `grok-imagine-video-1.5`。
+任务对应的模型名。该字段用于展示和排查，不应用作任务 ID。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -210,7 +210,7 @@ Authorization: Bearer YOUR_API_KEY
 
 ## 与 Grok 1.5 的区别
 
-| 项目 | `grok-imagine-video-1.5-preview` | `grok-video-1.5` / pro / max |
+| 项目 | `grok-imagine-video-1.5-preview` | `grok-video-3-pro` / `grok-video-3-max` |
 | --- | --- | --- |
 | 请求格式 | JSON | `multipart/form-data` |
 | 图片字段 | `image` | `input_reference` |
@@ -226,7 +226,6 @@ Authorization: Bearer YOUR_API_KEY
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok Video 1.5](./grok-video-1-5)
 - [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok 任务查询](./query)

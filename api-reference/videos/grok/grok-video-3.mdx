@@ -1,18 +1,17 @@
 ---
 title: Grok Video 3
-description: 使用 `POST /v1/videos` 调用 `grok-video-3`、`grok-video-3-pro` 与 `grok-video-3-max` 提交异步视频任务。
+description: 使用 `POST /v1/videos` 调用 `grok-video-3-pro` 与 `grok-video-3-max` 提交异步视频任务。
 api: "POST /v1/videos"
 ---
 
 # Grok Video 3
 
-`grok-video-3` 系列使用 `multipart/form-data` 创建异步视频任务。该系列包含基础模型名和两个固定时长档位：
+Grok Video 3 系列使用 `multipart/form-data` 创建异步视频任务。当前文档只列出可直接调用的固定时长模型：
 
 - `grok-video-3-pro`：固定 `10s`。
 - `grok-video-3-max`：固定 `15s`。
-- `grok-video-3`：基础模型名；如需兼容该写法，建议在客户端侧按 `seconds` 映射到 Pro / Max 后再请求。
 
-直接调用 API 时，建议提交具体档位模型。实测中，部分渠道会把创建和查询响应中的 `model` 归一化为 `grok-imagine-video`，客户端应以 `id` / `task_id` 作为任务主键。
+创建任务后，请使用响应里的 `id` 或 `task_id` 查询任务。不要用响应里的 `model` 字段拼接查询地址或判断任务唯一性。
 
 ## 方法与路径
 
@@ -26,7 +25,6 @@ POST /v1/videos
 | --- | --- | --- |
 | `grok-video-3-pro` | `10` | 固定 10 秒 |
 | `grok-video-3-max` | `15` | 固定 15 秒 |
-| `grok-video-3` | `10` / `15` | 基础模型名；客户端兼容层可分别映射为 Pro / Max |
 
 ## 请求格式
 
@@ -132,7 +130,7 @@ print(resp.json())
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。建议直接传 `grok-video-3-pro` 或 `grok-video-3-max`。如需兼容 `grok-video-3`，请在客户端侧按 `seconds` 解析到具体档位。
+模型名称。可用值为 `grok-video-3-pro` 或 `grok-video-3-max`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -166,7 +164,7 @@ print(resp.json())
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务对应的模型名。部分渠道可能返回归一化后的模型名。
+任务对应的模型名。该字段用于展示和排查，不应用作任务 ID。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -181,11 +179,9 @@ print(resp.json())
 
 - 客户端应使用创建响应中的 `id` 或 `task_id` 查询任务。
 - 不要把 Base64 字符串放进 `input_reference`；multipart 模式需要上传图片二进制。
-- 如果当前分组对基础模型名返回 `model_not_found`，请改用 `grok-video-3-pro` 或 `grok-video-3-max`。
 
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok Video 1.5](./grok-video-1-5)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok 任务查询](./query)
