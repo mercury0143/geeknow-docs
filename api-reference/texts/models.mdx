@@ -16,11 +16,15 @@ api: "GET /v1/models"
 
 | 家族 | 常见模型名 |
 | --- | --- |
-| GPT / OpenAI | `gpt-4o`、`gpt-4o-mini`、`gpt-4.1`、`gpt-4.1-mini`、`gpt-4.1-nano`、`o1`、`o3` |
-| Claude | `claude-sonnet-4-20250514`、`claude-sonnet-4-6`、`claude-opus-4-6`、`claude-opus-4-7`、`claude-haiku-4-5-20251001` |
-| Gemini | `gemini-2.0-flash`、`gemini-2.5-flash`、`gemini-2.5-pro`、`gemini-3.1-pro-preview` |
-| DeepSeek | `deepseek-chat`、`deepseek-reasoner`、`deepseek-v4-flash`、`deepseek-v4-pro`、`deepseek-r1` |
-| Qwen | `qwen-max`、`qwen3-max`、`qwen3-omni-flash` |
+| GPT / OpenAI | `gpt-5.5`、`gpt-5.4`、`gpt-5.4-high`、`gpt-5.4-medium`、`gpt-5.4-xhigh`、`gpt-5` |
+| Claude | `claude-fable-5`、`claude-opus-4-8`、`claude-sonnet-5`、`claude-haiku-4-5-20251001` |
+| Gemini | `gemini-3.5-flash`、`gemini-3.1-pro-preview`、`gemini-3-pro-preview`、`gemini-2.5-pro` |
+| DeepSeek | `deepseek-v4-flash`、`deepseek-v4-pro` |
+| Qwen | `qwen-max`、`qwen-plus`、`qwen-turbo`、`qwen3-max` |
+
+<Warning>
+模型列表会随渠道和账户权限变化。不要把上表当成完整模型清单，也不要假设每个模型都支持所有参数；上游官方最新模型只有在本接口返回后，才表示当前 API Key 可用。上线前请用当前 API Key 调用本页接口确认。
+</Warning>
 
 ## 路径
 
@@ -66,13 +70,13 @@ curl https://www.geeknow.top/v1beta/models \
   "object": "list",
   "data": [
     {
-      "id": "gpt-4o",
+      "id": "gpt-5.5",
       "object": "model",
       "created": 1735689600,
       "owned_by": "openai"
     },
     {
-      "id": "claude-sonnet-4-20250514",
+      "id": "claude-sonnet-5",
       "object": "model",
       "created": 1735689600,
       "owned_by": "anthropic"
@@ -119,11 +123,11 @@ curl https://www.geeknow.top/v1beta/models \
 ### 查询单个模型
 
 ```bash
-curl https://www.geeknow.top/v1/models/gpt-4o \
+curl https://www.geeknow.top/v1/models/gpt-5.5 \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
 - [Gemini 原生格式](./gemini-native)

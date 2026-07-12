@@ -1,0 +1,205 @@
+---
+title: 图像输入与图床上传
+description: 说明文本模型接收图片时的 URL、base64 和本地图片上传处理方式。
+---
+
+# 图像输入与图床上传
+
+文本模型处理图片时通常有两种传图方式：
+
+| 方式 | 适用场景 | 注意事项 |
+| --- | --- | --- |
+| 图片 URL | 服务端已有公网可访问图片，或本地图片可先上传到图床 | URL 必须能被上游模型下载；不稳定的外部 URL 建议先转存到自己的图床 |
+| base64 | 图片较小、希望请求自包含、不依赖外部下载 | 请求体会变大；不同协议对 base64 前缀要求不同 |
+
+<Warning>
+不要把 API Key 写进前端、日志或文档仓库。图片 URL 不要使用需要登录态、临时 Cookie 或内网访问的地址。
+</Warning>
+
+## 上传本地图片
+
+如果模型协议要求传图片 URL，可以先把本地图片上传到自己的图床，再把返回的 `url` 放进模型请求。
+
+图床上传接口建议采用 `multipart/form-data`，字段名为 `file`，返回 JSON 中包含公网可访问的 `url`：
+
+```bash
+curl -X POST https://YOUR_IMAGE_HOST/api/upload \
+  -F "file=@./diagram.png"
+```
+
+```json
+{
+  "url": "https://YOUR_IMAGE_HOST/path/diagram.png"
+}
+```
+
+Python 示例：
+
+```python
+import os
+import requests
+
+
+def upload_image_to_host(image_path: str, timeout: int = 60) -> str | None:
+    if not image_path:
+        return None
+
+    clean_path = str(image_path).split("?")[0]
+    if not os.path.exists(clean_path):
+        return None
+
+    upload_url = "https://YOUR_IMAGE_HOST/api/upload"
+    with open(clean_path, "rb") as image_file:
+        response = requests.post(
+            upload_url,
+            files={"file": (os.path.basename(clean_path), image_file)},
+            timeout=timeout,
+        )
+
+    if response.status_code != 200:
+        return None
+
+    return response.json().get("url")
+```
+
+## Chat Completions
+
+Chat Completions 使用 OpenAI 兼容的 `messages[].content` 数组。图片 URL 放在 `image_url.url`。
+
+```json
+{
+  "model": "claude-opus-4-7",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "描述这张图片。" },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://YOUR_IMAGE_HOST/path/diagram.png",
+            "detail": "high"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+base64 图片也通过 `image_url.url` 传入，但需要带完整 data URL 前缀：
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "data:image/png;base64,BASE64_IMAGE_DATA"
+  }
+}
+```
+
+## Claude Messages
+
+Claude 原生 Messages 使用 `content[].source`。
+
+URL 图片：
+
+```json
+{
+  "type": "image",
+  "source": {
+    "type": "url",
+    "url": "https://YOUR_IMAGE_HOST/path/diagram.png"
+  }
+}
+```
+
+base64 图片：
+
+```json
+{
+  "type": "image",
+  "source": {
+    "type": "base64",
+    "media_type": "image/png",
+    "data": "BASE64_IMAGE_DATA"
+  }
+}
+```
+
+<Tip>
+Claude 的 `source.data` 只放纯 base64 字符串，不要带 `data:image/png;base64,` 前缀。
+</Tip>
+
+## OpenAI Responses
+
+Responses 使用 `input[].content` 数组。图片 URL 放在 `input_image.image_url`。
+
+```json
+{
+  "model": "gpt-5.5",
+  "input": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "input_text", "text": "描述这张图片。" },
+        {
+          "type": "input_image",
+          "image_url": "https://YOUR_IMAGE_HOST/path/diagram.png",
+          "detail": "high"
+        }
+      ]
+    }
+  ]
+}
+```
+
+如果模型和通道支持 base64，可把 `image_url` 改成 data URL：
+
+```json
+{
+  "type": "input_image",
+  "image_url": "data:image/png;base64,BASE64_IMAGE_DATA"
+}
+```
+
+## Gemini 原生
+
+Gemini 原生格式常用 `inlineData` 传 base64：
+
+```json
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": [
+        { "text": "描述这张图片。" },
+        {
+          "inlineData": {
+            "mimeType": "image/png",
+            "data": "BASE64_IMAGE_DATA"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+URL 图片可使用 `fileData`，但是否能被上游下载取决于模型和通道：
+
+```json
+{
+  "fileData": {
+    "mimeType": "image/png",
+    "fileUri": "https://YOUR_IMAGE_HOST/path/diagram.png"
+  }
+}
+```
+
+## 上线前检查
+
+1. 先用 `/v1/models` 确认当前 API Key 能调用目标模型。
+2. 用一张小图分别测试 URL 与 base64，确认模型能正确读取图片内容。
+3. URL 方式失败时，先确认图片是否公网可访问；仍失败时，上传到稳定图床后重试。
+4. base64 方式失败时，确认协议是否需要 data URL 前缀，以及 `media_type` / `mimeType` 是否正确。

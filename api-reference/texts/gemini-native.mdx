@@ -23,7 +23,7 @@ x-goog-api-key: YOUR_API_KEY
 或查询参数：
 
 ```text
-/v1beta/models/gemini-2.0-flash:generateContent?key=YOUR_API_KEY
+/v1beta/models/gemini-3.5-flash:generateContent?key=YOUR_API_KEY
 ```
 
 ## 路径
@@ -73,7 +73,7 @@ Gemini cached content 标识。
 <RequestExample>
 
 ```bash
-curl -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:generateContent \
+curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.5-flash:generateContent \
   -H "x-goog-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -96,8 +96,10 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:generateCont
 
 ### 多模态输入
 
+Gemini 原生格式推荐用 `inlineData` 传 base64。URL 图片可使用 `fileData.fileUri`，但是否可用取决于模型和通道能否下载该 URL。
+
 ```bash
-curl -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:generateContent \
+curl -X POST https://www.geeknow.top/v1beta/models/gemini-3.5-flash:generateContent \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -118,10 +120,21 @@ curl -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:generateCont
   }'
 ```
 
+URL 图片写法：
+
+```json
+{
+  "fileData": {
+    "mimeType": "image/png",
+    "fileUri": "https://YOUR_IMAGE_HOST/path/image.png"
+  }
+}
+```
+
 ### 流式生成
 
 ```bash
-curl -N -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:streamGenerateContent \
+curl -N -X POST https://www.geeknow.top/v1beta/models/gemini-3.5-flash:streamGenerateContent \
   -H "x-goog-api-key: YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -244,5 +257,5 @@ curl -N -X POST https://www.geeknow.top/v1beta/models/gemini-2.0-flash:streamGen
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
 - [模型列表](./models)

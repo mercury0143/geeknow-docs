@@ -1,0 +1,148 @@
+---
+title: 参数测试用例
+description: 基于当前站点实测的文本接口参数兼容性用例，帮助开发者上线前验证模型、参数和错误处理。
+---
+
+# 参数测试用例
+
+本页记录一组小请求测试，用来验证当前 API Key、模型和参数组合是否可用。基础参数测试时间为 2026-07-07，图像输入补测时间为 2026-07-12；公开文档示例统一使用 `https://www.geeknow.top`。模型和渠道会变化，生产环境请用自己的 API Key 重新跑一遍。
+
+<Info>
+OpenAI 官方模型清单可能先于当前站点更新。最近一次复查时，当前模型列表未返回 `gpt-5.6`，因此示例继续使用已验证的 `gpt-5.5`；如果你的模型列表已返回新模型，请先跑本页用例再切换生产配置。
+</Info>
+
+<Warning>
+不要在前端、公开日志或文档仓库中暴露 API Key。下面示例统一使用 `YOUR_API_KEY` 占位。
+</Warning>
+
+## 已验证通过
+
+| 接口 | 模型 | 用例 | 结果 |
+| --- | --- | --- | --- |
+| `/v1/models` | - | Bearer Token 查询模型列表 | `200`，返回 OpenAI 风格 `object: list` |
+| `/v1/chat/completions` | `gpt-5.5` | 非流式基础对话 | `200`，返回 `chat.completion` |
+| `/v1/chat/completions` | `gpt-5.5` | `stream: true` + `stream_options.include_usage` | `200`，返回 `chat.completion.chunk` SSE 和 `[DONE]` |
+| `/v1/chat/completions` | `gpt-5.5` | JSON Schema 结构化输出 | `200`，返回符合 schema 的 JSON |
+| `/v1/chat/completions` | `gpt-5.5` | `tools` + `tool_choice: required` | `200`，返回 `tool_calls` |
+| `/v1/chat/completions` | `gpt-5.5` | `developer` 角色兼容性、`temperature`、`top_p`、`reasoning_effort` | `200` |
+| `/v1/responses` | `gpt-5.5` | 基础响应 | `200`，返回 `response` |
+| `/v1/responses` | `gpt-5.5` | `stream: true` | `200`，返回 Responses SSE 事件 |
+| `/v1/responses` | `gpt-5.5` | JSON Schema 结构化输出 | `200`，返回符合 schema 的 JSON |
+| `/v1/responses` | `gpt-5.5` | 函数工具调用 | `200`，返回 `function_call` output item |
+| `/v1/messages` | `claude-sonnet-5` | Bearer Token 基础调用 | `200`，返回 Claude `message` |
+| `/v1/messages` | `claude-sonnet-5` | `x-api-key` + `anthropic-version` | `200` |
+| `/v1/messages` | `claude-sonnet-5` | `stream: true` | `200`，返回 `message_start`、`content_block_delta`、`message_stop` |
+| `/v1/messages` | `claude-sonnet-5` | Claude 工具调用 | `200`，返回 `tool_use` |
+| `/v1/messages` | `claude-fable-5` | `effort: xhigh` | `200` |
+| `/v1/messages` | `claude-haiku-4-5-20251001` | `thinking` | `200`，返回 `thinking` 与 `text` 内容块 |
+| `/v1/chat/completions` | `claude-opus-4-7` | 图像 URL，图片先上传图床后传 `image_url.url` | `200`，模型能识别图片内容 |
+| `/v1/chat/completions` | `claude-opus-4-7` | base64 图片，使用 `data:image/png;base64,...` | `200`，模型能识别图片内容 |
+| `/v1/chat/completions` | `claude-opus-4-7` | 流式图像 URL 与 base64 | `200`，返回 `chat.completion.chunk` SSE 和 `[DONE]` |
+| `/v1/messages` | `claude-opus-4-7` | 图像 URL，图片先上传图床后传 `source.url` | `200`，模型能识别图片内容 |
+| `/v1/messages` | `claude-opus-4-7` | base64 图片，使用 `source.type: base64` | `200`，模型能识别图片内容 |
+| `/v1/messages` | `claude-opus-4-7` | 流式图像 URL 与 base64 | `200`，返回 `message_start`、`content_block_delta`、`message_stop` |
+| `/v1beta/models/{model}:generateContent` | `gemini-3.5-flash` | Gemini 原生 `generateContent` | `200` |
+| `/v1/completions` | `deepseek-v4-flash` | Legacy Completions | `200`，返回 `text_completion` |
+
+## 需要注意
+
+| 用例 | 实测结果 | 建议 |
+| --- | --- | --- |
+| `/v1/chat/completions` 缺少 `model` | `400`，提示模型名不能为空 | 客户端本地先校验必填字段 |
+| `/v1/chat/completions` 使用不存在的模型 | `503`，`code: model_not_found` | 上线前先请求 `/v1/models` |
+| Claude `claude-opus-4-8` 传 `top_p` | `400`，上游提示该模型不支持 `top_p` | Claude Sonnet 5、Opus 4.8 等新模型建议省略 `temperature`、`top_p`、`top_k` |
+| Claude `claude-opus-4-8` 传 `temperature` | 当前网关一次测试返回 `200`，但官方文档要求非默认采样参数返回 `400` | 以官方约束写客户端，生产请求不要依赖该兼容行为 |
+| Responses HTTP 路径传无效 `previous_response_id` | `400`，提示该字段仅特定 Responses WebSocket v2 路径支持 | 不要把 `previous_response_id` 当成通用上下文机制 |
+| Legacy Completions 使用 `gpt-3.5-turbo-instruct` | `503`，当前模型不可用 | 文档示例使用当前已验证模型；历史模型请先查 `/v1/models` |
+| `max_output_tokens` 过小 | 可能 `200` 但输出为空 | 结构化输出和推理模型建议给足输出预算 |
+| Responses 使用 Claude 模型转 `input_image` | `500`，提示当前转换链路未实现 | Responses 图像输入请使用支持 Responses 语义的模型，并先做小图验证 |
+| Gemini 原生图像输入在 Claude-only 测试 Key 下调用 | `503 model_not_found` | 这不是图像格式错误；需要有 Gemini 渠道的 API Key 才能验证 |
+| 直接传不稳定外部图片 URL | 可能下载失败或模型看不到图像 | 本地图片建议先上传图床，确保返回 URL 可公网访问 |
+
+## Chat JSON Schema
+
+```bash
+curl -X POST https://www.geeknow.top/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.5",
+    "messages": [
+      { "role": "user", "content": "Return JSON only: topic is billing, status is failed." }
+    ],
+    "max_completion_tokens": 128,
+    "response_format": {
+      "type": "json_schema",
+      "json_schema": {
+        "name": "event_extract",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "topic": { "type": "string" },
+            "status": { "type": "string" }
+          },
+          "required": ["topic", "status"]
+        }
+      }
+    }
+  }'
+```
+
+## Responses JSON Schema
+
+```bash
+curl -X POST https://www.geeknow.top/v1/responses \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-5.5",
+    "input": "Return JSON only: topic is billing, status is failed.",
+    "text": {
+      "format": {
+        "type": "json_schema",
+        "name": "event_extract",
+        "strict": true,
+        "schema": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "topic": { "type": "string" },
+            "status": { "type": "string" }
+          },
+          "required": ["topic", "status"]
+        }
+      }
+    }
+  }'
+```
+
+## Claude 工具调用
+
+```bash
+curl -X POST https://www.geeknow.top/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-5",
+    "max_tokens": 256,
+    "messages": [
+      { "role": "user", "content": "Check the weather for Shanghai." }
+    ],
+    "tools": [
+      {
+        "name": "get_weather",
+        "description": "Get weather by city.",
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "city": { "type": "string" }
+          },
+          "required": ["city"]
+        }
+      }
+    ],
+    "tool_choice": { "type": "tool", "name": "get_weather" }
+  }'
+```

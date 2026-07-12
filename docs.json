@@ -29,11 +29,13 @@
         "pages": [
           "api-reference/texts/overview",
           "api-reference/texts/model-matrix",
+          "api-reference/texts/image-inputs",
           "api-reference/texts/chat-completions-stream",
           "api-reference/texts/chat-completions-non-stream",
           "api-reference/texts/claude-messages",
           "api-reference/texts/gemini-native",
           "api-reference/texts/openai-responses",
+          "api-reference/texts/parameter-tests",
           "api-reference/texts/models",
           "api-reference/texts/completions",
           "api-reference/texts/realtime"

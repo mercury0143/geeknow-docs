@@ -1,12 +1,12 @@
 ---
-title: 通用对话接口（默认流式）
-description: 使用 OpenAI Chat Completions 兼容格式发起对话，并以 SSE 流式返回模型输出。
+title: Chat Completions（流式）
+description: 使用 OpenAI Chat Completions 兼容格式发起对话，并显式开启 SSE 流式返回。
 api: "POST /v1/chat/completions"
 ---
 
-# 通用对话接口（默认流式）
+# Chat Completions（流式）
 
-使用统一对话格式调用 OpenAI、Claude、Gemini、DeepSeek、Qwen 等上游模型。本文档以流式输出为默认写法，适合需要边生成边展示的聊天、Agent 和长文本生成场景。
+使用统一对话格式调用 OpenAI、Claude、Gemini、DeepSeek、Qwen 等上游模型。本页展示流式写法，适合需要边生成边展示的聊天、Agent 和长文本生成场景。
 
 <Info>
 如果未传 `stream`，接口默认按非流式返回。若希望固定获得流式响应，请显式传入 `"stream": true`。
@@ -63,7 +63,7 @@ api: "POST /v1/chat/completions"
 </ParamField>
 
 <ParamField body="reasoning_effort" type="string">
-推理强度。常见值为 `low`、`medium`、`high`，是否生效取决于模型。
+推理强度。常见值包括 `none`、`minimal`、`low`、`medium`、`high`、`xhigh`；是否生效取决于模型。高强度不一定更好，建议按业务评测选择。
 </ParamField>
 
 ## 请求示例
@@ -75,7 +75,7 @@ curl -N -X POST https://www.geeknow.top/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "messages": [
       { "role": "system", "content": "你是一个简洁的技术助手。" },
       { "role": "user", "content": "用三点说明 API 网关的作用。" }
@@ -91,18 +91,20 @@ curl -N -X POST https://www.geeknow.top/v1/chat/completions \
 
 ### 多模态流式
 
+图片 URL 需要能被上游模型公网下载；本地图片请先上传图床。base64 图片可使用 `data:image/png;base64,...` 形式放在 `image_url.url`。
+
 ```bash
 curl -N -X POST https://www.geeknow.top/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "messages": [
       {
         "role": "user",
         "content": [
           { "type": "text", "text": "概括这张图表的主要结论。" },
-          { "type": "image_url", "image_url": { "url": "https://.../chart.png", "detail": "high" } }
+          { "type": "image_url", "image_url": { "url": "https://YOUR_IMAGE_HOST/path/chart.png", "detail": "high" } }
         ]
       }
     ],
@@ -115,11 +117,11 @@ curl -N -X POST https://www.geeknow.top/v1/chat/completions \
 <ResponseExample>
 
 ```text 200
-data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"role":"assistant","content":"API"},"finish_reason":null}]}
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-5.5","choices":[{"index":0,"delta":{"role":"assistant","content":"API"},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{"content":" 网关"},"finish_reason":null}]}
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-5.5","choices":[{"index":0,"delta":{"content":" 网关"},"finish_reason":null}]}
 
-data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-4o","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":26,"completion_tokens":38,"total_tokens":64}}
+data: {"id":"chatcmpl_abc123","object":"chat.completion.chunk","created":1735689600,"model":"gpt-5.5","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":26,"completion_tokens":38,"total_tokens":64}}
 
 data: [DONE]
 ```
@@ -205,6 +207,6 @@ data: [DONE]
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
-- [OpenAI 多模态响应接口](./openai-responses)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
+- [OpenAI Responses 接口](./openai-responses)
 - [模型列表](./models)

@@ -1,10 +1,10 @@
 ---
-title: 通用对话接口（默认非流式）
+title: Chat Completions（非流式）
 description: 使用 OpenAI Chat Completions 兼容格式发起对话，并一次性返回完整结果。
 api: "POST /v1/chat/completions"
 ---
 
-# 通用对话接口（默认非流式）
+# Chat Completions（非流式）
 
 适用于后台任务、结构化输出、短问答和不需要实时展示生成过程的场景。省略 `stream` 或传入 `false` 时，接口一次性返回完整 `chat.completion` 对象。
 
@@ -15,7 +15,11 @@ api: "POST /v1/chat/completions"
 </ParamField>
 
 <ParamField body="messages" type="array<object>" required>
-对话消息数组。每条消息至少包含 `role` 与 `content`。
+对话消息数组。每条消息至少包含 `role` 与 `content`。常见角色为 `system`、`developer`、`user`、`assistant`、`tool`。第三方兼容接入建议优先用 `system` 放全局指令；如果明确按 OpenAI 新模型语义接入，可用 `developer` 表示应用开发者指令。
+</ParamField>
+
+<ParamField body="messages[].content" type="string | array">
+消息内容。字符串表示纯文本；数组可传多模态内容，例如 `{ "type": "text" }` 与 `{ "type": "image_url" }`。图片 URL、base64 和本地图片上传处理见 [图像输入与图床上传](./image-inputs)。
 </ParamField>
 
 <ParamField body="stream" type="boolean">
@@ -23,7 +27,7 @@ api: "POST /v1/chat/completions"
 </ParamField>
 
 <ParamField body="response_format" type="object">
-指定输出格式。常用于 JSON 输出或 JSON Schema 结构化输出。
+指定输出格式。常用于 JSON 输出或 JSON Schema 结构化输出。结构化输出对模型能力有要求，建议先用小 schema 验证。
 </ParamField>
 
 <ParamField body="tools" type="array<object>">
@@ -43,11 +47,19 @@ api: "POST /v1/chat/completions"
 </ParamField>
 
 <ParamField body="max_tokens" type="integer">
-最大生成 token 数。
+最大生成 token 数。部分新推理模型也支持或更推荐 `max_completion_tokens`。
+</ParamField>
+
+<ParamField body="max_completion_tokens" type="integer">
+最大补全 token 数，通常包含推理 token。对 GPT-5 系列等推理模型更明确。
 </ParamField>
 
 <ParamField body="seed" type="number">
 随机种子。上游支持时可提升复现性。
+</ParamField>
+
+<ParamField body="reasoning_effort" type="string">
+推理强度。常见值包括 `none`、`minimal`、`low`、`medium`、`high`、`xhigh`；是否生效取决于模型。延迟敏感场景可先评估 `low`，质量优先场景再逐级提高。
 </ParamField>
 
 ## 请求示例
@@ -59,11 +71,12 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "messages": [
-      { "role": "system", "content": "你是一个 API 文档助手。" },
+      { "role": "system", "content": "你是一个 API 文档助手，回答要简洁。" },
       { "role": "user", "content": "生成一个接口说明摘要。" }
     ],
+    "max_completion_tokens": 200,
     "stream": false
   }'
 ```
@@ -77,7 +90,7 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "messages": [
       { "role": "user", "content": "提取这句话的主题和语气：这个版本发布节奏很稳。" }
     ],
@@ -85,8 +98,10 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
       "type": "json_schema",
       "json_schema": {
         "name": "analysis",
+        "strict": true,
         "schema": {
           "type": "object",
+          "additionalProperties": false,
           "properties": {
             "topic": { "type": "string" },
             "tone": { "type": "string" }
@@ -98,6 +113,44 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
   }'
 ```
 
+### 图像输入
+
+```bash
+curl -X POST https://www.geeknow.top/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          { "type": "text", "text": "这张图片的主要颜色是什么？" },
+          {
+            "type": "image_url",
+            "image_url": {
+              "url": "https://YOUR_IMAGE_HOST/path/image.png",
+              "detail": "high"
+            }
+          }
+        ]
+      }
+    ],
+    "max_tokens": 128
+  }'
+```
+
+base64 图片使用 data URL：
+
+```json
+{
+  "type": "image_url",
+  "image_url": {
+    "url": "data:image/png;base64,BASE64_IMAGE_DATA"
+  }
+}
+```
+
 ## 响应示例
 
 <ResponseExample>
@@ -107,7 +160,7 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
   "id": "chatcmpl_abc123",
   "object": "chat.completion",
   "created": 1735689600,
-  "model": "gpt-4o",
+  "model": "gpt-5.5",
   "choices": [
     {
       "index": 0,
@@ -199,6 +252,6 @@ curl -X POST https://www.geeknow.top/v1/chat/completions \
 
 ## 相关接口
 
-- [通用对话接口（默认流式）](./chat-completions-stream)
-- [OpenAI 多模态响应接口](./openai-responses)
+- [Chat Completions（流式）](./chat-completions-stream)
+- [OpenAI Responses 接口](./openai-responses)
 - [文本补全接口](./completions)

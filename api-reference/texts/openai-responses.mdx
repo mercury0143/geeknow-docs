@@ -1,12 +1,12 @@
 ---
-title: OpenAI 多模态响应接口
+title: OpenAI Responses 接口
 description: 使用 OpenAI Responses API 格式创建响应，支持多模态输入、工具调用、流式输出和上下文压缩。
 api: "POST /v1/responses"
 ---
 
-# OpenAI 多模态响应接口
+# OpenAI Responses 接口
 
-Responses API 是面向多模态、工具调用和上下文续接的统一响应接口。相比 Chat Completions，它的输入、输出和工具调用结构更适合复杂任务编排。
+Responses API 是面向多模态、工具调用和结构化输出的统一响应接口。相比 Chat Completions，它的输入、输出和工具调用结构更适合复杂任务编排。新项目如果没有强依赖旧 Chat Completions 请求体，建议优先评估该接口。
 
 ## 请求体
 
@@ -15,7 +15,7 @@ Responses API 是面向多模态、工具调用和上下文续接的统一响应
 </ParamField>
 
 <ParamField body="input" type="string | array<object>">
-用户输入。可以是字符串，也可以是结构化消息数组。
+用户输入。可以是字符串，也可以是结构化消息数组；部分上游能力组合会要求使用结构化数组。
 </ParamField>
 
 <ParamField body="instructions" type="string">
@@ -23,7 +23,7 @@ Responses API 是面向多模态、工具调用和上下文续接的统一响应
 </ParamField>
 
 <ParamField body="previous_response_id" type="string">
-上一轮响应 ID。上游支持时可用于上下文续接。
+上一轮响应 ID。仅在上游和当前通道支持 Responses 会话续接时可用；当前 HTTP 路径不应依赖该字段做通用上下文管理。
 </ParamField>
 
 <ParamField body="tools" type="array<object>">
@@ -35,23 +35,23 @@ Responses API 是面向多模态、工具调用和上下文续接的统一响应
 </ParamField>
 
 <ParamField body="max_output_tokens" type="integer">
-最大输出 token 数。显式传 `0` 会被保留并转发给支持的上游。
+最大输出 token 数。不同模型和通道对该字段支持程度不同；如果返回空文本或上游报不支持，请调高限制或去掉该字段后重试。
 </ParamField>
 
 <ParamField body="reasoning" type="object">
-推理配置，例如 `{ "effort": "medium", "summary": "auto" }`。
+推理配置，例如 `{ "effort": "low" }`、`{ "effort": "medium" }`、`{ "effort": "high" }`、`{ "effort": "xhigh" }`。官方支持值还包括 `none` 和 `minimal`，但具体可用范围取决于模型。
 </ParamField>
 
 <ParamField body="text" type="object">
-文本输出配置，常用于 JSON Schema 结构化输出。
+文本输出配置，常用于 JSON Schema 结构化输出，也可包含支持模型的输出风格字段，例如 `verbosity`。
 </ParamField>
 
 <ParamField body="stream" type="boolean">
 是否启用 SSE 流式输出。
 </ParamField>
 
-<ParamField body="stream_options.include_usage" type="boolean">
-流式响应中是否包含 token 用量。
+<ParamField body="stream_options.include_obfuscation" type="boolean">
+OpenAI Responses 原生流式选项，用于控制流式事件中的 `obfuscation` 字段。不要把 Chat Completions 的 `stream_options.include_usage` 直接套到 Responses；用量通常随 `response.completed` 等事件返回，是否出现取决于上游。
 </ParamField>
 
 <ParamField body="store" type="boolean">
@@ -75,9 +75,10 @@ curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "instructions": "你是一个简洁的技术助手。",
-    "input": "用三句话解释 Responses API 适合什么场景。"
+    "input": "用三句话解释 Responses API 适合什么场景。",
+    "reasoning": { "effort": "low" }
   }'
 ```
 
@@ -85,18 +86,20 @@ curl -X POST https://www.geeknow.top/v1/responses \
 
 ### 多模态输入
 
+图片 URL 放在 `input_image.image_url`。如果传 base64，使用 `data:image/png;base64,...` 形式；具体是否支持取决于模型和通道，生产前请用当前 API Key 验证。
+
 ```bash
 curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "input": [
       {
         "role": "user",
         "content": [
           { "type": "input_text", "text": "提取这张截图中的异常指标。" },
-          { "type": "input_image", "image_url": "https://.../dashboard.png", "detail": "high" }
+          { "type": "input_image", "image_url": "https://YOUR_IMAGE_HOST/path/dashboard.png", "detail": "high" }
         ]
       }
     ]
@@ -110,7 +113,7 @@ curl -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "input": "北京今天适合户外跑步吗？",
     "tools": [
       {
@@ -137,13 +140,19 @@ curl -N -X POST https://www.geeknow.top/v1/responses \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "input": "写一个 5 行以内的产品发布公告。",
-    "stream": true,
-    "stream_options": {
-      "include_usage": true
-    }
+    "stream": true
   }'
+```
+
+base64 写法：
+
+```json
+{
+  "type": "input_image",
+  "image_url": "data:image/png;base64,BASE64_IMAGE_DATA"
+}
 ```
 
 ## 响应示例
@@ -156,7 +165,7 @@ curl -N -X POST https://www.geeknow.top/v1/responses \
   "object": "response",
   "created_at": 1735689600,
   "status": "completed",
-  "model": "gpt-4o",
+  "model": "gpt-5.5",
   "output": [
     {
       "type": "message",
@@ -181,15 +190,17 @@ curl -N -X POST https://www.geeknow.top/v1/responses \
 ```
 
 ```text 200 - 流式
-data: {"type":"response.created","response":{"id":"resp_abc123","object":"response","status":"in_progress","model":"gpt-4o"}}
+event: response.created
+data: {"type":"response.created","response":{"id":"resp_abc123","object":"response","status":"in_progress","model":"gpt-5.5"}}
 
+event: response.output_text.delta
 data: {"type":"response.output_text.delta","delta":"Responses"}
 
+event: response.output_text.delta
 data: {"type":"response.output_text.delta","delta":" API"}
 
+event: response.completed
 data: {"type":"response.completed","response":{"id":"resp_abc123","status":"completed","usage":{"prompt_tokens":26,"completion_tokens":62,"total_tokens":88}}}
-
-data: [DONE]
 ```
 
 ```json 400
@@ -262,7 +273,7 @@ curl -X POST https://www.geeknow.top/v1/responses/compact \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-4o",
+    "model": "gpt-5.5",
     "instructions": "压缩成后续对话可继续使用的上下文，保留决策、约束和待办。",
     "input": [
       { "role": "user", "content": "第一轮需求..." },
@@ -273,5 +284,5 @@ curl -X POST https://www.geeknow.top/v1/responses/compact \
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
-- [通用对话接口（默认流式）](./chat-completions-stream)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
+- [Chat Completions（流式）](./chat-completions-stream)

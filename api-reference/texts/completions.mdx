@@ -6,7 +6,11 @@ api: "POST /v1/completions"
 
 # 文本补全接口
 
-Legacy Completions 接口使用 `prompt` 作为输入，适合仍在使用旧 OpenAI SDK 或简单补全文本的业务。新对话场景建议使用 [通用对话接口](./chat-completions-non-stream)。
+Legacy Completions 接口使用 `prompt` 作为输入，适合仍在使用旧 OpenAI SDK 或简单补全文本的业务。新对话场景建议使用 [Chat Completions](./chat-completions-non-stream) 或 [OpenAI Responses](./openai-responses)。
+
+<Warning>
+该接口只适合历史系统兼容，不建议新项目优先接入。模型列表中的聊天或推理模型不一定支持 Legacy Completions；上线前请单独验证目标模型。
+</Warning>
 
 ## 请求体
 
@@ -47,7 +51,7 @@ curl -X POST https://www.geeknow.top/v1/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "gpt-3.5-turbo-instruct",
+    "model": "deepseek-v4-flash",
     "prompt": "把下面一句话改写得更正式：这个接口挺好用。",
     "max_tokens": 120,
     "temperature": 0.3
@@ -65,7 +69,7 @@ curl -X POST https://www.geeknow.top/v1/completions \
   "id": "cmpl_abc123",
   "object": "text_completion",
   "created": 1735689600,
-  "model": "gpt-3.5-turbo-instruct",
+  "model": "deepseek-v4-flash",
   "choices": [
     {
       "index": 0,
@@ -140,5 +144,5 @@ curl -X POST https://www.geeknow.top/v1/completions \
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
 - [模型列表](./models)

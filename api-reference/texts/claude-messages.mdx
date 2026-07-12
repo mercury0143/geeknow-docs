@@ -8,6 +8,10 @@ api: "POST /v1/messages"
 
 Claude Messages 接口保留 Anthropic 原生请求结构，适合已有 Claude SDK 或原生提示词结构的业务迁移。可用模型与实际能力以账户配置和模型列表返回为准。
 
+<Info>
+当前站点已验证 `claude-fable-5`、`claude-opus-4-8`、`claude-sonnet-5` 和 `claude-haiku-4-5-20251001` 可以通过该接口调用。生产环境仍建议先请求 [模型列表](./models)，确认当前 API Key 的可用范围。
+</Info>
+
 ## 认证
 
 ```http
@@ -36,7 +40,7 @@ Claude 模型名称。
 </ParamField>
 
 <ParamField body="max_tokens" type="integer">
-最大输出 token 数。多数 Claude 请求都应显式传入。
+最大输出 token 数。Anthropic 原生请求通常要求显式传入；当前网关可能提供默认值，但生产请求建议固定传入。
 </ParamField>
 
 <ParamField body="stream" type="boolean">
@@ -44,15 +48,15 @@ Claude 模型名称。
 </ParamField>
 
 <ParamField body="temperature" type="number">
-采样温度。
+采样温度。Claude Sonnet 5、Claude Opus 4.8 等新模型官方要求不要设置非默认采样参数；建议省略该字段，用系统提示词控制风格。
 </ParamField>
 
 <ParamField body="top_p" type="number">
-核采样参数。
+核采样参数。Claude Sonnet 5、Claude Opus 4.8 等新模型会拒绝非默认 `top_p`；如果返回参数不支持错误，请删除该字段。
 </ParamField>
 
 <ParamField body="top_k" type="integer">
-Top-K 采样参数。
+Top-K 采样参数。Claude Sonnet 5、Claude Opus 4.8 等新模型会拒绝非默认 `top_k`；是否支持取决于模型和上游。
 </ParamField>
 
 <ParamField body="stop_sequences" type="array<string>">
@@ -68,7 +72,11 @@ Claude 工具列表，通常包含 `name`、`description` 与 `input_schema`。
 </ParamField>
 
 <ParamField body="thinking" type="object">
-扩展思考配置，例如 `{ "type": "enabled", "budget_tokens": 10000 }`。
+思考配置。Claude Sonnet 5 和 Opus 4.8 官方推荐自适应思考；旧式 `{ "type": "enabled", "budget_tokens": ... }` 可能返回 `400`，请优先使用模型支持的 adaptive/effort 写法。
+</ParamField>
+
+<ParamField body="effort" type="string">
+部分 Claude 新模型支持的思考强度，常见值为 `low`、`medium`、`high`、`xhigh`。当前站点已验证 `claude-fable-5` 可接受 `xhigh`。
 </ParamField>
 
 <ParamField body="metadata" type="object">
@@ -84,8 +92,8 @@ curl -X POST https://www.geeknow.top/v1/messages \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
-    "max_tokens": 1024,
+    "model": "claude-sonnet-5",
+    "max_tokens": 512,
     "system": "你是一个严谨的技术顾问。",
     "messages": [
       {
@@ -100,13 +108,15 @@ curl -X POST https://www.geeknow.top/v1/messages \
 
 ### 多模态输入
 
+URL 图片需要公网可访问。如果本地图片没有稳定 URL，先上传到图床，再把返回的 URL 放进 `source.url`。base64 图片则使用 `source.type: "base64"`，且 `data` 只放纯 base64 字符串。
+
 ```bash
 curl -X POST https://www.geeknow.top/v1/messages \
   -H "x-api-key: YOUR_API_KEY" \
   -H "anthropic-version: 2023-06-01" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5",
     "max_tokens": 1024,
     "messages": [
       {
@@ -116,10 +126,38 @@ curl -X POST https://www.geeknow.top/v1/messages \
             "type": "image",
             "source": {
               "type": "url",
-              "url": "https://.../architecture.png"
+              "url": "https://YOUR_IMAGE_HOST/path/architecture.png"
             }
           },
           { "type": "text", "text": "这张架构图里有哪些风险点？" }
+        ]
+      }
+    ]
+  }'
+```
+
+base64 写法：
+
+```bash
+curl -X POST https://www.geeknow.top/v1/messages \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-opus-4-7",
+    "max_tokens": 256,
+    "messages": [
+      {
+        "role": "user",
+        "content": [
+          {
+            "type": "image",
+            "source": {
+              "type": "base64",
+              "media_type": "image/png",
+              "data": "BASE64_IMAGE_DATA"
+            }
+          },
+          { "type": "text", "text": "描述这张图片。" }
         ]
       }
     ]
@@ -133,7 +171,7 @@ curl -X POST https://www.geeknow.top/v1/messages \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
-    "model": "claude-sonnet-4-20250514",
+    "model": "claude-sonnet-5",
     "max_tokens": 1024,
     "messages": [
       { "role": "user", "content": "上海今天适合骑行吗？" }
@@ -163,7 +201,7 @@ curl -X POST https://www.geeknow.top/v1/messages \
   "id": "msg_abc123",
   "type": "message",
   "role": "assistant",
-  "model": "claude-sonnet-4-20250514",
+  "model": "claude-sonnet-5",
   "content": [
     {
       "type": "text",
@@ -180,7 +218,7 @@ curl -X POST https://www.geeknow.top/v1/messages \
 
 ```text 200 - 流式
 event: message_start
-data: {"type":"message_start","message":{"id":"msg_abc123","type":"message","role":"assistant","content":[],"model":"claude-sonnet-4-20250514"}}
+data: {"type":"message_start","message":{"id":"msg_abc123","type":"message","role":"assistant","content":[],"model":"claude-sonnet-5"}}
 
 event: content_block_delta
 data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"API"}}
@@ -251,6 +289,6 @@ data: {"type":"message_stop"}
 
 ## 相关接口
 
-- [通用对话接口（默认非流式）](./chat-completions-non-stream)
-- [通用对话接口（默认流式）](./chat-completions-stream)
+- [Chat Completions（非流式）](./chat-completions-non-stream)
+- [Chat Completions（流式）](./chat-completions-stream)
 - [模型列表](./models)

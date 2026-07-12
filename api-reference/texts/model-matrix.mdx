@@ -1,22 +1,26 @@
 ---
-title: 文本模型支持矩阵
-description: 汇总当前文本系列接口支持的协议风格、典型模型家族、能力范围和推荐入口。
+title: 文本模型与协议矩阵
+description: 汇总文本接口支持的协议风格、典型模型家族、能力范围和推荐入口。
 ---
 
-# 文本模型支持矩阵
+# 文本模型与协议矩阵
 
-文本系列的复杂点不在于“模型多”，而在于“协议也多”。当前系统同时支持 OpenAI Chat Completions、OpenAI Responses、Claude Messages、Gemini 原生格式、Legacy Completions 与 Realtime。如果没有一张矩阵，外部用户很容易只看到接口名，却不知道应该从哪条协议接入。
+文本接口的复杂点不在于“模型多”，而在于“协议也多”。当前系统同时支持 OpenAI Chat Completions、OpenAI Responses、Claude Messages、Gemini 原生格式、Legacy Completions 与 Realtime。接入时先选协议，再查当前 API Key 可用模型，最后按目标模型验证参数。
 
 <Info>
 这一页按“协议风格 + 能力类型”整理，不按单个模型逐个枚举。单个 API Key 实际可用哪些模型，还是以 [模型列表](/api-reference/texts/models) 返回结果为准。
 </Info>
+
+<Warning>
+模型示例按当前站点可见模型整理，不等同于各上游官方最新模型清单。上游官方先发布、但本接口尚未返回的模型，不建议直接写入生产配置。
+</Warning>
 
 ## 协议总表
 
 | 协议/能力 | 推荐入口 | 典型模型家族 | 流式 | 工具调用 | 多模态 | 适用场景 |
 | --- | --- | --- | --- | --- | --- | --- |
 | OpenAI Chat Completions | `/v1/chat/completions` | GPT、Claude 映射模型、Gemini 映射模型、DeepSeek、Qwen 等 | 支持 | 支持 | 支持 | 聊天、Agent、传统 OpenAI SDK 兼容 |
-| OpenAI Responses | `/v1/responses` | GPT、支持 Responses 语义的兼容模型 | 支持 | 支持 | 支持 | 结构化输出、工具编排、上下文续接 |
+| OpenAI Responses | `/v1/responses` | GPT、支持 Responses 语义的兼容模型 | 支持 | 支持 | 支持 | 结构化输出、工具编排、复杂任务编排 |
 | Claude Messages | `/v1/messages` | Claude Sonnet / Opus / Haiku 等 | 支持 | 支持 | 支持 | 已有 Anthropic SDK 或 Claude 原生提示结构 |
 | Gemini 原生 | `/v1beta/models/{model}:{action}` | Gemini Flash / Pro / 图像预览模型 | 支持 | 支持 | 支持 | 已有 Gemini SDK、要保留 `contents/parts` 结构 |
 | Legacy Completions | `/v1/completions` | 兼容旧 Completion 风格的文本模型 | 通常非首选 | 有限 | 否 | 历史系统兼容 |
@@ -26,40 +30,34 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 
 下面这些不是“完整可用模型列表”，而是当前系统里常见、对外最容易遇到的一批文本模型名称示例。实际是否可用仍取决于你的渠道配置和 `GET /v1/models` 返回。
 
-### OpenAI / GPT 风格
+### GPT / OpenAI 风格
 
 | 常见模型名 | 说明 |
 | --- | --- |
-| `gpt-4o` | 通用多模态模型 |
-| `gpt-4o-mini` | 轻量版通用模型 |
-| `gpt-4.1` | 通用文本/工具调用模型 |
-| `gpt-4.1-mini` | 轻量版 4.1 |
-| `gpt-4.1-nano` | 更小规格 4.1 |
-| `o1` | 推理模型 |
-| `o3` | 推理模型 |
-| `o4` | 推理模型 |
+| `gpt-5.5` | 当前站点已验证的高能力模型，Chat Completions 和 Responses 均通过 |
+| `gpt-5.4` | GPT-5.4 系列通用模型 |
+| `gpt-5.4-high` / `gpt-5.4-medium` / `gpt-5.4-xhigh` | 不同推理强度或渠道配置的 GPT-5.4 变体 |
+| `gpt-5` | GPT-5 系列模型 |
+| `gpt-4o-audio-preview` / `gpt-4o-realtime-preview` | 语音或 Realtime 相关预览模型，具体能力以接口返回和通道配置为准 |
 
 ### Claude
 
 | 常见模型名 | 说明 |
 | --- | --- |
-| `claude-sonnet-4-20250514` | Claude Sonnet 系列常见版本 |
-| `claude-sonnet-4-5-20250929` | Sonnet 后续版本 |
-| `claude-sonnet-4-6` | Sonnet 4.6 |
-| `claude-opus-4-20250514` | Claude Opus 系列 |
-| `claude-opus-4-1-20250805` | Opus 后续版本 |
-| `claude-opus-4-6` | Opus 4.6 |
-| `claude-opus-4-7` | Opus 4.7 |
-| `claude-haiku-4-5-20251001` | Haiku 轻量模型 |
+| `claude-fable-5` | Claude 5 系列模型，已验证 Messages 基础调用和 `effort` 参数 |
+| `claude-sonnet-5` | Claude Sonnet 系列，适合通用开发者场景 |
+| `claude-opus-4-8` | Claude Opus 高能力模型，已验证基础调用 |
+| `claude-haiku-4-5-20251001` | Claude Haiku 轻量模型，已验证 `thinking` 响应结构 |
+| `claude-opus-4-6` / `claude-opus-4-7` / `claude-sonnet-4-6` | 站点中仍可能存在的 Claude 4 系列模型，具体以模型列表为准 |
 
 ### Gemini
 
 | 常见模型名 | 说明 |
 | --- | --- |
-| `gemini-2.0-flash` | Gemini 通用快速模型 |
-| `gemini-2.5-flash` | Gemini 2.5 Flash |
-| `gemini-2.5-pro` | Gemini 2.5 Pro |
+| `gemini-3.5-flash` | Gemini 快速模型，已验证原生 `generateContent` |
 | `gemini-3.1-pro-preview` | Gemini 预览版 Pro |
+| `gemini-3-pro-preview` | Gemini 预览版 Pro |
+| `gemini-2.5-pro` | Gemini 2.5 Pro |
 | `gemini-3-pro-image-preview` | Gemini 图像预览模型 |
 | `gemini-3.1-flash-image-preview` | Gemini 图像预览快速模型 |
 
@@ -67,21 +65,17 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 
 | 常见模型名 | 说明 |
 | --- | --- |
-| `deepseek-chat` | 通用对话模型 |
-| `deepseek-reasoner` | 推理模型 |
-| `deepseek-v4-flash` | 新一代快速模型 |
-| `deepseek-v4-pro` | 新一代高阶模型 |
-| `deepseek-r1` | 推理系列 |
-| `deepseek-r1-distill-qwen-32b` | 蒸馏推理模型 |
+| `deepseek-v4-flash` | 快速模型，已验证 Legacy Completions 可返回 `text_completion` |
+| `deepseek-v4-pro` | 高阶模型 |
 
 ### Qwen
 
 | 常见模型名 | 说明 |
 | --- | --- |
 | `qwen-max` | Qwen 高规格模型 |
+| `qwen-plus` | Qwen 通用模型 |
+| `qwen-turbo` | Qwen 快速模型 |
 | `qwen3-max` | Qwen 3 系列高规格模型 |
-| `qwen3-omni-flash` | Qwen 多模态快速模型 |
-| `qwq` / `qwq-*` | Qwen 推理系列常见命名 |
 
 ## 按协议选入口
 
@@ -94,7 +88,7 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 | 多模态输入 | `messages[].content` 支持 `text`、`image_url`、`input_audio`、`file`、`video_url` |
 | 适合人群 | 已经在用 OpenAI SDK、希望最低迁移成本接入 |
 | 典型模型家族 | GPT、Claude 映射模型、Gemini 映射模型、DeepSeek、Qwen |
-| 常见模型名示例 | `gpt-4o`、`gpt-4.1`、`gpt-4o-mini`、`deepseek-chat`、`deepseek-reasoner`、`qwen-max` |
+| 常见模型名示例 | `gpt-5.5`、`gpt-5.4`、`claude-sonnet-5`、`gemini-3.5-flash`、`deepseek-v4-flash`、`qwen-max` |
 
 ### 2. OpenAI Responses
 
@@ -105,7 +99,7 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 | 优势 | 更适合结构化输出、工具调用和复杂任务编排 |
 | 流式 | 支持 SSE |
 | 典型模型家族 | GPT 风格模型及兼容 Responses 语义的上游 |
-| 常见模型名示例 | `gpt-4o`、`gpt-4.1`、`o1`、`o3` |
+| 常见模型名示例 | `gpt-5.5`、`gpt-5.4` |
 
 ### 3. Claude Messages
 
@@ -115,7 +109,7 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 | 典型字段 | `model`、`messages`、`system`、`max_tokens`、`tools`、`thinking` |
 | 认证兼容 | `Authorization: Bearer` 或 `x-api-key` + `anthropic-version` |
 | 适合人群 | 已经有 Claude 原生格式调用代码 |
-| 常见模型名示例 | `claude-sonnet-4-20250514`、`claude-sonnet-4-6`、`claude-opus-4-6`、`claude-opus-4-7` |
+| 常见模型名示例 | `claude-fable-5`、`claude-sonnet-5`、`claude-opus-4-8`、`claude-haiku-4-5-20251001` |
 
 ### 4. Gemini 原生
 
@@ -125,7 +119,7 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 | 典型字段 | `contents`、`generationConfig`、`tools`、`safetySettings` |
 | 认证兼容 | `Authorization: Bearer` 或 `x-goog-api-key` |
 | 适合人群 | 需要完整保留 Gemini `contents/parts` 结构、图像 part、Google 工具风格 |
-| 常见模型名示例 | `gemini-2.0-flash`、`gemini-2.5-flash`、`gemini-2.5-pro`、`gemini-3.1-pro-preview` |
+| 常见模型名示例 | `gemini-3.5-flash`、`gemini-3.1-pro-preview`、`gemini-2.5-pro` |
 
 ## 按能力选接口
 
@@ -157,8 +151,8 @@ description: 汇总当前文本系列接口支持的协议风格、典型模型�
 
 ## 选型建议
 
-1. 如果你已经是 OpenAI SDK 客户端，先从 [通用对话接口（默认流式）](/api-reference/texts/chat-completions-stream) 开始。
-2. 如果你要做工具调用、上下文续接、结构化输出，优先用 [OpenAI 多模态响应接口](/api-reference/texts/openai-responses)。
+1. 如果你已经是 OpenAI SDK 客户端，先从 [Chat Completions（非流式）](/api-reference/texts/chat-completions-non-stream) 开始，需要边生成边展示时再打开 `stream`。
+2. 如果你要做工具调用、结构化输出或复杂任务编排，优先用 [OpenAI Responses 接口](/api-reference/texts/openai-responses)。
 3. 如果你已有 Anthropic SDK，直接接 [Claude 消息接口](/api-reference/texts/claude-messages)。
 4. 如果你已有 Gemini SDK 或要保留 `contents/parts` 结构，直接接 [Gemini 原生格式](/api-reference/texts/gemini-native)。
 5. 如果你需要低延迟双向语音或实时会话，优先看 [Realtime 接口](/api-reference/texts/realtime)。
