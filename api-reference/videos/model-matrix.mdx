@@ -13,7 +13,6 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | --- | --- | --- | --- | --- | --- |
 | Sora | `sora-2` | [概览](/api-reference/videos/sora/overview) | `/v1/videos` | 文生视频、首帧生视频 | JSON `input_reference` |
 | Veo | `veo_3_1`、`veo_3_1-fast` | [概览](/api-reference/videos/veo/overview) | `/v1/videos` | 文生视频、首尾帧、参考生视频 | JSON `input_reference` |
-| Grok Video 3 | `grok-video-3-pro`、`grok-video-3-max` | [Grok Video 3](/api-reference/videos/grok/grok-video-3) | `/v1/videos` | 文生视频、首帧生视频、首尾帧、参考生视频 | multipart `input_reference`，支持重复字段传多图 |
 | Grok Imagine | `grok-imagine-video`、`grok-imagine-video-1.5-preview` | [概览](/api-reference/videos/grok/overview) | `/v1/videos` | 文生视频、图生视频、参考图视频 | JSON `image` / `images`；1.5 Preview 当前仅单图 |
 | Omni | `omni-fast`、`omni-fast-v2v` | [概览](/api-reference/videos/omni/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、多参考图、参考视频编辑 | JSON `first_image_url` / `last_image_url` / `images` / `video` |
 | 国产视频模型（AIGC） | `Vidu-*`、`Kling-*`、`GV-*`、`OS-*`、`Hunyuan-*`、`Mingmou-*`、`Hailuo-*`、`SV-*`、`JV-*` | [概览](/api-reference/videos/aigc/overview) | `/v1/videos` | 文生、图生、参考图、参考视频、首尾帧、动作控制、数字人、对口型、模板特效 | JSON `image` / `images` / `input_reference` / `metadata` |
@@ -56,17 +55,6 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | 常见字段 | `model`、`prompt`、`seconds`、`duration`、`size`、`image`、`images`、`metadata` |
 | 参考图 | 支持 `image`、`images`、`input_reference`，高级场景也可通过 `metadata.file_infos` 传入 |
 | 典型场景 | 文生视频、图生视频、参考图、参考视频、首尾帧、动作控制、数字人、对口型、模板特效 |
-
-### Grok Video 3
-
-| 项目 | 说明 |
-| --- | --- |
-| 模型示例 | `grok-video-3-pro`、`grok-video-3-max` |
-| 推荐入口 | `POST /v1/videos` |
-| 文档页面 | [Grok Video 3](/api-reference/videos/grok/grok-video-3) |
-| 常见字段 | `prompt`、`seconds`、`aspect_ratio`、`size` |
-| 参考图 | 使用 multipart `input_reference`，可重复字段传多张参考图 |
-| 时长规则 | `grok-video-3-pro` 固定 `10s`，`grok-video-3-max` 固定 `15s` |
 
 ### Grok Imagine
 
@@ -176,7 +164,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | --- | --- | --- | --- | --- | --- |
 | Sora | 支持 | 支持 | 部分场景依赖上游 | 部分场景通过多图参考实现 | 支持 |
 | Veo | 支持 | 可通过参考图实现 | 支持 | 支持 | 依赖上游 |
-| Grok Video | 支持 | 支持 | 支持 | 支持 | 依赖上游 |
+| Grok Imagine | 支持 | 支持 | 依赖上游 | 支持 | 依赖上游 |
 | Omni | 支持 | 支持 | 支持 | `omni-fast` 支持参考图；`omni-fast-v2v` 支持参考视频 | 模型相关 |
 | 特惠渠道系列 | 支持 | 支持 | 支持 | `manxue-2.0` 支持参考图和参考音频 | 模型相关 |
 | Seedance 2.0 | 支持 | 支持 | 支持 | 支持参考图、参考视频和参考音频 | 模型相关 |
@@ -208,10 +196,8 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | `Kling-3.0-Omni` | 国产视频模型 | 可灵 3.0 Omni（基础模型）。 |
 | `omni-fast` | Omni | 文生视频、首帧图生视频、首尾帧和多参考图视频；JSON 请求；参考图最多 5 张；时长 4 到 30 秒。 |
 | `omni-fast-v2v` | Omni | 在 `omni-fast` 基础上额外支持参考视频编辑或延长；参考视频字段为 `video` / `video_url` / `input_video`，最大 15MB。 |
-| `grok-imagine-video` | Grok Video | Grok Imagine Video；JSON 请求；单图传 `image`，多图传 `images`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
-| `grok-imagine-video-1.5-preview` | Grok Video | Grok Imagine 1.5 Preview；JSON 请求；当前仅建议单图 `image`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
-| `grok-video-3-pro` | Grok Video | Grok 3 Pro；固定 `10s`。 |
-| `grok-video-3-max` | Grok Video | Grok 3 Max；固定 `15s`。 |
+| `grok-imagine-video` | Grok Imagine | Grok Imagine Video；JSON 请求；单图传 `image`，多图传 `images`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
+| `grok-imagine-video-1.5-preview` | Grok Imagine | Grok Imagine 1.5 Preview；JSON 请求；当前仅建议单图 `image`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
 | `Hailuo-2.3` | 国产视频模型 | 海螺 2.3（基础模型）。 |
 | `Hailuo-2.3-fast` | 国产视频模型 | 海螺 2.3 fast（基础模型）。 |
 

@@ -1,20 +1,16 @@
 ---
 title: Grok 视频概览
-description: 按模型系列整理 `grok-video-3-pro`、`grok-video-3-max`、`grok-imagine-video` 与 `grok-imagine-video-1.5-preview` 的视频生成与任务查询接口。
+description: 按模型系列整理 `grok-imagine-video` 与 `grok-imagine-video-1.5-preview` 的视频生成与任务查询接口。
 ---
 
 # Grok 视频
 
-Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `GET /v1/videos/{task_id}` 查询状态。开发者接入时需要先区分两条请求形态：
+Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `GET /v1/videos/{task_id}` 查询状态。
 
-- `grok-video-3-pro` / `grok-video-3-max` 使用 `multipart/form-data`；参考图通过重复的 `input_reference` 文件字段上传。
 - `grok-imagine-video` / `grok-imagine-video-1.5-preview` 使用 `application/json`；`grok-imagine-video` 通过 `image` 或 `images` 传入参考图，`grok-imagine-video-1.5-preview` 当前仅建议使用单张 `image`。
-- 两类模型共用 `model`、`prompt`、`seconds`、`aspect_ratio` 等字段，但清晰度字段不同：Grok Video 使用 `size`，Grok Imagine 使用 `resolution`。
+- Grok Imagine 使用 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` 等字段。
 
 <CardGroup cols={2}>
-  <Card title="Grok Video 3" icon="clapperboard" href="/api-reference/videos/grok/grok-video-3">
-    `grok-video-3-pro`、`grok-video-3-max` 的 multipart 视频生成任务。
-  </Card>
   <Card title="Grok Imagine Video" icon="sparkles" href="/api-reference/videos/grok/grok-imagine-video">
     `grok-imagine-video` 的 JSON 视频生成任务。
   </Card>
@@ -30,8 +26,6 @@ Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `
 
 | 模型 | 请求格式 | 时长规则 | 参考图规则 |
 | --- | --- | --- | --- |
-| `grok-video-3-pro` | multipart | 固定 `10s` | 支持多张参考图，建议按实际场景控制数量 |
-| `grok-video-3-max` | multipart | 固定 `15s` | 支持多张参考图，建议按实际场景控制数量 |
 | `grok-imagine-video` | JSON | 自定义秒数，最小 `1s` | 单图传 `image`，多图传 `images` |
 | `grok-imagine-video-1.5-preview` | JSON | 自定义秒数，最小 `1s` | 当前仅建议传 1 张参考图 |
 
@@ -40,25 +34,20 @@ Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `
 | 能力 | 传参方式 | 说明 |
 | --- | --- | --- |
 | 文生视频 | 仅传文本字段 | 不需要上传参考图 |
-| 首帧生视频 | `input_reference` 传 1 张图 | 适用于 `grok-video-3-pro` / `grok-video-3-max` |
-| 首尾帧 | `input_reference` 依次传首帧、尾帧 | 适用于 multipart Grok Video 系列 |
-| 参考生视频 | 重复传 `input_reference` | `grok-video-3-pro` / `grok-video-3-max` 支持多图参考 |
 | Grok Imagine 图生视频 | JSON `image` 或 `images` | 单图用 `image`；多图用 `images`，其中 `grok-imagine-video-1.5-preview` 当前仅建议传 1 张 |
 
 ## 参数约束
 
 | 字段 | 可用值 | 说明 |
 | --- | --- | --- |
-| `aspect_ratio` | Grok Video 常用 `2:3`、`3:2`、`1:1`、`16:9`、`9:16`；Grok Imagine 支持常见比例和 `数字:数字` 自定义比例 | 建议显式传入目标比例 |
-| `size` | `480P`、`540P`、`720P`、`1080P` | 仅适用于 `grok-video-3-pro` / `grok-video-3-max` |
+| `aspect_ratio` | Grok Imagine 支持常见比例和 `数字:数字` 自定义比例 | 建议显式传入目标比例 |
 | `resolution` | `480P`、`720P` | 仅适用于 `grok-imagine-video` / `grok-imagine-video-1.5-preview` |
-| `seconds` | Grok Video 使用 `10` 或 `15`；Grok Imagine 使用大于等于 `1` 的整数秒 | `grok-video-3-pro` 固定 `10s`，`grok-video-3-max` 固定 `15s` |
+| `seconds` | 大于等于 `1` 的整数秒 | Grok Imagine 支持自定义秒数 |
 | `prompt` | 字符串 | Grok Imagine 系列建议控制在 `4096` 字符以内；长提示词可能导致上游创建任务失败 |
 
 ## 相关页面
 
 - [视频模型支持矩阵](/api-reference/videos/model-matrix)
-- [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
 - [Grok 任务查询](./query)

@@ -225,16 +225,6 @@ Authorization: Bearer YOUR_API_KEY
 任务完成后的视频地址。也可以使用 `GET /v1/videos/{task_id}/content` 下载结果。
 </ResponseField>
 
-## 与 Grok 1.5 / 3 的区别
-
-| 项目 | `grok-imagine-video` | `grok-video-3-pro` / `grok-video-3-max` |
-| --- | --- | --- |
-| 请求格式 | JSON | `multipart/form-data` |
-| 图片字段 | `image` / `images` | `input_reference` |
-| 清晰度字段 | `resolution` | `size` |
-| 清晰度值 | `480P`、`720P` | `480P`、`540P`、`720P`、`1080P` |
-| 时长规则 | 自定义秒数，最小 `1s` | `10s` 对应 Pro 档，`15s` 对应 Max 档 |
-
 ## 错误处理建议
 
 如果创建任务返回 `5xx`，且错误信息包含 `task_id is empty`，通常表示上游没有接受本次任务。常见触发原因包括提示词过长、分镜描述过密或上游临时拒绝创建任务。建议客户端记录当前 `prompt` 的字符数与字节数，并在重试前压缩提示词。
@@ -242,6 +232,5 @@ Authorization: Bearer YOUR_API_KEY
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok Video 3](./grok-video-3)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
 - [Grok 任务查询](./query)

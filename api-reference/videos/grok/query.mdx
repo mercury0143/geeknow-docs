@@ -6,7 +6,7 @@ api: "GET /v1/videos/{task_id}"
 
 # Grok 任务查询
 
-Grok 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态。`grok-video-3-pro` / `grok-video-3-max` 与 Grok Imagine 系列共用同一组查询与下载接口。
+Grok Imagine 系列任务提交后，通过 `GET /v1/videos/{task_id}` 轮询状态，并共用同一组查询与下载接口。
 
 - 接口路径是 `GET /v1/videos/{task_id}`。
 - 任务完成后，优先从响应中的视频 URL 字段读取结果地址。
@@ -59,7 +59,7 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-video-3-pro",
+  "model": "grok-imagine-video",
   "status": "processing",
   "progress": 42,
   "created_at": 1735689600,
@@ -101,7 +101,7 @@ console.log(await response.json());
 {
   "id": "video_abc123",
   "object": "video",
-  "model": "grok-video-3-pro",
+  "model": "grok-imagine-video-1.5-preview",
   "status": "failed",
   "progress": 100,
   "created_at": 1735689600,
@@ -209,6 +209,5 @@ curl https://www.geeknow.top/v1/videos/video_abc123/content \
 ## 相关接口
 
 - [Grok 视频概览](./overview)
-- [Grok Video 3](./grok-video-3)
 - [Grok Imagine Video](./grok-imagine-video)
 - [Grok Imagine 1.5 Preview](./grok-imagine-video-1-5-preview)
