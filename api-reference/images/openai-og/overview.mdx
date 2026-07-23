@@ -1,0 +1,37 @@
+---
+title: OpenAI 系列（OG）图像任务
+description: 面向 `image2` 系列的图像任务接入说明，统一使用 `POST /v1/videos` 提交任务，并通过查询接口获取结果。
+---
+
+# OpenAI 系列（OG）图像任务
+
+这组接口归属于图像系列中的 OpenAI 系列，用于 `image2` / OG 模型线。接口形态参考任务式请求：先提交图像任务，再通过任务 ID 查询生成结果。
+
+## 接口概览
+
+| 项目 | 说明 |
+| --- | --- |
+| 提交任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 适用模型 | `image2` / `image2-medium` / `image2-low` / `image2-high` / `image2-high-2k` |
+| 结果字段 | `output.file_infos[].file_url` |
+
+## 模型命名
+
+| 网关模型名 | 上游模型 |
+| --- | --- |
+| `image2` / `image2-medium` | `image2_medium` |
+| `image2-low` | `image2_low` |
+| `image2-high` / `image2-high-2k` | `image2_high` |
+
+## 请求重点
+
+- 请求体使用 JSON。
+- 顶层保留 `model`、`prompt`、`image` / `images` / `input_reference`。
+- `metadata.output_image_count` 仅用于 OG / `image2` 系列，表示期望输出图片张数。
+- `metadata.output_config` 用于传递尺寸、比例等输出配置，优先级高于顶层 `size`。
+
+## 推荐阅读
+
+- [OpenAI 系列（OG）图像生成提交](/api-reference/images/openai-og/generation)
+- [OpenAI 系列（OG）图像任务查询](/api-reference/images/openai-og/query)

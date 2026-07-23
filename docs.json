@@ -84,12 +84,21 @@
             ]
           },
           {
-            "group": "Tencent VOD",
+            "group": "OpenAI OG",
             "expanded": true,
             "pages": [
-              "api-reference/images/tencent-vod/overview",
-              "api-reference/images/tencent-vod/generation",
-              "api-reference/images/tencent-vod/query"
+              "api-reference/images/openai-og/overview",
+              "api-reference/images/openai-og/generation",
+              "api-reference/images/openai-og/query"
+            ]
+          },
+          {
+            "group": "Gemini GG",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gemini-gg/overview",
+              "api-reference/images/gemini-gg/generation",
+              "api-reference/images/gemini-gg/query"
             ]
           },
           {

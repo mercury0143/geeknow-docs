@@ -1,0 +1,86 @@
+---
+title: OpenAI 系列（OG）图像生成提交
+description: 使用 `POST /v1/videos` 提交 `image2` 系列图像任务。
+api: "POST /v1/videos"
+---
+
+# OpenAI 系列（OG）图像生成提交
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "image2-high-2k",
+    "prompt": "把这个空间重新设计成现代极简风格，保持骨架不变",
+    "image": "https://example.com/room.jpg",
+    "metadata": {
+      "output_image_count": 2,
+      "output_config": {
+        "width": 2048,
+        "height": 2048
+      }
+    }
+  }'
+```
+
+</RequestExample>
+
+## 请求字段
+
+<ParamField body="model" type="string" required>
+OpenAI OG 模型名，例如 `image2`、`image2-medium`、`image2-low`、`image2-high`、`image2-high-2k`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+图像生成或编辑提示词。
+</ParamField>
+
+<ParamField body="image" type="string">
+单张参考图 URL 或 Base64。图生图场景常用。
+</ParamField>
+
+<ParamField body="images" type="string[]">
+多张参考图。和 `image` 二选一或按实际模型要求组合使用。
+</ParamField>
+
+<ParamField body="input_reference" type="object | object[]">
+结构化参考图输入，用于传递参考图 URL、权重、类型等扩展信息。
+</ParamField>
+
+<ParamField body="metadata.output_image_count" type="integer">
+OG / `image2` 系列输出图片张数。
+</ParamField>
+
+<ParamField body="metadata.output_config" type="object">
+输出配置，例如 `width`、`height`、`aspect_ratio`。该配置优先级高于顶层 `size`。
+</ParamField>
+
+## 返回示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "status": "QUEUED",
+  "model": "image2-high-2k",
+  "created_at": 1784788800
+}
+```
+
+</ResponseExample>
+
+提交成功后保存 `task_id`，再调用 [任务查询接口](/api-reference/images/openai-og/query) 获取最终图片 URL。

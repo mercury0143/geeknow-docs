@@ -1,0 +1,38 @@
+---
+title: Gemini 系列（GG）图像任务
+description: 面向 `GG` 系列的图像任务接入说明，统一使用 `POST /v1/videos` 提交任务，并通过查询接口获取结果。
+---
+
+# Gemini 系列（GG）图像任务
+
+这组接口归属于图像系列中的 Gemini 系列，用于 `GG` 模型线。接口形态参考任务式请求：先提交图像任务，再通过任务 ID 查询生成结果。
+
+## 接口概览
+
+| 项目 | 说明 |
+| --- | --- |
+| 提交任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 适用模型 | `GG-2.5` / `GG-3.0` / `GG-3.1` / `gg-3.1-4k` |
+| 结果字段 | `output.file_infos[].file_url` |
+
+## 模型命名
+
+| 网关模型名 | 上游模型 |
+| --- | --- |
+| `GG-2.5` | `GG` / `2.5` |
+| `GG-3.0` | `GG` / `3.0` |
+| `GG-3.1` | `GG` / `3.1` |
+| `gg-3.1-4k` | `GG` / `3.1`，4K 输出配置 |
+
+## 请求重点
+
+- 请求体使用 JSON。
+- 顶层保留 `model`、`prompt`、`image` / `images` / `input_reference`。
+- `images` 最多支持 14 张参考图。
+- `metadata.output_config` 用于传递尺寸、比例等输出配置，优先级高于顶层 `size`。
+
+## 推荐阅读
+
+- [Gemini 系列（GG）图像生成提交](/api-reference/images/gemini-gg/generation)
+- [Gemini 系列（GG）图像任务查询](/api-reference/images/gemini-gg/query)

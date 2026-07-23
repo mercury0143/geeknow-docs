@@ -1,0 +1,65 @@
+---
+title: Gemini 系列（GG）图像任务查询
+description: 使用 `GET /v1/videos/{task_id}` 查询 GG 图像任务状态和结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Gemini 系列（GG）图像任务查询
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X GET https://www.geeknow.top/v1/videos/task_img_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+</RequestExample>
+
+## 返回示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "status": "FINISH",
+  "model": "GG-3.1",
+  "progress": 100,
+  "output": {
+    "file_infos": [
+      {
+        "file_url": "https://example.com/result-1.png",
+        "width": 1024,
+        "height": 1024
+      }
+    ]
+  }
+}
+```
+
+</ResponseExample>
+
+## 返回字段
+
+<ResponseField name="status" type="string">
+任务状态。常见值包括 `QUEUED`、`RUNNING`、`FINISH`、`FAILED`。
+</ResponseField>
+
+<ResponseField name="output.file_infos[].file_url" type="string">
+任务完成后的图片 URL。
+</ResponseField>
+
+## 推荐阅读
+
+- [Gemini 系列（GG）图像任务概览](/api-reference/images/gemini-gg/overview)
+- [Gemini 系列（GG）图像生成提交](/api-reference/images/gemini-gg/generation)

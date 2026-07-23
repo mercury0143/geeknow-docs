@@ -1,0 +1,75 @@
+---
+title: Gemini 系列（GG）图像生成提交
+description: 使用 `POST /v1/videos` 提交 `GG` 系列图像任务。
+api: "POST /v1/videos"
+---
+
+# Gemini 系列（GG）图像生成提交
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "GG-3.1",
+    "prompt": "一只在窗台晒太阳的橘猫，胶片质感",
+    "size": "1024x1024"
+  }'
+```
+
+</RequestExample>
+
+## 请求字段
+
+<ParamField body="model" type="string" required>
+Gemini GG 模型名，例如 `GG-2.5`、`GG-3.0`、`GG-3.1`、`gg-3.1-4k`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+图像生成或编辑提示词。
+</ParamField>
+
+<ParamField body="image" type="string">
+单张参考图 URL 或 Base64。
+</ParamField>
+
+<ParamField body="images" type="string[]">
+多张参考图，最多 14 张。
+</ParamField>
+
+<ParamField body="input_reference" type="object | object[]">
+结构化参考图输入，用于传递参考图 URL、权重、类型等扩展信息。
+</ParamField>
+
+<ParamField body="metadata.output_config" type="object">
+输出配置，例如 `width`、`height`、`aspect_ratio`。该配置优先级高于顶层 `size`。
+</ParamField>
+
+## 返回示例
+
+<ResponseExample>
+
+```json
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "status": "QUEUED",
+  "model": "GG-3.1",
+  "created_at": 1784788800
+}
+```
+
+</ResponseExample>
+
+提交成功后保存 `task_id`，再调用 [任务查询接口](/api-reference/images/gemini-gg/query) 获取最终图片 URL。
