@@ -1,0 +1,136 @@
+﻿---
+title: Tencent VOD 图像生成提交
+description: 使用 `POST /v1/videos` 提交 GG 与 image2(OG) 图像任务。
+api: "POST /v1/videos"
+---
+
+# Tencent VOD 图像生成提交
+
+图像系列的 TencentVod 接入统一走任务提交接口。模型由 `model` 决定，网关会按模型名自动路由到 GG 或 image2(OG) 上游。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "GG-3.1",
+    "prompt": "一只在窗台晒太阳的橘猫，胶片质感",
+    "size": "1024x1024"
+  }'
+```
+
+```bash
+curl -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "image2-high-2k",
+    "prompt": "把这个空间重新设计成现代极简风格，保持骨架不变",
+    "image": "https://example.com/room.jpg",
+    "metadata": {
+      "output_image_count": 2,
+      "output_config": {
+        "storage_mode": "Temporary",
+        "resolution": "2K",
+        "aspect_ratio": "16:9"
+      }
+    }
+  }'
+```
+
+</RequestExample>
+
+## 请求字段
+
+<ParamField body="model" type="string" required>
+模型名称。GG 系列可传 `GG-2.5`、`GG-3.0`、`GG-3.1`；OG 系列可传 `image2`、`image2-low`、`image2-medium`、`image2-high`，也可直接传组合计费模型名，例如 `image2-high-2k`、`gg-3.1-4k`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+图像生成提示词。
+</ParamField>
+
+<ParamField body="size" type="string">
+顶层尺寸字段。支持 `WxH`、`1K`、`2K`、`4K` 等写法；如果同时传了 `metadata.output_config`，以后者为准。
+</ParamField>
+
+<ParamField body="image" type="string">
+单张参考图。支持可访问的 `http(s)` URL 或 FileId，不支持 base64 data URI。
+</ParamField>
+
+<ParamField body="images" type="array<string>">
+多张参考图。GG 3.0 / 3.1 场景最多支持 14 张。
+</ParamField>
+
+<ParamField body="input_reference" type="string | array<string>">
+参考图兼容字段。建议优先使用 `image` / `images`。
+</ParamField>
+
+<ParamField body="metadata.negative_prompt" type="string">
+反向提示词。
+</ParamField>
+
+<ParamField body="metadata.enhance_prompt" type="string">
+提示词增强开关，建议按上游要求传 `Enabled` / `Disabled`。
+</ParamField>
+
+<ParamField body="metadata.seed" type="integer">
+随机种子。
+</ParamField>
+
+<ParamField body="metadata.output_image_count" type="integer">
+输出图片张数。仅 OG 支持，范围为 `1-8`。
+</ParamField>
+
+<ParamField body="metadata.output_config" type="object">
+输出配置。支持分辨率、宽高比、存储模式、输出格式等字段。
+</ParamField>
+
+<ParamField body="metadata.ext_info" type="string">
+原样透传的扩展信息。
+</ParamField>
+
+## 返回示例
+
+<ResponseExample>
+
+```json 200
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "image2-high-2k",
+  "status": "queued",
+  "created_at": 1735689600
+}
+```
+
+```json 400
+{
+  "code": "invalid_request",
+  "message": "prompt is required"
+}
+```
+
+</ResponseExample>
+
+## 说明
+
+- 提交成功后只返回任务 ID，结果需要走查询接口轮询。
+- `metadata.output_config.resolution` 和 `metadata.output_config.aspect_ratio` 的优先级高于顶层 `size`。
+- `output_image_count` 只对 OG 生效，多张输出按张数计费。
+
+## 相关页面
+
+- [Tencent VOD 图像生成概览](/api-reference/images/tencent-vod/overview)
+- [Tencent VOD 图像任务查询](/api-reference/images/tencent-vod/query)

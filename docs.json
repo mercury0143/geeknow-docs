@@ -84,6 +84,15 @@
             ]
           },
           {
+            "group": "Tencent VOD",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/tencent-vod/overview",
+              "api-reference/images/tencent-vod/generation",
+              "api-reference/images/tencent-vod/query"
+            ]
+          },
+          {
             "group": "Doubao Seedream",
             "expanded": true,
             "pages": [

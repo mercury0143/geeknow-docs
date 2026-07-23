@@ -1,11 +1,11 @@
 ---
 title: 图像系列概览
-description: 汇总图像生成、图像编辑、异步任务、素材上传和 Midjourney 相关接口。
+description: 汇总图像生成、图像编辑、异步任务、素材上传与 Tencent VOD 图像接入能力。
 ---
 
 # 图像系列
 
-图像能力按接口和模型分别组织。每个模型页面都独立说明请求路径、模型名、参数、尺寸表和返回结构；接入时可以直接进入目标模型页面，不需要先阅读其它模型文档。
+图像能力按接口和模型分别组织。每个模型页都会说明请求路径、模型名、参考图输入、尺寸约束和返回结构，开发者可以直接进入目标模型页，不必先读完其他文档。
 
 <CardGroup cols={2}>
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/images/model-matrix">
@@ -26,8 +26,11 @@ description: 汇总图像生成、图像编辑、异步任务、素材上传和 
   <Card title="图像异步生成" icon="hourglass" href="/api-reference/images/gpt-image-async/generation">
     `POST /v1/images/generations/async`，支持 GPT Image、Doubao Seedream 和 Gemini 图像模型异步提交。
   </Card>
-  <Card title="图像任务查询" icon="list-checks" href="/api-reference/images/gpt-image-async/query">
+  <Card title="图像异步任务查询" icon="list-checks" href="/api-reference/images/gpt-image-async/query">
     `GET /v1/images/generations/async/{taskId}`，查询异步生图任务状态、进度和结果。
+  </Card>
+  <Card title="Tencent VOD 图像生成" icon="image" href="/api-reference/images/tencent-vod/overview">
+    `POST /v1/videos` 与 `GET /v1/videos/{task_id}`，用于 GG 与 image2(OG) 图像任务接入。
   </Card>
   <Card title="Doubao Seedream" icon="image-upscale" href="/api-reference/images/doubao-seedream/generation">
     `POST /v1/images/generations`，支持 Seedream 文生图与 `image` 数组图生图。
@@ -50,6 +53,8 @@ description: 汇总图像生成、图像编辑、异步任务、素材上传和 
 | `POST` | `/v1/images/generations` | 图像生成入口 |
 | `POST` | `/v1/images/generations/async` | 图像异步生成入口 |
 | `GET` | `/v1/images/generations/async/{taskId}` | 图像异步任务查询 |
+| `POST` | `/v1/videos` | Tencent VOD 图像任务提交 |
+| `GET` | `/v1/videos/{task_id}` | Tencent VOD 图像任务查询 |
 | `POST` | `/v1/images/edits` | OpenAI Images 兼容编辑入口 |
 | `POST` | `/v1/edits` | 旧版编辑别名 |
 | `POST` | `/v1/images/variations` | 路由已保留，当前未实现 |
@@ -72,17 +77,12 @@ description: 汇总图像生成、图像编辑、异步任务、素材上传和 
 2. [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 3. [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
 4. [gpt-image-2-vip 生成图像 API](/api-reference/images/gpt-image-2-vip/generation)
-5. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
-6. [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
-7. [图像异步任务查询](/api-reference/images/gpt-image-async/query)
-8. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
-9. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
-10. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)
-11. [上传图片](/api-reference/uploads/image-upload)
-12. [Midjourney 概览](/api-reference/images/midjourney/overview)
-
-## 相关页面
-
-- [视频系列概览](/api-reference/videos/overview)
-- [任务管理概览](/api-reference/tasks/overview)
-- [账户管理概览](/api-reference/account/overview)
+5. [Tencent VOD 图像生成概览](/api-reference/images/tencent-vod/overview)
+6. [Tencent VOD 图像生成提交](/api-reference/images/tencent-vod/generation)
+7. [Tencent VOD 图像任务查询](/api-reference/images/tencent-vod/query)
+8. [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
+9. [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
+10. [图像异步任务查询](/api-reference/images/gpt-image-async/query)
+11. [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
+12. [OpenAI Images 兼容概览](/api-reference/images/gpt-image-1/overview)
+13. [OpenAI Images 兼容图像编辑](/api-reference/images/gpt-image-1/edit)

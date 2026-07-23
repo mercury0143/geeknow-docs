@@ -20,6 +20,7 @@ description: 汇总当前图像相关接口支持的模型家族、入口路由�
 | gpt-image-2-pro | `gpt-image-2-pro` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
 | gpt-image-2-vip | `gpt-image-2-vip` | `/v1/images/generations` | JSON `image`，支持多张 Base64 | `url` 或 `b64_json` |
 | 图像异步生成 | `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream、Gemini 图像模型 | `/v1/images/generations/async` + 查询接口 | JSON `image`，异步通道目前只接受公网 `http(s)` URL | 先返回任务对象，完成后查询返回结果对象 |
+| Tencent VOD 图像 | `GG-2.5`、`GG-3.0`、`GG-3.1`、`image2`、`image2-low`、`image2-medium`、`image2-high`、`image2-high-2k`、`gg-3.1-4k` | `/v1/videos` + `/v1/videos/{task_id}` | `image` / `images` / `input_reference` | 先返回任务 ID，再查询 `output.file_infos[].file_url` |
 | 豆包 Seedream | `doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128` | `/v1/images/generations` 或 `/v1/images/generations/async` | JSON `image`，通常为 Base64 数组 | `url`、`b64_json` 或异步任务 ID |
 | Grok Image | `grok-4-2-image` | `/v1/images/generations` | JSON `image`，通常为 Base64 数组 | 主要是 `url` |
 | OpenAI Images 兼容 | `gpt-image-1`、`dall-e-3`、`dall-e-2` | `/v1/images/generations`、`/v1/images/edits` | `image` / `mask` | `url` 或 `b64_json` |
@@ -121,6 +122,19 @@ description: 汇总当前图像相关接口支持的模型家族、入口路由�
 | 参考图 | `image: ["<base64>", ...]` |
 | 比例到尺寸映射 | `16:9 -> 2560x1440`、`9:16 -> 1440x2560`、`1:1 -> 2048x2048` 等 |
 | 返回格式 | 主要返回 `url`，不应依赖 `b64_json` |
+
+### Tencent VOD 图像
+
+| 项目 | 说明 |
+| --- | --- |
+| 推荐接口 | `POST /v1/videos` |
+| 查询接口 | `GET /v1/videos/{task_id}` |
+| 模型示例 | `GG-2.5`、`GG-3.0`、`GG-3.1`、`image2-low`、`image2-medium`、`image2-high` |
+| 请求风格 | TencentVod 任务 JSON |
+| 参考图输入 | `image` / `images` / `input_reference` |
+| 结果获取 | 先拿任务 ID，再读 `output.file_infos[].file_url` |
+| 尺寸优先级 | `metadata.output_config` 高于顶层 `size` |
+| 适用场景 | GG 与 image2(OG) 图像任务统一接入 |
 
 ### OpenAI Images 兼容
 

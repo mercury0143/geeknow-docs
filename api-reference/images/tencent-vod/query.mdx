@@ -1,0 +1,135 @@
+﻿---
+title: Tencent VOD 图像任务查询
+description: 使用 `GET /v1/videos/{task_id}` 查询 TencentVod 图像任务状态、进度和最终结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Tencent VOD 图像任务查询
+
+提交图像任务后，通过任务 ID 轮询查询。这个接口负责返回任务状态、错误信息和最终图片地址。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash
+curl -X GET https://www.geeknow.top/v1/videos/task_img_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+</RequestExample>
+
+## 返回示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "image2-high-2k",
+  "status": "PROCESSING",
+  "progress": 60,
+  "created_at": 1735689600
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "image2-high-2k",
+  "status": "FINISH",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689640,
+  "output": {
+    "file_infos": [
+      {
+        "file_url": "https://example.com/output-1.png"
+      },
+      {
+        "file_url": "https://example.com/output-2.png"
+      }
+    ]
+  }
+}
+```
+
+```json 200 - 失败
+{
+  "id": "task_img_abc123",
+  "task_id": "task_img_abc123",
+  "object": "image.generation.task",
+  "model": "image2-high-2k",
+  "status": "FAILED",
+  "error": {
+    "ErrCode": "InvalidParameter",
+    "ErrCodeExt": "InvalidParameter",
+    "Message": "prompt is required"
+  }
+}
+```
+
+</ResponseExample>
+
+## 响应字段
+
+<ResponseField name="id" type="string">
+任务 ID。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+任务 ID 的兼容字段。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `image.generation.task`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+提交时使用的模型名。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值包括 `PROCESSING`、`FINISH`、`FAILED`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度，通常表示百分比。
+</ResponseField>
+
+<ResponseField name="created_at" type="integer">
+创建时间戳。
+</ResponseField>
+
+<ResponseField name="completed_at" type="integer">
+完成时间戳。
+</ResponseField>
+
+<ResponseField name="output.file_infos[].file_url" type="string">
+生成结果图片地址。多图输出时，第一张图通常作为任务结果主图。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+失败原因信息，通常包含 `ErrCode`、`ErrCodeExt` 和 `Message`。
+</ResponseField>
+
+## 说明
+
+- `PROCESSING` 时继续轮询。
+- `FINISH` 后读取 `output.file_infos[].file_url`。
+- 如果是多图输出，优先取第一张作为主结果。
+
+## 相关页面
+
+- [Tencent VOD 图像生成概览](/api-reference/images/tencent-vod/overview)
+- [Tencent VOD 图像生成提交](/api-reference/images/tencent-vod/generation)

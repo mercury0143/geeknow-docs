@@ -1,0 +1,49 @@
+﻿---
+title: Tencent VOD 图像生成
+description: 面向图像系列的 TencentVod 接入说明，统一使用 `POST /v1/videos` 提交 GG 与 image2(OG) 图像任务，并通过任务查询接口获取结果。
+---
+
+# Tencent VOD 图像生成
+
+这组接口属于图像系列，但底层走的是 TencentVod 任务通道。当前主要覆盖两条模型线：
+
+- `GG`
+- `image2` / `image2-medium` / `image2-low` / `image2-high`
+
+## 接口概览
+
+| 项目 | 说明 |
+| --- | --- |
+| 提交任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 渠道类型 | `TencentVod` |
+| 适用模型 | `GG` 与 `image2(OG)` |
+
+## 模型命名
+
+| 网关模型名 | 上游 ModelName | 上游 ModelVersion |
+| --- | --- | --- |
+| `GG-2.5` | GG | 2.5 |
+| `GG-3.0` | GG | 3.0 |
+| `GG-3.1` | GG | 3.1 |
+| `image2` / `image2-medium` | OG | image2_medium |
+| `image2-low` | OG | image2_low |
+| `image2-high` | OG | image2_high |
+
+也支持组合计费模型名，例如：
+
+- `image2-high-2k`
+- `gg-3.1-4k`
+
+## 请求重点
+
+- 请求体使用 JSON。
+- 顶层保留 `model`、`prompt`、`size`、`image` / `images` / `input_reference`、`metadata`。
+- 参考图只接受 `http(s)` URL 或 FileId，不支持 base64 data URI。
+- `metadata.output_config` 的优先级高于顶层 `size`。
+
+## 相关页面
+
+- [Tencent VOD 图像生成提交](/api-reference/images/tencent-vod/generation)
+- [Tencent VOD 图像任务查询](/api-reference/images/tencent-vod/query)
+- [图像模型支持矩阵](/api-reference/images/model-matrix)
