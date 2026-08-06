@@ -1,0 +1,65 @@
+---
+title: MiniMax H3 视频概览
+description: 说明 MiniMax H3 按秒计费版本在 Geeknow 视频接口中的模型映射、生成能力和查询链路。
+---
+
+# MiniMax H3 视频
+
+MiniMax H3 使用 `POST /v1/videos` 创建异步视频任务，使用 `GET /v1/videos/{task_id}` 查询状态，并可通过 `GET /v1/videos/{task_id}/content` 下载生成结果。
+
+本项目将 MiniMax H3 按秒计费版本拆成两个实际 API 模型：
+
+| 模型 | 清晰度 | 计费方式 | 时长 | 说明 |
+| --- | --- | --- | --- | --- |
+| `minimax-h3-768p` | 768P | 按输出秒数计费 | `4` 到 `15` 秒 | 适合常规清晰度、成本敏感的视频生成任务 |
+| `minimax-h3-2k` | 2K | 按输出秒数计费 | `4` 到 `15` 秒 | 适合需要更高清晰度的成片任务 |
+
+前端插件为了降低配置成本，会展示一个单入口 `minimax-h3`。后端适配层会根据 `resolution`、`video_resolution` 或 `size` 自动分流到 `minimax-h3-768p` 或 `minimax-h3-2k`。直接调用 API 的开发者也可以跳过单入口，直接传实际模型名。
+
+<CardGroup cols={2}>
+  <Card title="创建视频任务" icon="sparkles" href="/api-reference/videos/minimax-h3/generation">
+    使用 `minimax-h3-768p` 或 `minimax-h3-2k` 提交文生视频、图生视频和首尾帧任务。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/minimax-h3/query">
+    使用 `GET /v1/videos/{task_id}` 轮询任务状态，并在完成后获取结果地址。
+  </Card>
+</CardGroup>
+
+## 支持能力
+
+| 能力 | 字段 | 说明 |
+| --- | --- | --- |
+| 文生视频 | `prompt` | 只传文本提示词，不需要参考素材 |
+| 图生视频 | `referenceImages` | 传 1 张参考图时常用于首帧图生视频 |
+| 多参考图 | `referenceImages` | 最多 5 张，适合角色、主体、风格或场景参考 |
+| 首尾帧 | `first_image`、`last_image` | 用首帧和尾帧约束视频起止画面；不要同时传 `referenceImages` |
+| 参考音频 | `referenceAudios` | 最多 3 段公网音频 URL；需要搭配至少 1 张 `referenceImages` |
+
+## 接口约定
+
+| 项目 | 规则 |
+| --- | --- |
+| 创建任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 下载内容 | `GET /v1/videos/{task_id}/content` |
+| 请求格式 | `application/json` |
+| 鉴权方式 | `Authorization: Bearer YOUR_API_KEY` |
+| 时长字段 | `duration`，整数秒，范围 `4` 到 `15` |
+| 画幅字段 | `ratio`，支持 `16:9`、`9:16`、`1:1`、`21:9`、`4:3`、`3:4` |
+| 清晰度字段 | `resolution`、`video_resolution` 或 `size`，支持 `768P` 和 `2K` |
+
+## 与插件实现的关系
+
+插件配置中的 `model` 可以保存为 `minimax-h3`，这是前端单入口值。提交任务前，插件会读取清晰度配置：
+
+1. 如果清晰度是 `2K` 或包含 `2160`，实际模型使用 `minimax-h3-2k`。
+2. 其他情况默认使用 `minimax-h3-768p`。
+3. 如果调用方已经直接传 `minimax-h3-768p` 或 `minimax-h3-2k`，适配层会保留该模型名。
+
+插件当前不透出 `adaptive` 画幅，也不透出参考视频 Pro 档。需要参考视频驱动的场景不属于本页记录的当前 H3 接入范围。
+
+## 推荐阅读
+
+1. [MiniMax H3 创建视频任务](./generation)
+2. [MiniMax H3 查询视频任务](./query)
+3. [视频模型支持矩阵](/api-reference/videos/model-matrix)

@@ -1,0 +1,203 @@
+---
+title: MiniMax H3 查询视频任务
+description: 使用 `GET /v1/videos/{task_id}` 查询 MiniMax H3 视频任务状态、结果与错误信息。
+api: "GET /v1/videos/{task_id}"
+---
+
+# MiniMax H3 查询视频任务
+
+MiniMax H3 任务提交成功后，通过 `GET /v1/videos/{task_id}` 轮询状态。任务完成后优先读取响应中的 `video_url`，如果没有可访问直链，再使用 `GET /v1/videos/{task_id}/content` 代理下载 MP4。
+
+- 根据创建任务返回的 `id` 或 `task_id` 查询。
+- 任务处理中继续轮询，不要重复提交同一个生成请求。
+- 任务完成后读取 `video_url` 或回退到 `/content`。
+- 任务失败时读取 `error`，并把原始错误信息写入日志，方便定位上游拒绝、额度不足或素材不可访问。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash cURL
+curl -X GET https://www.geeknow.top/v1/videos/video_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+task_id = "video_abc123"
+
+resp = requests.get(
+    f"https://www.geeknow.top/v1/videos/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const taskId = "video_abc123";
+
+const response = await fetch(`https://www.geeknow.top/v1/videos/${taskId}`, {
+  method: "GET",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "minimax-h3-768p",
+  "status": "in_progress",
+  "progress": 36,
+  "created_at": 1735689600,
+  "completed_at": 0,
+  "video_url": ""
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "minimax-h3-2k",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "completed_at": 1735689900,
+  "duration": 8,
+  "video_url": "https://example.com/results/minimax-h3.mp4"
+}
+```
+
+```json 200 - 失败
+{
+  "id": "video_abc123",
+  "task_id": "video_abc123",
+  "object": "video",
+  "model": "minimax-h3-2k",
+  "status": "failed",
+  "progress": 100,
+  "created_at": 1735689600,
+  "error": {
+    "message": "upstream task failed",
+    "code": "task_failed"
+  },
+  "video_url": ""
+}
+```
+
+```json 404 - 任务不存在
+{
+  "error": {
+    "message": "Task not found",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField path="task_id" type="string" required>
+视频任务 ID。创建视频任务接口返回的 `id` 或 `task_id`。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+视频任务 ID。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+视频任务 ID 的兼容字段。通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+任务实际使用的模型，例如 `minimax-h3-768p` 或 `minimax-h3-2k`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`pending`、`in_progress`、`processing`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度百分比。部分上游不会稳定更新进度，客户端不要只依赖该字段判断是否卡住。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的视频地址。为空或不可访问时，使用 `GET /v1/videos/{task_id}/content` 下载。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败原因。通常包含 `message` 和 `code`。
+</ResponseField>
+
+## 状态处理建议
+
+| 状态类型 | 状态值 |
+| --- | --- |
+| 继续轮询 | `queued`、`pending`、`processing`、`in_progress`、`running`、`generating` |
+| 视为完成 | `completed`、`succeeded`、`success` |
+| 视为失败 | `failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted` |
+
+建议轮询间隔保持在数秒以上。长视频或 2K 任务可能需要更长生成时间，只要状态仍是处理中，就继续轮询。
+
+## 下载视频内容
+
+如果查询结果没有直接返回可访问的 `video_url`，或者直链下载失败，可以请求内容代理端点：
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+下载 `/content` 时需要继续携带鉴权头：
+
+```bash
+curl -L https://www.geeknow.top/v1/videos/video_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --output result.mp4
+```
+
+## 注意事项
+
+- 查询接口只读取任务状态，不会重新提交生成任务。
+- `progress` 长时间不变不一定代表任务失败，应以终态状态为准。
+- 如果任务失败，建议记录 `model`、`duration`、`ratio`、参考素材 URL 和完整 `error`，方便排查参数、素材访问和内容审核问题。
+
+## 相关页面
+
+- [MiniMax H3 视频概览](./overview)
+- [MiniMax H3 创建视频任务](./generation)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)

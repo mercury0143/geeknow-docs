@@ -134,6 +134,15 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "MiniMax H3",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/minimax-h3/overview",
+              "api-reference/videos/minimax-h3/generation",
+              "api-reference/videos/minimax-h3/query"
+            ]
+          },
+          {
             "group": "Omni 视频",
             "expanded": true,
             "pages": [
