@@ -15,7 +15,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | Veo | `veo_3_1`、`veo_3_1-fast` | [概览](/api-reference/videos/veo/overview) | `/v1/videos` | 文生视频、首尾帧、参考生视频 | JSON `input_reference` |
 | Grok Imagine | `grok-imagine-video`、`grok-imagine-video-1.5-preview` | [概览](/api-reference/videos/grok/overview) | `/v1/videos` | 文生视频、图生视频、参考图视频 | JSON `image` / `images`；1.5 Preview 当前仅单图 |
 | Omni | `omni-fast`、`omni-fast-v2v` | [概览](/api-reference/videos/omni/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、多参考图、参考视频编辑 | JSON `first_image_url` / `last_image_url` / `images` / `video` |
-| MiniMax H3 | `minimax-h3-768p`、`minimax-h3-2k` | [概览](/api-reference/videos/minimax-h3/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、参考音频 | JSON `referenceImages` / `first_image` / `last_image` / `referenceAudios`；两个模型能力一致，差异是 768P / 2K 清晰度 |
+| MiniMax H3 | `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p`、`minimax-h3-pro-2k` | [概览](/api-reference/videos/minimax-h3/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、参考音频、Pro 参考视频 | JSON `referenceImages` / `first_image` / `last_image` / `referenceAudios` / `referenceVideos`；普通档是 `503`，Pro 档是 `913` |
 | 国产视频模型（AIGC） | `Vidu-*`、`Kling-*`、`GV-*`、`OS-*`、`Hunyuan-*`、`Mingmou-*`、`Hailuo-*`、`SV-*`、`JV-*` | [概览](/api-reference/videos/aigc/overview) | `/v1/videos` | 文生、图生、参考图、参考视频、首尾帧、动作控制、数字人、对口型、模板特效 | JSON `image` / `images` / `input_reference` / `metadata` |
 | 特惠渠道系列 | `manxue-2.0` | [概览](/api-reference/videos/special-offer/overview) | `/v1/videos` | 文生视频、首帧生视频、首尾帧、参考图、参考音频 | JSON `content[].image_url` / `content[].audio_url` |
 | Seedance 2.0 | `doubao-seedance-2-0-260128`、`doubao-seedance-2-0-fast-260128` | [概览](/api-reference/videos/seedance-2/overview) | `/v1/videos` | 文生视频、首帧、尾帧、参考图、参考视频、参考音频 | JSON URL 字段 |
@@ -83,19 +83,22 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 
 | 项目 | 说明 |
 | --- | --- |
-| 模型示例 | `minimax-h3-768p`、`minimax-h3-2k` |
-| 兼容入口 | `minimax-h3`，按 `resolution`、`video_resolution` 或 `size` 分流到 768P / 2K 实际模型 |
+| 模型示例 | `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p`、`minimax-h3-pro-2k` |
+| 兼容入口 | `minimax-h3`，按 `resolution`、`video_resolution` 或 `size` 分流到普通 768P / 2K 实际模型；不会自动分流到 Pro |
 | 推荐入口 | `POST /v1/videos` |
 | 文档页面 | [MiniMax H3 视频概览](/api-reference/videos/minimax-h3/overview) |
-| 768P 档 | `minimax-h3-768p`；适合草稿预览、批量生成、移动端分发和常规清晰度任务 |
-| 2K 档 | `minimax-h3-2k`；适合高清成片、大屏展示、细节保留和后期裁切 |
-| 差异边界 | 两档请求字段和生成能力一致；2K 只影响输出清晰度，不代表不同的生成模式 |
-| 常见字段 | `prompt`、`duration`、`ratio`、`referenceImages`、`first_image`、`last_image`、`referenceAudios` |
+| 普通 768P 档 | `minimax-h3-768p`；全能参考 `503`；适合草稿预览、批量生成、移动端分发和常规清晰度任务 |
+| 普通 2K 档 | `minimax-h3-2k`；全能参考 `503`；适合高清成片、大屏展示、细节保留和后期裁切 |
+| Pro 768P 档 | `minimax-h3-pro-768p`；全能参考 `913`；基础能力加参考视频 |
+| Pro 2K 档 | `minimax-h3-pro-2k`；全能参考 `913`；同上，2K 超清输出 |
+| 差异边界 | 普通档和 Pro 档的差异是参考视频；768P 和 2K 的差异是输出清晰度 |
+| 常见字段 | `prompt`、`duration`、`ratio`、`referenceImages`、`first_image`、`last_image`、`referenceAudios`、`referenceVideos` |
 | 清晰度 | `768P`、`2K`；未明确选择时默认按 `768P` 处理 |
 | 时长规则 | `duration` 支持 `4` 到 `15` 秒，整数秒，按秒计费 |
 | 画幅比例 | 当前项目支持 `16:9`、`9:16`、`1:1`、`21:9`、`4:3`、`3:4` |
-| 参考素材 | `503`：最多 5 张参考图、0 段参考视频、3 段参考音频；参考音频需要搭配至少 1 张参考图 |
-| 当前边界 | 当前文档不覆盖 `minimax-h3-pro-*` 参考视频模型 |
+| 普通档参考素材 | `503`：最多 5 张参考图、0 段参考视频、3 段参考音频；参考音频需要搭配至少 1 张参考图 |
+| Pro 档参考素材 | `913`：最多 9 张参考图、1 段 2 到 5 秒参考视频、3 段参考音频；参考视频放在 `referenceVideos` |
+| 当前边界 | Pro 不单开系列；当前插件前端单入口 `minimax-h3` 不自动选择 Pro，直接接入时传真实 Pro 模型名 |
 
 ### 特惠渠道系列
 
@@ -185,7 +188,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | Veo | 支持 | 可通过参考图实现 | 支持 | 支持 | 依赖上游 |
 | Grok Imagine | 支持 | 支持 | 依赖上游 | 支持 | 依赖上游 |
 | Omni | 支持 | 支持 | 支持 | `omni-fast` 支持参考图；`omni-fast-v2v` 支持参考视频 | 模型相关 |
-| MiniMax H3 | 支持 | 支持 | 支持 | 支持参考图和参考音频；当前不覆盖参考视频 Pro 档 | 原生音频能力，前端不透出关闭开关 |
+| MiniMax H3 | 支持 | 支持 | 支持 | 普通档支持参考图和参考音频；Pro 档额外支持 1 段 2 到 5 秒参考视频 | 原生音频能力，前端不透出关闭开关 |
 | 特惠渠道系列 | 支持 | 支持 | 支持 | `manxue-2.0` 支持参考图和参考音频 | 模型相关 |
 | Seedance 2.0 | 支持 | 支持 | 支持 | 支持参考图、参考视频和参考音频 | 模型相关 |
 | Seedance 1.5 | 支持 | 支持 | 支持 | 建议使用首帧或首尾帧 | 依赖上游 |
@@ -218,9 +221,11 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | `omni-fast-v2v` | Omni | 在 `omni-fast` 基础上额外支持参考视频编辑或延长；参考视频字段为 `video` / `video_url` / `input_video`，最大 15MB。 |
 | `grok-imagine-video` | Grok Imagine | Grok Imagine Video；JSON 请求；单图传 `image`，多图传 `images`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
 | `grok-imagine-video-1.5-preview` | Grok Imagine | Grok Imagine 1.5 Preview；JSON 请求；当前仅建议单图 `image`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
-| `minimax-h3` | MiniMax H3 | 前端单入口；按 `resolution`、`video_resolution` 或 `size` 分流到 `minimax-h3-768p` 或 `minimax-h3-2k`；未明确选择时默认 768P。 |
-| `minimax-h3-768p` | MiniMax H3 | 768P 按秒计费模型；`duration` 支持 `4` 到 `15` 秒；适合草稿、批量和常规清晰度任务。 |
-| `minimax-h3-2k` | MiniMax H3 | 2K 按秒计费模型；参数与 `minimax-h3-768p` 一致；适合高清成片、大屏展示和后期裁切。 |
+| `minimax-h3` | MiniMax H3 | 前端单入口；按 `resolution`、`video_resolution` 或 `size` 分流到普通档 `minimax-h3-768p` 或 `minimax-h3-2k`；未明确选择时默认 768P，不自动选择 Pro。 |
+| `minimax-h3-768p` | MiniMax H3 | 普通 768P 模型；全能参考 `503`；`duration` 支持 `4` 到 `15` 秒；适合草稿、批量和常规清晰度任务。 |
+| `minimax-h3-2k` | MiniMax H3 | 普通 2K 模型；全能参考 `503`；参数与 `minimax-h3-768p` 一致；适合高清成片、大屏展示和后期裁切。 |
+| `minimax-h3-pro-768p` | MiniMax H3 | Pro 768P 模型；全能参考 `913`；支持 `referenceVideos` 传 1 段 2 到 5 秒参考视频，可叠加参考图、参考音频和首尾帧。 |
+| `minimax-h3-pro-2k` | MiniMax H3 | Pro 2K 模型；全能参考 `913`；同 `minimax-h3-pro-768p`，用于参考视频驱动且需要 2K 超清输出的任务。 |
 | `Hailuo-2.3` | 国产视频模型 | 海螺 2.3（基础模型）。 |
 | `Hailuo-2.3-fast` | 国产视频模型 | 海螺 2.3 fast（基础模型）。 |
 

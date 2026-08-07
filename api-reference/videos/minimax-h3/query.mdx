@@ -80,7 +80,7 @@ console.log(await response.json());
   "id": "video_abc123",
   "task_id": "video_abc123",
   "object": "video",
-  "model": "minimax-h3-2k",
+  "model": "minimax-h3-pro-2k",
   "status": "completed",
   "progress": 100,
   "created_at": 1735689600,
@@ -145,7 +145,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务实际使用的模型，例如 `minimax-h3-768p` 或 `minimax-h3-2k`。如果创建任务时传的是前端单入口 `minimax-h3`，这里可用来确认最终落到 768P 还是 2K 档。
+任务实际使用的模型，例如 `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p` 或 `minimax-h3-pro-2k`。如果创建任务时传的是前端单入口 `minimax-h3`，这里可用来确认最终落到普通 768P 还是普通 2K 档。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -172,7 +172,7 @@ Authorization: Bearer YOUR_API_KEY
 | 视为完成 | `completed`、`succeeded`、`success` |
 | 视为失败 | `failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted` |
 
-建议轮询间隔保持在数秒以上。长视频或 2K 任务可能需要更长生成时间，只要状态仍是处理中，就继续轮询。
+建议轮询间隔保持在数秒以上。长视频、2K 或 Pro 参考视频任务可能需要更长生成时间，只要状态仍是处理中，就继续轮询。
 
 ## 下载视频内容
 
@@ -194,7 +194,7 @@ curl -L https://www.geeknow.top/v1/videos/video_abc123/content \
 
 - 查询接口只读取任务状态，不会重新提交生成任务。
 - `progress` 长时间不变不一定代表任务失败，应以终态状态为准。
-- 如果任务失败，建议记录 `model`、`duration`、`ratio`、参考素材 URL 和完整 `error`，方便排查参数、素材访问和内容审核问题。
+- 如果任务失败，建议记录 `model`、`duration`、`ratio`、`referenceImages`、`referenceVideos`、`referenceAudios` 和完整 `error`，方便排查参数、素材访问和内容审核问题。
 
 ## 相关页面
 
