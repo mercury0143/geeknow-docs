@@ -6,15 +6,31 @@ api: "POST /v1/videos"
 
 # MiniMax H3 视频生成
 
-MiniMax H3 按秒计费版本通过 `POST /v1/videos` 提交异步任务。当前项目支持 `768P` 和 `2K` 两个实际模型，适合文生视频、图生视频、多参考图和首尾帧过渡。
+MiniMax H3 按秒计费版本通过 `POST /v1/videos` 提交异步任务。当前项目支持两个实际模型：`minimax-h3-768p` 和 `minimax-h3-2k`。
 
-- 推荐直接传 `minimax-h3-768p` 或 `minimax-h3-2k`。
-- 如果传 `minimax-h3`，后端会根据清晰度字段分流到实际模型。
-- 请求格式是 `application/json`。
-- `duration` 支持 `4` 到 `15` 秒，必须是整数秒。
-- 参考图使用 `referenceImages`，最多 5 张。
-- 首尾帧使用 `first_image` 和 `last_image`，不要同时传 `referenceImages`。
-- 参考音频使用 `referenceAudios`，仅接受公网 URL，并且需要搭配至少 1 张参考图。
+两者的请求字段和生成能力一致，差异主要是输出清晰度和推荐场景。直接接入 API 时，建议优先传真实模型名，避免把 2K 任务误分流成 768P。
+
+## 模型选择
+
+| 传入 `model` | 实际模型 | 清晰度 | 什么时候用 |
+| --- | --- | --- | --- |
+| `minimax-h3-768p` | `minimax-h3-768p` | 768P | 默认档，适合草稿、批量、移动端和常规清晰度任务 |
+| `minimax-h3-2k` | `minimax-h3-2k` | 2K | 高清成片、大屏展示、细节保留、后期裁切 |
+| `minimax-h3` + `resolution: "768P"` | `minimax-h3-768p` | 768P | 前端单入口的 768P 写法 |
+| `minimax-h3` + `resolution: "2K"` | `minimax-h3-2k` | 2K | 前端单入口的 2K 写法 |
+
+两个实际模型都按输出秒数计费，`duration` 就是用量计算的关键字段。接入方只需要保证模型名和清晰度选择一致。
+
+## 生成能力
+
+| 能力 | 字段 | 规则 |
+| --- | --- | --- |
+| 文生视频 | `prompt` | 只传文本即可 |
+| 图生视频 / 多参考图 | `referenceImages` | 最多 5 张；可传公网 URL 或 `data:image/...;base64,...` |
+| 首尾帧 | `first_image`、`last_image` | 通常成对使用；不要和 `referenceImages` 混用 |
+| 参考音频 | `referenceAudios` | 最多 3 段公网 URL，合计建议不超过 15 秒；必须搭配至少 1 张 `referenceImages` |
+
+`duration` 支持 `4` 到 `15` 秒，必须是整数秒。`ratio` 支持 `16:9`、`9:16`、`1:1`、`21:9`、`4:3`、`3:4`。
 
 ## 方法与路径
 
@@ -26,7 +42,7 @@ POST /v1/videos
 
 <RequestExample>
 
-```bash 文生视频 cURL
+```bash 2K 文生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
@@ -216,7 +232,9 @@ Content-Type: application/json
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。推荐传 `minimax-h3-768p` 或 `minimax-h3-2k`。兼容传 `minimax-h3`，此时会按 `resolution`、`video_resolution` 或 `size` 分流到实际模型。
+模型名称。推荐直接传真实模型：`minimax-h3-768p` 或 `minimax-h3-2k`。
+
+也兼容传前端单入口 `minimax-h3`。此时适配层会读取 `resolution`、`video_resolution` 或 `size`：值为 `2K` 或包含 `2160` 时分流到 `minimax-h3-2k`，其他情况分流到 `minimax-h3-768p`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -233,6 +251,8 @@ Content-Type: application/json
 
 <ParamField body="resolution" type="string">
 单入口 `minimax-h3` 的清晰度选择。支持 `768P` 和 `2K`。包含 `2k` 或 `2160` 的值会映射为 `2K`，其他值默认按 `768P` 处理。
+
+如果 `model` 已经是 `minimax-h3-768p` 或 `minimax-h3-2k`，不需要再传这个字段；实际模型以 `model` 为准。
 </ParamField>
 
 <ParamField body="video_resolution" type="string">
@@ -256,7 +276,7 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="referenceAudios" type="array<string>">
-参考音频数组，最多 3 段。当前插件适配层仅保留 `http://` 或 `https://` 公网 URL，并要求同时存在至少 1 张 `referenceImages`。
+参考音频数组，最多 3 段，合计建议不超过 15 秒。当前插件适配层仅保留 `http://` 或 `https://` 公网 URL，并要求同时存在至少 1 张 `referenceImages`。
 </ParamField>
 
 ## 请求构造规则
@@ -269,13 +289,24 @@ Content-Type: application/json
 | 首尾帧 | 文生字段加 `first_image`、`last_image` |
 | 参考音频 | 文生字段加 `referenceImages` 和 `referenceAudios` |
 
+## 模型分流规则
+
+| 请求写法 | 结果 |
+| --- | --- |
+| `model: "minimax-h3-768p"` | 固定使用 768P 按秒计费模型 |
+| `model: "minimax-h3-2k"` | 固定使用 2K 按秒计费模型 |
+| `model: "minimax-h3"`，且 `resolution` / `video_resolution` / `size` 是 `2K` 或包含 `2160` | 分流到 `minimax-h3-2k` |
+| `model: "minimax-h3"`，未传清晰度或清晰度不是 2K | 分流到 `minimax-h3-768p` |
+
 ## 注意事项
 
-- `minimax-h3` 是当前插件的前端单入口值，不是最终计费模型名；直接接入 API 时建议传实际模型名。
+- `minimax-h3` 是当前插件的前端单入口值，不是最终模型名；直接接入 API 时建议传 `minimax-h3-768p` 或 `minimax-h3-2k`。
+- `minimax-h3-768p` 与 `minimax-h3-2k` 的功能一致，差异是输出清晰度。不应把 2K 当作更强的生成模式；2K 只解决输出清晰度问题。
+- 当前两个模型的参考规格都是 `503`：最多 5 张参考图、0 段参考视频、3 段参考音频。
 - 当前文档只覆盖 `minimax-h3-768p` 和 `minimax-h3-2k`，不覆盖 `minimax-h3-pro-*` 参考视频模型。
 - 当前项目 H3 适配层不透出 `adaptive` 画幅；如果传入不支持的比例，会回退为 `16:9`。
 - `first_image` / `last_image` 与 `referenceImages` 不要混用，避免上游把生成模式判定错。
-- 单价可能随渠道配置调整，实际扣费以账户用量和价格接口为准。
+- 如需核对用量或账户信息，请以账户后台和相关查询接口为准。
 
 ## 相关接口
 
