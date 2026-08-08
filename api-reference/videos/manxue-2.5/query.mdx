@@ -1,0 +1,250 @@
+---
+title: manxue-2.5 查询视频任务
+description: 使用 `GET /v1/videos/{task_id}` 查询 manxue-2.5 视频任务状态、结果和错误信息。
+api: "GET /v1/videos/{task_id}"
+---
+
+# manxue-2.5 查询视频任务
+
+`manxue-2.5` 任务提交成功后，通过 `GET /v1/videos/{task_id}` 轮询任务状态。任务完成后优先读取响应中的 `video_url` 或 `url`；如果没有可访问直链，再使用 `GET /v1/videos/{task_id}/content` 下载 MP4。
+
+- 根据创建任务返回的 `id` 或 `task_id` 查询。
+- 任务处理中继续轮询，不要重复提交同一个生成请求。
+- 任务完成后读取 `video_url`、`url` 或 `metadata.content_url`。
+- 任务失败时读取 `error.code` 和 `error.message`，并记录请求参数与素材地址，便于排查。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash cURL
+curl -X GET https://www.geeknow.top/v1/videos/manxue-2.5_xxx \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+task_id = "manxue-2.5_xxx"
+
+resp = requests.get(
+    f"https://www.geeknow.top/v1/videos/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+
+print(resp.json())
+```
+
+```javascript JavaScript
+const taskId = "manxue-2.5_xxx";
+
+const response = await fetch(`https://www.geeknow.top/v1/videos/${taskId}`, {
+  method: "GET",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+  },
+});
+
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "manxue-2.5_xxx",
+  "task_id": "manxue-2.5_xxx",
+  "object": "video",
+  "model": "manxue-2.5",
+  "status": "in_progress",
+  "progress": 50,
+  "created_at": 1782690295,
+  "completed_at": null,
+  "seconds": "20",
+  "url": null,
+  "video_url": null,
+  "metadata": {
+    "cached": false,
+    "cost_credits": 70
+  },
+  "error": null
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "manxue-2.5_xxx",
+  "task_id": "manxue-2.5_xxx",
+  "object": "video",
+  "model": "manxue-2.5",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1782690295,
+  "completed_at": 1782690494,
+  "seconds": "20",
+  "url": "https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content",
+  "video_url": "https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content",
+  "metadata": {
+    "cached": true,
+    "content_url": "https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content",
+    "expires_in": 86400,
+    "cost_credits": 70
+  },
+  "error": null
+}
+```
+
+```json 200 - 失败
+{
+  "id": "manxue-2.5_xxx",
+  "task_id": "manxue-2.5_xxx",
+  "object": "video",
+  "model": "manxue-2.5",
+  "status": "failed",
+  "progress": 100,
+  "created_at": 1782690000,
+  "completed_at": 1782690010,
+  "seconds": "20",
+  "url": null,
+  "video_url": null,
+  "metadata": {},
+  "error": {
+    "message": "素材格式不被支持，请更换素材或转码后重试。",
+    "code": "unsupported_material"
+  }
+}
+```
+
+```json 404 - 任务不存在
+{
+  "error": {
+    "message": "Task not found",
+    "type": "invalid_request_error"
+  }
+}
+```
+
+</ResponseExample>
+
+## 认证
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Path Parameters
+
+<ParamField path="task_id" type="string" required>
+视频任务 ID。创建视频任务接口返回的 `id` 或 `task_id`。
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+视频任务 ID。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+视频任务 ID 的兼容字段。通常与 `id` 相同。
+</ResponseField>
+
+<ResponseField name="object" type="string">
+对象类型，通常为 `video`。
+</ResponseField>
+
+<ResponseField name="model" type="string">
+任务实际使用的模型，例如 `manxue-2.5`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
+</ResponseField>
+
+<ResponseField name="progress" type="integer">
+任务进度百分比。部分上游不会稳定更新进度，客户端不应只依赖该字段判断任务是否卡住。
+</ResponseField>
+
+<ResponseField name="seconds" type="string">
+任务输出时长。上游通常按字符串返回秒数。
+</ResponseField>
+
+<ResponseField name="url" type="string">
+任务完成后的视频地址。不同渠道可能同时返回 `url` 和 `video_url`。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+任务完成后的视频地址。为空或不可访问时，可使用 `GET /v1/videos/{task_id}/content` 下载。
+</ResponseField>
+
+<ResponseField name="metadata" type="object">
+任务元信息。可能包含 `content_url`、`expires_in`、`cost_credits`、`cached` 等字段。
+</ResponseField>
+
+<ResponseField name="error" type="object">
+任务失败原因。通常包含 `message` 和 `code`。
+</ResponseField>
+
+## 状态处理建议
+
+| 状态类型 | 状态值 |
+| --- | --- |
+| 继续轮询 | `queued`、`pending`、`processing`、`in_progress`、`running`、`generating` |
+| 视为完成 | `completed`、`succeeded`、`success` |
+| 视为失败 | `failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted` |
+
+建议轮询间隔保持在 `5` 到 `10` 秒。长时长任务、高清任务或多素材任务可能需要更长处理时间，只要状态仍为处理中，就继续轮询。
+
+## 下载视频内容
+
+如果查询结果没有直接返回可访问的 `video_url`，或直链下载失败，可以请求内容下载端点：
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+下载 `/content` 时建议继续携带鉴权头：
+
+```bash
+curl -L https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --output result.mp4
+```
+
+## 常见错误码
+
+| `error.code` | 说明 |
+| --- | --- |
+| `unsupported_material` | 素材格式不支持 |
+| `material_policy_violation` | 图片、视频或音频素材未通过审核 |
+| `unsupported_request` | 请求参数、模型或素材组合不支持 |
+| `content_policy_violation` | 提示词或内容未通过审核 |
+| `material_limit_exceeded` | 素材数量、大小或时长超出限制 |
+| `upload_failed` | 素材上传失败 |
+| `download_failed` | 素材或结果下载失败 |
+| `generation_failed` | 视频生成失败 |
+| `generation_timeout` | 视频生成超时 |
+| `upstream_network_error` | 上游网络异常 |
+| `server_error` | 服务内部异常 |
+
+## 注意事项
+
+- 查询接口只读取任务状态，不会重新提交生成任务。
+- `progress` 长时间不变不一定代表任务失败，应以终态状态为准。
+- 如果任务失败，建议记录 `model`、`duration`、`ratio`、`resolution`、参考素材 URL 和完整 `error`。
+
+## 相关页面
+
+- [manxue-2.5 视频概览](./overview)
+- [manxue-2.5 创建视频任务](./generation)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)

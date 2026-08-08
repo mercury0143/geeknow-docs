@@ -1,0 +1,58 @@
+---
+title: manxue-2.5 视频概览
+description: 说明 manxue-2.5 系列的视频生成、参考素材规格、请求字段和查询链路。
+---
+
+# manxue-2.5 视频
+
+`manxue-2.5` 是独立的视频生成系列，使用 `POST /v1/videos` 创建异步任务，使用 `GET /v1/videos/{task_id}` 查询任务状态，并可通过 `GET /v1/videos/{task_id}/content` 下载生成结果。
+
+该系列采用 `/v1/videos` JSON 请求体，参考素材直接放在顶层数组字段中：`referenceImages`、`referenceVideos`、`referenceAudios`。
+
+<CardGroup cols={2}>
+  <Card title="创建视频任务" icon="sparkles" href="/api-reference/videos/manxue-2.5/generation">
+    使用 `manxue-2.5` 提交文生视频、多参考图、参考视频和参考音频任务。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/manxue-2.5/query">
+    使用任务 ID 轮询状态，读取失败原因、结果地址或下载内容。
+  </Card>
+</CardGroup>
+
+## 模型与规格
+
+| 项目 | 规则 |
+| --- | --- |
+| 模型名 | `manxue-2.5` |
+| 创建任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 下载内容 | `GET /v1/videos/{task_id}/content` |
+| 请求格式 | `application/json` |
+| 时长字段 | `duration`，整数秒，支持 `4` 到 `29` |
+| 画幅字段 | `ratio`，支持 `16:9`、`9:16`、`1:1`、`21:9` |
+| 清晰度字段 | `resolution`，支持 `480p`、`720p`、`1080p`、`4k` |
+| 参考图 | `referenceImages`，最多 `30` 张 |
+| 参考视频 | `referenceVideos`，最多 `10` 个 |
+| 参考音频 | `referenceAudios`，最多 `10` 个 |
+
+## 支持能力
+
+| 能力 | 字段 | 说明 |
+| --- | --- | --- |
+| 文生视频 | `prompt` | 只传文本提示词即可创建任务 |
+| 多参考图 | `referenceImages` | 使用公网图片 URL 约束主体、角色、产品、场景或风格 |
+| 参考视频 | `referenceVideos` | 使用公网视频 URL 提供镜头运动、动作节奏或画面参考 |
+| 参考音频 | `referenceAudios` | 使用公网音频 URL 提供旁白、音乐、节奏或声音情绪参考 |
+| 多模态参考 | `referenceImages`、`referenceVideos`、`referenceAudios` | 三类素材可以组合使用，素材数量分别按各自上限控制 |
+
+## 请求体边界
+
+- `model` 固定传 `manxue-2.5`。
+- `duration` 使用整数秒，支持范围为 `4` 到 `29`。
+- 参考素材字段只接收 URL 字符串数组；本地文件应先上传到服务端可访问的公网地址。
+- `referenceImages` 最多 `30` 张，`referenceVideos` 最多 `10` 个，`referenceAudios` 最多 `10` 个。
+
+## 推荐阅读
+
+1. [manxue-2.5 创建视频任务](./generation)
+2. [manxue-2.5 查询视频任务](./query)
+3. [视频模型支持矩阵](/api-reference/videos/model-matrix)

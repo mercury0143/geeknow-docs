@@ -143,6 +143,15 @@
             ]
           },
           {
+            "group": "manxue-2.5",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/manxue-2.5/overview",
+              "api-reference/videos/manxue-2.5/generation",
+              "api-reference/videos/manxue-2.5/query"
+            ]
+          },
+          {
             "group": "Omni 视频",
             "expanded": true,
             "pages": [
