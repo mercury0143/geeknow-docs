@@ -16,7 +16,7 @@ api: "POST /v1/videos"
 | 请求格式 | `application/json` |
 | 时长 | `duration` 支持 `4` 到 `29` 秒 |
 | 画幅 | `ratio` 支持 `16:9`、`9:16`、`1:1`、`21:9` |
-| 清晰度 | `resolution` 支持 `480p`、`720p`、`1080p`、`4k` |
+| 清晰度 | `resolution` 支持 `480p`、`720p` |
 | 参考图 | `referenceImages` 最多 `30` 张 |
 | 参考视频 | `referenceVideos` 最多 `10` 个 |
 | 参考音频 | `referenceAudios` 最多 `10` 个 |
@@ -53,7 +53,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
     "prompt": "参考图片中的人物外观、服装和场景氛围，生成一段自然行走的竖屏视频，镜头轻微前推",
     "duration": 12,
     "ratio": "9:16",
-    "resolution": "1080p",
+    "resolution": "720p",
     "referenceImages": [
       "https://example.com/assets/person.png",
       "https://example.com/assets/location.png"
@@ -70,7 +70,7 @@ curl -X POST https://www.geeknow.top/v1/videos \
     "prompt": "参考产品图保持主体一致，参考视频的镜头运动和动作节奏，参考音频的情绪生成一条广告短片",
     "duration": 20,
     "ratio": "16:9",
-    "resolution": "1080p",
+    "resolution": "720p",
     "referenceImages": [
       "https://example.com/assets/product-front.png",
       "https://example.com/assets/product-side.png"
@@ -225,7 +225,7 @@ Content-Type: application/json
 </ParamField>
 
 <ParamField body="resolution" type="string">
-输出清晰度。支持 `480p`、`720p`、`1080p`、`4k`。未明确选择时，通常按渠道默认清晰度处理。
+输出清晰度。支持 `480p`、`720p`。未明确选择时，通常按渠道默认清晰度处理。
 </ParamField>
 
 <ParamField body="referenceImages" type="array<string>">

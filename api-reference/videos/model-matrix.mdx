@@ -112,7 +112,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | 常见字段 | `model`、`prompt`、`duration`、`ratio`、`resolution`、`referenceImages`、`referenceVideos`、`referenceAudios` |
 | 时长规则 | `duration` 支持 `4` 到 `29` 秒，整数秒 |
 | 画幅比例 | `16:9`、`9:16`、`1:1`、`21:9` |
-| 清晰度 | `480p`、`720p`、`1080p`、`4k` |
+| 清晰度 | `480p`、`720p` |
 | 参考图 | 顶层 `referenceImages`，最多 `30` 张公网图片 URL |
 | 参考视频 | 顶层 `referenceVideos`，最多 `10` 个公网视频 URL |
 | 参考音频 | 顶层 `referenceAudios`，最多 `10` 个公网音频 URL |
@@ -223,7 +223,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | `model` | 归属 | 说明 |
 | --- | --- | --- |
 | `manxue-2.0` | 特惠渠道系列 | JSON 请求；`seconds` 支持 `4` 到 `15` 秒；`resolution` 支持 `480P`、`720P`；参考图通过 `content[].image_url.url` 传入，参考音频通过 `content[].audio_url.url` 传入。 |
-| `manxue-2.5` | manxue-2.5 | JSON 请求；`duration` 支持 `4` 到 `29` 秒；`resolution` 支持 `480p`、`720p`、`1080p`、`4k`；参考图、参考视频、参考音频分别通过 `referenceImages`、`referenceVideos`、`referenceAudios` 传入。 |
+| `manxue-2.5` | manxue-2.5 | JSON 请求；`duration` 支持 `4` 到 `29` 秒；`resolution` 支持 `480p`、`720p`；参考图、参考视频、参考音频分别通过 `referenceImages`、`referenceVideos`、`referenceAudios` 传入。 |
 | `doubao-seedance-2-0-260128` | Seedance 2.0 | Seedance 2.0 标准档位；支持 JSON URL 字段。 |
 | `doubao-seedance-2-0-fast-260128` | Seedance 2.0 | Seedance 2.0 fast 档位；适合更快提交的视频任务。 |
 | `doubao-seedance-1-5-pro_480p` | Seedance 1.5 | Seedance 1.5 480p；multipart 请求；`seconds` 范围 `4` 到 `11`；首尾帧图片 URL 使用 `first_frame_image` / `last_frame_image` 传入。 |
