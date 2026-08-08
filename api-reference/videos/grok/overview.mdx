@@ -27,22 +27,22 @@ Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `
 | 模型 | 请求格式 | 时长规则 | 参考图规则 |
 | --- | --- | --- | --- |
 | `grok-imagine-video` | JSON | 自定义秒数，最小 `1s` | 单图传 `image`，多图传 `images` |
-| `grok-imagine-video-1.5-preview` | JSON | 自定义秒数，最小 `1s` | 当前仅建议传 1 张参考图 |
+| `grok-imagine-video-1.5-preview` | JSON | 按字符串传入秒数 | 单图传 `image` |
 
 ## 常见能力
 
 | 能力 | 传参方式 | 说明 |
 | --- | --- | --- |
 | 文生视频 | 仅传文本字段 | 不需要上传参考图 |
-| Grok Imagine 图生视频 | JSON `image` 或 `images` | 单图用 `image`；多图用 `images`，其中 `grok-imagine-video-1.5-preview` 当前仅建议传 1 张 |
+| Grok Imagine 图生视频 | JSON `image` 或 `images` | `grok-imagine-video-1.5-preview` 使用单图 `image`；`grok-imagine-video` 可使用 `image` 或 `images` |
 
 ## 参数约束
 
 | 字段 | 可用值 | 说明 |
 | --- | --- | --- |
 | `aspect_ratio` | Grok Imagine 支持常见比例和 `数字:数字` 自定义比例 | 建议显式传入目标比例 |
-| `resolution` | `480P`、`720P` | 仅适用于 `grok-imagine-video` / `grok-imagine-video-1.5-preview` |
-| `seconds` | 大于等于 `1` 的整数秒 | Grok Imagine 支持自定义秒数 |
+| `resolution` | `480P`、`720P`、`1080P` | Grok Imagine 1.5 Preview 支持 `1080P` |
+| `seconds` | 字符串形式的秒数 | Grok Imagine 支持按秒提交 |
 | `prompt` | 字符串 | Grok Imagine 系列建议控制在 `4096` 字符以内；长提示词可能导致上游创建任务失败 |
 
 ## 相关页面

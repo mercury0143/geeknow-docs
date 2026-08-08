@@ -6,14 +6,14 @@ api: "POST /v1/videos"
 
 # Grok Imagine 1.5 Preview
 
-`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。本模型使用 `application/json` 请求体，参考图通过 JSON 字段传递。
+`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。本模型使用 `application/json` 请求体，参考图通过顶层 `image` 字段传递。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
 - 图生视频使用单张 `image`。
-- 当前 1.5 Preview 规范仅支持 1 张参考图；不要传多图 `images` 数组。
-- `resolution` 支持 `480P` 和 `720P`，也兼容 `480` / `720`。
+- 当前 1.5 Preview 规范按单张参考图请求，使用 `image` 字段即可。
+- `resolution` 支持 `480P`、`720P` 和 `1080P`。
 - `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
 ## 方法与路径
@@ -31,9 +31,9 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -d '{
     "model": "grok-imagine-video-1.5-preview",
     "prompt": "雨夜霓虹街头，一辆复古跑车驶过湿润路面",
-    "seconds": "8",
+    "seconds": "4",
     "aspect_ratio": "16:9",
-    "resolution": "720P"
+    "resolution": "1080P"
   }'
 ```
 
@@ -44,21 +44,15 @@ curl -X POST https://www.geeknow.top/v1/videos \
   -d '{
     "model": "grok-imagine-video-1.5-preview",
     "prompt": "让参考图中的人物缓慢转身，背景光线自然流动",
-    "seconds": "6",
-    "aspect_ratio": "9:16",
-    "resolution": "720P",
-    "image": "data:image/png;base64,BASE64_IMAGE_DATA"
+    "seconds": "4",
+    "aspect_ratio": "16:9",
+    "resolution": "1080P",
+    "image": "https://example.com/reference.png"
   }'
 ```
 
 ```python Python
-import base64
 import requests
-
-def to_data_url(path, mime="image/png"):
-    with open(path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode("ascii")
-    return f"data:{mime};base64,{encoded}"
 
 resp = requests.post(
     "https://www.geeknow.top/v1/videos",
@@ -69,10 +63,10 @@ resp = requests.post(
     json={
         "model": "grok-imagine-video-1.5-preview",
         "prompt": "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
-        "seconds": "6",
+        "seconds": "4",
         "aspect_ratio": "16:9",
-        "resolution": "720P",
-        "image": to_data_url("reference.png"),
+        "resolution": "1080P",
+        "image": "https://example.com/reference.png",
     },
     timeout=60,
 )
@@ -90,10 +84,10 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
   body: JSON.stringify({
     model: "grok-imagine-video-1.5-preview",
     prompt: "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
-    seconds: "6",
+    seconds: "4",
     aspect_ratio: "16:9",
-    resolution: "720P",
-    image: "data:image/png;base64,BASE64_IMAGE_DATA",
+    resolution: "1080P",
+    image: "https://example.com/reference.png",
   }),
 });
 
@@ -115,8 +109,8 @@ console.log(await response.json());
   "status": "queued",
   "progress": 0,
   "created_at": 1735689600,
-  "seconds": "6",
-  "size": "720x1280"
+  "seconds": "4",
+  "size": "1920x1080"
 }
 ```
 
@@ -150,7 +144,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="seconds" type="string">
-目标秒数。最小为 `1` 秒；建议按字符串传入，例如 `"6"`。
+目标秒数。建议按字符串传入，例如 `"4"`。
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -158,15 +152,11 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="resolution" type="string">
-输出清晰度。支持 `480P`、`720P`，也兼容 `480`、`720` 写法。
+输出清晰度。支持 `480P`、`720P`、`1080P`。
 </ParamField>
 
 <ParamField body="image" type="string">
-单张参考图。使用 `data:image/png;base64,...` 这类 data URI。
-</ParamField>
-
-<ParamField body="images" type="array<string>">
-不建议使用。当前 `grok-imagine-video-1.5-preview` 规范仅接受 1 张参考图，客户端应使用 `image` 字段。
+单张参考图 URL。请传入上游可访问的图片地址，例如 `https://example.com/reference.png`。
 </ParamField>
 
 ## 请求构造规则
@@ -176,7 +166,7 @@ Authorization: Bearer YOUR_API_KEY
 | 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
 | 单图生视频 | 在文生字段基础上追加 `image` |
 
-客户端如从本地文件构造 JSON 请求，应先读取图片二进制并转为 Base64 data URI，再写入 `image`。不要把本地文件路径直接作为 JSON 图片字段提交。
+`image` 应传入上游可访问的图片 URL，不要把本地文件路径直接作为 JSON 字段提交。
 
 ## Response
 
