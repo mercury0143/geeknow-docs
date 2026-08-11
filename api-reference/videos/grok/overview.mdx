@@ -7,7 +7,7 @@ description: 按模型系列整理 `grok-imagine-video` 与 `grok-imagine-video-
 
 Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `GET /v1/videos/{task_id}` 查询状态。
 
-- `grok-imagine-video` / `grok-imagine-video-1.5-preview` 使用 `application/json`；`grok-imagine-video` 通过 `image` 或 `images` 传入参考图，`grok-imagine-video-1.5-preview` 当前仅建议使用单张 `image`。
+- `grok-imagine-video` / `grok-imagine-video-1.5-preview` 使用 `application/json`；`grok-imagine-video` 通过 `image` 或 `images` 传入参考图，`grok-imagine-video-1.5-preview` 通过 `images` 传入一张或多张参考图。
 - Grok Imagine 使用 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` 等字段。
 
 <CardGroup cols={2}>
@@ -27,21 +27,21 @@ Grok 视频系列统一使用 `POST /v1/videos` 创建异步任务，并使用 `
 | 模型 | 请求格式 | 时长规则 | 参考图规则 |
 | --- | --- | --- | --- |
 | `grok-imagine-video` | JSON | 自定义秒数，最小 `1s` | 单图传 `image`，多图传 `images` |
-| `grok-imagine-video-1.5-preview` | JSON | 按字符串传入秒数 | 单图传 `image` |
+| `grok-imagine-video-1.5-preview` | JSON | 按字符串传入秒数 | 参考图传 `images`，支持多张 |
 
 ## 常见能力
 
 | 能力 | 传参方式 | 说明 |
 | --- | --- | --- |
 | 文生视频 | 仅传文本字段 | 不需要上传参考图 |
-| Grok Imagine 图生视频 | JSON `image` 或 `images` | `grok-imagine-video-1.5-preview` 使用单图 `image`；`grok-imagine-video` 可使用 `image` 或 `images` |
+| Grok Imagine 图生视频 | JSON `image` 或 `images` | `grok-imagine-video-1.5-preview` 使用 `images`；`grok-imagine-video` 可使用 `image` 或 `images` |
 
 ## 参数约束
 
 | 字段 | 可用值 | 说明 |
 | --- | --- | --- |
 | `aspect_ratio` | Grok Imagine 支持常见比例和 `数字:数字` 自定义比例 | 建议显式传入目标比例 |
-| `resolution` | `480P`、`720P`、`1080P` | Grok Imagine 1.5 Preview 支持 `1080P` |
+| `resolution` | `480P`、`720P` | Grok Imagine 1.5 支持 `480P`、`720P` |
 | `seconds` | 字符串形式的秒数 | Grok Imagine 支持按秒提交 |
 | `prompt` | 字符串 | Grok Imagine 系列建议控制在 `4096` 字符以内；长提示词可能导致上游创建任务失败 |
 

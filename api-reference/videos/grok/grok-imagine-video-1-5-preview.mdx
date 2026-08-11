@@ -6,14 +6,14 @@ api: "POST /v1/videos"
 
 # Grok Imagine 1.5 Preview
 
-`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。本模型使用 `application/json` 请求体，参考图通过顶层 `image` 字段传递。
+`grok-imagine-video-1.5-preview` 是 Grok Imagine 线路的 1.5 Preview 模型。本模型使用 `application/json` 请求体，参考图通过顶层 `images` 字段传递。
 
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
-- 图生视频使用单张 `image`。
-- 当前 1.5 Preview 规范按单张参考图请求，使用 `image` 字段即可。
-- `resolution` 支持 `480P`、`720P` 和 `1080P`。
+- 图生视频使用 `images` 数组传入参考图。
+- 当前 1.5 规范支持多张参考图，统一使用 `images` 字段。
+- `resolution` 支持 `480P` 和 `720P`。
 - `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
 ## 方法与路径
@@ -25,7 +25,7 @@ POST /v1/videos
 <RequestExample>
 
 ```bash 文生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
+curl -X POST https://td.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -33,21 +33,24 @@ curl -X POST https://www.geeknow.top/v1/videos \
     "prompt": "雨夜霓虹街头，一辆复古跑车驶过湿润路面",
     "seconds": "4",
     "aspect_ratio": "16:9",
-    "resolution": "1080P"
+    "resolution": "720P"
   }'
 ```
 
-```bash 单图生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
+```bash 多图参考 cURL
+curl -X POST https://td.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "model": "grok-imagine-video-1.5-preview",
-    "prompt": "让参考图中的人物缓慢转身，背景光线自然流动",
+    "prompt": "参考多张图片中的人物外观和场景氛围，生成一段自然运镜视频",
     "seconds": "4",
     "aspect_ratio": "16:9",
-    "resolution": "1080P",
-    "image": "https://example.com/reference.png"
+    "resolution": "720P",
+    "images": [
+      "https://example.com/reference-1.png",
+      "https://example.com/reference-2.png"
+    ]
   }'
 ```
 
@@ -55,18 +58,21 @@ curl -X POST https://www.geeknow.top/v1/videos \
 import requests
 
 resp = requests.post(
-    "https://www.geeknow.top/v1/videos",
+    "https://td.geeknow.top/v1/videos",
     headers={
         "Authorization": "Bearer YOUR_API_KEY",
         "Content-Type": "application/json",
     },
     json={
         "model": "grok-imagine-video-1.5-preview",
-        "prompt": "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
+        "prompt": "参考多张图片中的人物外观和场景氛围，生成一段自然运镜视频",
         "seconds": "4",
         "aspect_ratio": "16:9",
-        "resolution": "1080P",
-        "image": "https://example.com/reference.png",
+        "resolution": "720P",
+        "images": [
+            "https://example.com/reference-1.png",
+            "https://example.com/reference-2.png",
+        ],
     },
     timeout=60,
 )
@@ -75,7 +81,7 @@ print(resp.json())
 ```
 
 ```javascript JavaScript
-const response = await fetch("https://www.geeknow.top/v1/videos", {
+const response = await fetch("https://td.geeknow.top/v1/videos", {
   method: "POST",
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
@@ -83,11 +89,14 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
   },
   body: JSON.stringify({
     model: "grok-imagine-video-1.5-preview",
-    prompt: "让参考图中的人物向镜头微笑，头发和衣摆轻微摆动",
+    prompt: "参考多张图片中的人物外观和场景氛围，生成一段自然运镜视频",
     seconds: "4",
     aspect_ratio: "16:9",
-    resolution: "1080P",
-    image: "https://example.com/reference.png",
+    resolution: "720P",
+    images: [
+      "https://example.com/reference-1.png",
+      "https://example.com/reference-2.png",
+    ],
   }),
 });
 
@@ -110,7 +119,7 @@ console.log(await response.json());
   "progress": 0,
   "created_at": 1735689600,
   "seconds": "4",
-  "size": "1920x1080"
+  "size": "1280x720"
 }
 ```
 
@@ -152,11 +161,11 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="resolution" type="string">
-输出清晰度。支持 `480P`、`720P`、`1080P`。
+输出清晰度。支持 `480P`、`720P`。
 </ParamField>
 
-<ParamField body="image" type="string">
-单张参考图 URL。请传入上游可访问的图片地址，例如 `https://example.com/reference.png`。
+<ParamField body="images" type="array<string>">
+参考图 URL 数组，支持传入多张图片。请传入上游可访问的图片地址，例如 `["https://example.com/reference-1.png", "https://example.com/reference-2.png"]`。
 </ParamField>
 
 ## 请求构造规则
@@ -164,9 +173,9 @@ Authorization: Bearer YOUR_API_KEY
 | 场景 | 字段组合 |
 | --- | --- |
 | 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
-| 单图生视频 | 在文生字段基础上追加 `image` |
+| 图生视频 / 多图参考 | 在文生字段基础上追加 `images` |
 
-`image` 应传入上游可访问的图片 URL，不要把本地文件路径直接作为 JSON 字段提交。
+`images` 应传入上游可访问的图片 URL 数组；只有一张参考图时，也按 `images: ["https://..."]` 传入。不要把本地文件路径直接作为 JSON 字段提交。
 
 ## Response
 
