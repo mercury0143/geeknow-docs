@@ -13,6 +13,7 @@ api: "POST /v1/images/generations/async"
 - 当前已验证可用模型包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream 系列和 Gemini 图像模型。
 - 异步任务的 `image` 目前只接受公网 `http(s)` 图片 URL，不支持 Base64 或 `data:` URI。
 - 成功提交后优先读取 `id`、`task_id` 或 `taskId` 作为后续查询 ID。
+- Gemini 图像模型走异步入口时，`size` 表示图片清晰度，按 `1K` / `2K` 传入。
 - `prompt` 建议控制在 `1` 到 `4000` 个字符。
 - `n` 表示生成数量，常用范围为 `1` 到 `10`。
 
@@ -89,7 +90,8 @@ curl -X POST https://www.geeknow.top/v1/images/generations/async \
     "model": "gemini-3-pro-image-preview",
     "prompt": "一张极简 API 文档封面图，白色背景，清晰几何构图",
     "n": 1,
-    "size": "1024x1024",
+    "size": "2K",
+    "aspect_ratio": "16:9",
     "quality": "auto",
     "response_format": "url"
   }'
@@ -232,7 +234,11 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="size" type="string">
-输出尺寸。常见值包括 `1024x1024`、`1536x1024`、`1024x1536`、`2048x2048`、`2048x1152`、`3840x2160`、`2160x3840`、`1920x1080`、`1080x1920`。`gpt-image-2-vip` 使用独立尺寸约束，常见值还包括 `2304x1728`、`3264x2448`、`3504x2336`、`3808x1632`。
+输出尺寸。常见值包括 `1024x1024`、`1536x1024`、`1024x1536`、`2048x2048`、`2048x1152`、`3840x2160`、`2160x3840`、`1920x1080`、`1080x1920`。`gpt-image-2-vip` 使用独立尺寸约束，常见值还包括 `2304x1728`、`3264x2448`、`3504x2336`、`3808x1632`。Gemini 图像模型中，`size` 对应 Gemini 原生 `generationConfig.imageConfig.imageSize` 清晰度字段，不传像素尺寸；可传 `1K` 或 `2K`。`gemini-3-pro-image-preview` 支持 `1K` / `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
+</ParamField>
+
+<ParamField body="aspect_ratio" type="string">
+图片比例。Gemini 异步生图支持该字段，传入什么比例就按什么比例生成。常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
 </ParamField>
 
 <ParamField body="image" type="array<string>">
@@ -282,7 +288,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="size" type="string">
-最终结果对象的输出尺寸，例如 `1024x1024`、`1536x1024` 或 `3840x2160`。
+最终结果对象的输出尺寸或清晰度，例如 `1024x1024`、`1536x1024`、`3840x2160` 或 Gemini 的 `2K`。
 </ResponseField>
 
 <ResponseField name="quality" type="string">
@@ -330,6 +336,8 @@ Authorization: Bearer YOUR_API_KEY
 - 提交成功后保存 `id`、`task_id` 或 `taskId`，并调用任务查询接口轮询最终结果。
 - `gpt-image-2-pro` 的常见高分辨率尺寸包括 `2048x2048`、`3840x2160`、`2160x3840`。
 - `gpt-image-2-vip` 的 `size` 必须满足：每条边是 `16px` 倍数，最长边不超过 `3840px`，长短边比例不超过 `3:1`，总像素数在 `655,360` 到 `8,294,400` 之间。
+- Gemini 图像模型的 `size` 表示清晰度：`gemini-3-pro-image-preview` 可传 `1K` 或 `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会按 `1K` 处理。
+- Gemini 异步生图的 `aspect_ratio` 传入什么比例就按什么比例生成，常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
 - 异步参考图请使用公网 `http(s)` URL，不能传 Base64 / data URI。
 
 ## 相关页面
