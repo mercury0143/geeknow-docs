@@ -11,7 +11,8 @@ api: "POST /v1/videos"
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
-- 图生视频单图使用 `image`，多图使用 `images`。
+- `seconds` 支持 `4` 到 `15` 秒，建议按字符串传入。
+- 图生视频单图使用 `image`，多图使用 `images`，参考图最多 `7` 张。
 - `resolution` 支持 `480P` 和 `720P`，也兼容 `480` / `720`。
 - `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
@@ -166,7 +167,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="seconds" type="string">
-目标秒数。最小为 `1` 秒；建议按字符串传入，例如 `"6"`。
+目标秒数。支持 `4` 到 `15` 秒；建议按字符串传入，例如 `"6"`。
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -182,7 +183,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="images" type="array<string>">
-多张参考图。数组成员使用 `data:image/png;base64,...` 这类 data URI。传多张图时不要同时传 `image`。
+多张参考图，最多 `7` 张。数组成员使用 `data:image/png;base64,...` 这类 data URI。传多张图时不要同时传 `image`。
 </ParamField>
 
 ## 请求构造规则
@@ -191,7 +192,7 @@ Authorization: Bearer YOUR_API_KEY
 | --- | --- |
 | 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
 | 单图生视频 | 在文生字段基础上追加 `image` |
-| 多图参考 | 在文生字段基础上追加 `images`，数组内每一项为 data URI |
+| 多图参考 | 在文生字段基础上追加 `images`，最多 `7` 张，数组内每一项为 data URI |
 
 客户端如从本地文件构造 JSON 请求，应先读取图片二进制并转为 Base64 data URI，再写入 `image` 或 `images`。不要把本地文件路径直接作为 JSON 图片字段提交。
 

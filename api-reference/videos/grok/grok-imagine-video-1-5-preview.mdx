@@ -11,8 +11,9 @@ api: "POST /v1/videos"
 - 接口路径是 `POST /v1/videos`。
 - 请求格式是 `application/json`。
 - 文生视频只需要 `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution`。
-- 图生视频使用 `images` 数组传入参考图。
-- 当前 1.5 规范支持多张参考图，统一使用 `images` 字段。
+- `seconds` 支持 `4` 到 `15` 秒，建议按字符串传入。
+- 图生视频使用 `images` 数组传入参考图，最多 `7` 张。
+- 当前 1.5 规范统一使用 `images` 字段传入参考图。
 - `resolution` 支持 `480P` 和 `720P`。
 - `prompt` 最多支持 `4096` 个字符；过长或过密的提示词可能导致上游没有返回任务 ID。
 
@@ -153,7 +154,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="seconds" type="string">
-目标秒数。建议按字符串传入，例如 `"4"`。
+目标秒数。支持 `4` 到 `15` 秒；建议按字符串传入，例如 `"4"`。
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -165,7 +166,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="images" type="array<string>">
-参考图 URL 数组，支持传入多张图片。请传入上游可访问的图片地址，例如 `["https://example.com/reference-1.png", "https://example.com/reference-2.png"]`。
+参考图 URL 数组，最多 `7` 张。请传入上游可访问的图片地址，例如 `["https://example.com/reference-1.png", "https://example.com/reference-2.png"]`。
 </ParamField>
 
 ## 请求构造规则
@@ -173,9 +174,9 @@ Authorization: Bearer YOUR_API_KEY
 | 场景 | 字段组合 |
 | --- | --- |
 | 文生视频 | `model`、`prompt`、`seconds`、`aspect_ratio`、`resolution` |
-| 图生视频 / 多图参考 | 在文生字段基础上追加 `images` |
+| 图生视频 / 多图参考 | 在文生字段基础上追加 `images`，最多 `7` 张 |
 
-`images` 应传入上游可访问的图片 URL 数组；只有一张参考图时，也按 `images: ["https://..."]` 传入。不要把本地文件路径直接作为 JSON 字段提交。
+`images` 应传入上游可访问的图片 URL 数组，最多 `7` 张；只有一张参考图时，也按 `images: ["https://..."]` 传入。不要把本地文件路径直接作为 JSON 字段提交。
 
 ## Response
 

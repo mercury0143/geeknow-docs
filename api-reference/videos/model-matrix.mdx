@@ -13,7 +13,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | --- | --- | --- | --- | --- | --- |
 | Sora | `sora-2` | [概览](/api-reference/videos/sora/overview) | `/v1/videos` | 文生视频、首帧生视频 | JSON `input_reference` |
 | Veo | `veo_3_1`、`veo_3_1-fast` | [概览](/api-reference/videos/veo/overview) | `/v1/videos` | 文生视频、首尾帧、参考生视频 | JSON `input_reference` |
-| Grok Imagine | `grok-imagine-video`、`grok-imagine-video-1.5-preview` | [概览](/api-reference/videos/grok/overview) | `/v1/videos` | 文生视频、图生视频、参考图视频 | JSON `image` / `images`；1.5 Preview 使用 `images` 支持多参考图 |
+| Grok Imagine | `grok-imagine-video`、`grok-imagine-video-1.5-preview` | [概览](/api-reference/videos/grok/overview) | `/v1/videos` | 文生视频、图生视频、参考图视频 | JSON `image` / `images`；参考图最多 `7` 张，1.5 Preview 使用 `images` |
 | Omni | `omni-fast`、`omni-fast-v2v` | [概览](/api-reference/videos/omni/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、多参考图、参考视频编辑 | JSON `first_image_url` / `last_image_url` / `images` / `video` |
 | MiniMax H3 | `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p`、`minimax-h3-pro-2k` | [概览](/api-reference/videos/minimax-h3/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、参考音频、Pro 参考视频 | JSON `referenceImages` / `first_image` / `last_image` / `referenceAudios` / `referenceVideos`；普通档是 `503`，Pro 档是 `913` |
 | manxue-2.5 | `manxue-2.5` | [概览](/api-reference/videos/manxue-2.5/overview) | `/v1/videos` | 文生视频、多参考图、参考视频、参考音频 | JSON `referenceImages` / `referenceVideos` / `referenceAudios` |
@@ -66,8 +66,8 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | 推荐入口 | `POST /v1/videos` |
 | 文档页面 | [Grok 视频概览](/api-reference/videos/grok/overview) |
 | 常见字段 | `prompt`、`seconds`、`aspect_ratio`、`resolution`、`image`、`images` |
-| 参考图 | JSON `image` / `images`，其中 `grok-imagine-video-1.5-preview` 使用 `images` 支持多参考图 |
-| 时长规则 | 支持自定义秒数，最小 `1s` |
+| 参考图 | JSON `image` / `images`，最多 `7` 张；其中 `grok-imagine-video-1.5-preview` 使用 `images` |
+| 时长规则 | `seconds` 支持 `4` 到 `15` 秒 |
 
 ### Omni
 
@@ -239,8 +239,8 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | `Kling-3.0-Omni` | 国产视频模型 | 可灵 3.0 Omni（基础模型）。 |
 | `omni-fast` | Omni | 文生视频、首帧图生视频、首尾帧和多参考图视频；JSON 请求；参考图最多 5 张；时长 4 到 30 秒。 |
 | `omni-fast-v2v` | Omni | 在 `omni-fast` 基础上额外支持参考视频编辑或延长；参考视频字段为 `video` / `video_url` / `input_video`，最大 15MB。 |
-| `grok-imagine-video` | Grok Imagine | Grok Imagine Video；JSON 请求；单图传 `image`，多图传 `images`；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
-| `grok-imagine-video-1.5-preview` | Grok Imagine | Grok Imagine 1.5 Preview；JSON 请求；使用 `images` 支持多参考图；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
+| `grok-imagine-video` | Grok Imagine | Grok Imagine Video；JSON 请求；`seconds` 支持 `4` 到 `15` 秒；单图传 `image`，多图传 `images`，参考图最多 `7` 张；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
+| `grok-imagine-video-1.5-preview` | Grok Imagine | Grok Imagine 1.5 Preview；JSON 请求；`seconds` 支持 `4` 到 `15` 秒；使用 `images` 传参考图，最多 `7` 张；`resolution` 支持 `480P` / `720P`；`prompt` 最多 `4096` 个字符。 |
 | `minimax-h3` | MiniMax H3 | 前端单入口；按 `resolution`、`video_resolution` 或 `size` 分流到普通档 `minimax-h3-768p` 或 `minimax-h3-2k`；未明确选择时默认 768P，不自动选择 Pro。 |
 | `minimax-h3-768p` | MiniMax H3 | 普通 768P 模型；全能参考 `503`；`duration` 支持 `4` 到 `15` 秒；适合草稿、批量和常规清晰度任务。 |
 | `minimax-h3-2k` | MiniMax H3 | 普通 2K 模型；全能参考 `503`；参数与 `minimax-h3-768p` 一致；适合高清成片、大屏展示和后期裁切。 |
