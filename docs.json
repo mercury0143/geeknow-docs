@@ -152,6 +152,15 @@
             ]
           },
           {
+            "group": "Wan 3.0",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/wan3/overview",
+              "api-reference/videos/wan3/generation",
+              "api-reference/videos/wan3/query"
+            ]
+          },
+          {
             "group": "Omni 视频",
             "expanded": true,
             "pages": [

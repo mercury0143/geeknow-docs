@@ -17,6 +17,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | Omni | `omni-fast`、`omni-fast-v2v` | [概览](/api-reference/videos/omni/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、多参考图、参考视频编辑 | JSON `first_image_url` / `last_image_url` / `images` / `video` |
 | MiniMax H3 | `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p`、`minimax-h3-pro-2k` | [概览](/api-reference/videos/minimax-h3/overview) | `/v1/videos` | 文生视频、图生视频、首尾帧、参考音频、Pro 参考视频 | JSON `referenceImages` / `first_image` / `last_image` / `referenceAudios` / `referenceVideos`；普通档是 `503`，Pro 档是 `913` |
 | manxue-2.5 | `manxue-2.5` | [概览](/api-reference/videos/manxue-2.5/overview) | `/v1/videos` | 文生视频、多参考图、参考视频、参考音频 | JSON `referenceImages` / `referenceVideos` / `referenceAudios` |
+| Wan 3.0 | `wan3.0-video`、`wan3.0-video-prime` | [概览](/api-reference/videos/wan3/overview) | `/v1/videos` | 文生视频、首帧、首尾帧、多图参考、参考视频、参考音频 | JSON `image` / `images` / `input_reference` / `metadata`；高级场景可用原生 `input.media` |
 | 国产视频模型（AIGC） | `Vidu-*`、`Kling-*`、`GV-*`、`OS-*`、`Hunyuan-*`、`Mingmou-*`、`Hailuo-*`、`SV-*`、`JV-*` | [概览](/api-reference/videos/aigc/overview) | `/v1/videos` | 文生、图生、参考图、参考视频、首尾帧、动作控制、数字人、对口型、模板特效 | JSON `image` / `images` / `input_reference` / `metadata` |
 | 特惠渠道系列 | `manxue-2.0` | [概览](/api-reference/videos/special-offer/overview) | `/v1/videos` | 文生视频、首帧生视频、首尾帧、参考图、参考音频 | JSON `content[].image_url` / `content[].audio_url` |
 | Seedance 2.0 | `doubao-seedance-2-0-260128`、`doubao-seedance-2-0-fast-260128` | [概览](/api-reference/videos/seedance-2/overview) | `/v1/videos` | 文生视频、首帧、尾帧、参考图、参考视频、参考音频 | JSON URL 字段 |
@@ -118,6 +119,22 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | 参考音频 | 顶层 `referenceAudios`，最多 `10` 个公网音频 URL |
 | 参考素材字段 | `referenceImages`、`referenceVideos`、`referenceAudios` |
 
+### Wan 3.0
+
+| 项目 | 说明 |
+| --- | --- |
+| 模型示例 | `wan3.0-video`、`wan3.0-video-prime` |
+| 推荐入口 | `POST /v1/videos` |
+| 文档页面 | [概览](/api-reference/videos/wan3/overview) |
+| 常见字段 | `prompt`、`seconds`、`size`、`aspect_ratio`、`image`、`images`、`mode`、`metadata` |
+| 查询接口 | `GET /v1/videos/{task_id}` |
+| 下载接口 | `GET /v1/videos/{task_id}/content` |
+| 分辨率 | `480P`、`720P`、`1080P`，默认 `1080P` |
+| 时长规则 | `seconds` 支持 `2` 到 `30` 秒，默认 `5` |
+| 画幅比例 | `16:9`、`9:16`、`1:1`、`4:3`、`3:4`、`adaptive` |
+| 参考素材 | 参考图最多 `10` 张，参考视频最多 `5` 个，参考音频最多 `5` 个 |
+| 客户端域名 | `https://www.geeknow.top` |
+
 ### 特惠渠道系列
 
 | 项目 | 说明 |
@@ -208,6 +225,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | Omni | 支持 | 支持 | 支持 | `omni-fast` 支持参考图；`omni-fast-v2v` 支持参考视频 | 模型相关 |
 | MiniMax H3 | 支持 | 支持 | 支持 | 普通档支持参考图和参考音频；Pro 档额外支持 1 段 2 到 5 秒参考视频 | 原生音频能力，前端不透出关闭开关 |
 | manxue-2.5 | 支持 | 可通过 `referenceImages` 表达 | 可通过 `referenceImages` 加提示词表达 | 支持多参考图、最多 10 个参考视频和 10 个参考音频 | 模型相关 |
+| Wan 3.0 | 支持 | 支持 | 支持 | 支持多图、参考视频和参考音频；高级场景可直接传 `input.media` | 可通过 `metadata.parameters.audio` 请求有声视频 |
 | 特惠渠道系列 | 支持 | 支持 | 支持 | `manxue-2.0` 支持参考图和参考音频 | 模型相关 |
 | Seedance 2.0 | 支持 | 支持 | 支持 | 支持参考图、参考视频和参考音频 | 模型相关 |
 | Seedance 1.5 | 支持 | 支持 | 支持 | 建议使用首帧或首尾帧 | 依赖上游 |
@@ -224,6 +242,8 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | --- | --- | --- |
 | `manxue-2.0` | 特惠渠道系列 | JSON 请求；`seconds` 支持 `4` 到 `15` 秒；`resolution` 支持 `480P`、`720P`；参考图通过 `content[].image_url.url` 传入，参考音频通过 `content[].audio_url.url` 传入。 |
 | `manxue-2.5` | manxue-2.5 | JSON 请求；`duration` 支持 `4` 到 `29` 秒；`resolution` 支持 `480p`、`720p`；参考图、参考视频、参考音频分别通过 `referenceImages`、`referenceVideos`、`referenceAudios` 传入。 |
+| `wan3.0-video` | Wan 3.0 | 通义万相 Wan 3.0 标准版；JSON 请求；`seconds` 支持 `2` 到 `30` 秒；`size` 支持 `480P`、`720P`、`1080P`；支持首帧、首尾帧、多图参考、参考视频和参考音频。 |
+| `wan3.0-video-prime` | Wan 3.0 | 通义万相 Wan 3.0 优速版；参数格式与 `wan3.0-video` 一致，适合需要更快端到端处理的任务。 |
 | `doubao-seedance-2-0-260128` | Seedance 2.0 | Seedance 2.0 标准档位；支持 JSON URL 字段。 |
 | `doubao-seedance-2-0-fast-260128` | Seedance 2.0 | Seedance 2.0 fast 档位；适合更快提交的视频任务。 |
 | `doubao-seedance-1-5-pro_480p` | Seedance 1.5 | Seedance 1.5 480p；multipart 请求；`seconds` 范围 `4` 到 `11`；首尾帧图片 URL 使用 `first_frame_image` / `last_frame_image` 传入。 |
@@ -254,7 +274,8 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 1. [Grok 视频概览](/api-reference/videos/grok/overview)
 2. [MiniMax H3 视频概览](/api-reference/videos/minimax-h3/overview)
 3. [manxue-2.5 视频概览](/api-reference/videos/manxue-2.5/overview)
-4. [Omni 视频模型概览](/api-reference/videos/omni/overview)
-5. [Veo 视频概览](/api-reference/videos/veo/overview)
-6. 如果你要做图生视频，先确认目标模型需要的是 `image`、`images`、`input_reference`、`referenceImages` 还是 `first_frame_image` / `last_frame_image`。
-7. 如果你明确是 Kling 官方格式接入，再看 `/kling/v1/videos/*` 这一组路由。
+4. [Wan 3.0 视频概览](/api-reference/videos/wan3/overview)
+5. [Omni 视频模型概览](/api-reference/videos/omni/overview)
+6. [Veo 视频概览](/api-reference/videos/veo/overview)
+7. 如果你要做图生视频，先确认目标模型需要的是 `image`、`images`、`input_reference`、`referenceImages` 还是 `first_frame_image` / `last_frame_image`。
+8. 如果你明确是 Kling 官方格式接入，再看 `/kling/v1/videos/*` 这一组路由。

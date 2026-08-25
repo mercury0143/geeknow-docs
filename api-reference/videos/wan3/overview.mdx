@@ -1,0 +1,105 @@
+---
+title: Wan 3.0 视频概览
+description: 说明通义万相 Wan 3.0 的模型、请求方式、视频生成场景、参考素材和任务查询链路。
+---
+
+# Wan 3.0 视频
+
+Wan 3.0 是通义万相视频生成系列，统一通过 Geeknow 视频接口调用。客户端使用 `POST /v1/videos` 创建异步任务，使用 `GET /v1/videos/{task_id}` 查询任务状态，并可通过 `GET /v1/videos/{task_id}/content` 下载生成结果。
+
+## 接口信息
+
+| 项目 | 说明 |
+| --- | --- |
+| Base URL | `https://www.geeknow.top` |
+| 创建任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 下载内容 | `GET /v1/videos/{task_id}/content` |
+| 请求格式 | `application/json` |
+| 鉴权方式 | `Authorization: Bearer YOUR_API_KEY` |
+
+<CardGroup cols={2}>
+  <Card title="创建视频任务" icon="sparkles" href="/api-reference/videos/wan3/generation">
+    使用 `wan3.0-video` 或 `wan3.0-video-prime` 提交文生、图生、首尾帧和多图参考任务。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/wan3/query">
+    轮询任务状态，读取结果地址，并在需要时下载生成的视频内容。
+  </Card>
+</CardGroup>
+
+## 支持模型
+
+| 模型 | 说明 |
+| --- | --- |
+| `wan3.0-video` | Wan 3.0 标准版 |
+| `wan3.0-video-prime` | Wan 3.0 优速版，能力对齐，端到端处理更快 |
+
+模型是否可用取决于当前账户分组和渠道配置。请求中的 `model` 必须与已开通的模型名称一致。
+
+## 支持能力
+
+| 能力 | 请求字段 | 说明 |
+| --- | --- | --- |
+| 文生视频 | `prompt` | 不传参考素材时，根据提示词生成视频 |
+| 图生视频 | `image` | 单张图片作为首帧 |
+| 首尾帧生成 | `mode`、`metadata.first_frame_url`、`metadata.last_frame_url` | 必须显式标记首帧和尾帧 |
+| 多图参考 | `images`、`mode: all-reference` | 使用多张图片约束人物、道具或场景 |
+| 参考视频 | `metadata.reference_video_urls` 或 `input.media` | 使用视频提供动作、镜头或风格参考 |
+| 参考音频 | `metadata.reference_audio_urls` 或 `input.media` | 使用音频提供节奏、旁白或情绪参考 |
+| 有声视频 | `metadata.parameters.audio` | 设置为 `true` 请求生成有声视频 |
+
+## 请求字段速览
+
+| 字段 | 说明 |
+| --- | --- |
+| `model` | 必填，传 `wan3.0-video` 或 `wan3.0-video-prime` |
+| `prompt` | 必填，描述主体、动作、镜头和风格 |
+| `seconds` | 视频时长，支持 `2` 到 `30` 秒，默认 `5` |
+| `duration` | 时长兼容字段，优先级低于 `seconds` |
+| `size` | 分辨率档位，支持 `480P`、`720P`、`1080P`，默认 `1080P` |
+| `aspect_ratio` | 画幅比例，例如 `16x9`、`9x16`、`1x1` |
+| `image` | 单张首帧或参考图 URL |
+| `images` | 多张参考图 URL |
+| `input_reference` | OpenAI Videos 兼容的参考图字段 |
+| `mode` | 首尾帧或全能参考模式提示 |
+| `metadata` | 首尾帧、参考媒体和高级参数 |
+
+### 分辨率与画幅
+
+`size` 只表示分辨率档位，不使用 `1280x720` 这类 WxH 字符串作为 Wan 3.0 的主分辨率字段。画幅请通过 `aspect_ratio` 指定。
+
+| `aspect_ratio` 传入值 | 上游画幅 |
+| --- | --- |
+| `16x9` / `16:9` | `16:9` |
+| `9x16` / `9:16` | `9:16` |
+| `1x1` / `1:1` | `1:1` |
+| `4x3` / `4:3` | `4:3` |
+| `3x4` / `3:4` | `3:4` |
+| `adaptive` | `adaptive` |
+
+### 参考素材限制
+
+- 参考图最多 `10` 张。
+- 参考视频最多 `5` 个。
+- 参考音频最多 `5` 个。
+- 参考素材应使用服务端可访问的 `http://` 或 `https://` URL。
+- `first_frame` / `last_frame` 不能与 `reference_image`、`reference_video`、`reference_audio`、`file` 或 `link` 混传。
+
+## 媒体类型判定
+
+如果不直接使用原生 `input.media`，接口按以下顺序判断媒体类型：
+
+1. 已提供 `input.media` 时，原样透传给上游，不再自动映射。
+2. 存在首尾帧字段或 `mode: first-last-frame` 时，映射为 `first_frame` 和 `last_frame`。
+3. 存在参考类 metadata、`mode: all-reference` 或至少两张图片时，映射为 `reference_image`。
+4. 只有一张图片时，映射为 `first_frame`。
+5. 没有图片或其他媒体时，按文生视频处理。
+
+需要首尾帧时，不要仅依赖 `images` 数组顺序，建议同时传 `mode` 和 `metadata.first_frame_url` / `metadata.last_frame_url`。
+
+## 相关页面
+
+- [Wan 3.0 视频生成](./generation)
+- [Wan 3.0 查询视频任务](./query)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)
+- [视频系列概览](/api-reference/videos/overview)
