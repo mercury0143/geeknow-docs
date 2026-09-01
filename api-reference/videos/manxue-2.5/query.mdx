@@ -71,7 +71,7 @@ console.log(await response.json());
   "progress": 50,
   "created_at": 1782690295,
   "completed_at": null,
-  "seconds": "20",
+  "seconds": "10",
   "url": null,
   "video_url": null,
   "metadata": {
@@ -92,7 +92,7 @@ console.log(await response.json());
   "progress": 100,
   "created_at": 1782690295,
   "completed_at": 1782690494,
-  "seconds": "20",
+  "seconds": "10",
   "url": "https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content",
   "video_url": "https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content",
   "metadata": {
@@ -115,7 +115,7 @@ console.log(await response.json());
   "progress": 100,
   "created_at": 1782690000,
   "completed_at": 1782690010,
-  "seconds": "20",
+  "seconds": "10",
   "url": null,
   "video_url": null,
   "metadata": {},
@@ -241,7 +241,7 @@ curl -L https://www.geeknow.top/v1/videos/manxue-2.5_xxx/content \
 
 - 查询接口只读取任务状态，不会重新提交生成任务。
 - `progress` 长时间不变不一定代表任务失败，应以终态状态为准。
-- 如果任务失败，建议记录 `model`、`duration`、`ratio`、`resolution`、参考素材 URL 和完整 `error`。
+- 如果任务失败，建议记录 `model`、`seconds`、`ratio`、参考图片和完整 `error`。
 
 ## 相关页面
 
