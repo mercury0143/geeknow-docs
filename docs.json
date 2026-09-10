@@ -69,6 +69,20 @@
             ]
           },
           {
+            "group": "gpt-image-2.5-flare",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-2.5-flare/generation"
+            ]
+          },
+          {
+            "group": "gpt-image-2.5-sunburst",
+            "expanded": true,
+            "pages": [
+              "api-reference/images/gpt-image-2.5-sunburst/generation"
+            ]
+          },
+          {
             "group": "gpt-image-2-vip",
             "expanded": true,
             "pages": [

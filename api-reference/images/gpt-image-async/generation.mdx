@@ -10,7 +10,7 @@ api: "POST /v1/images/generations/async"
 
 - 异步入口为 `POST /v1/images/generations/async`。
 - 查询入口为 `GET /v1/images/generations/async/{taskId}`。
-- 当前已验证可用模型包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、Doubao Seedream 系列和 Gemini 图像模型。
+- 当前已验证可用模型包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`、`gpt-image-2-vip`、Doubao Seedream 系列和 Gemini 图像模型。
 - 异步任务的 `image` 目前只接受公网 `http(s)` 图片 URL，不支持 Base64 或 `data:` URI。
 - 成功提交后优先读取 `id`、`task_id` 或 `taskId` 作为后续查询 ID。
 - Gemini 图像模型走异步入口时，`size` 表示图片清晰度，按 `1K` / `2K` 传入。
@@ -222,7 +222,7 @@ Authorization: Bearer YOUR_API_KEY
 ## Body
 
 <ParamField body="model" type="string" required>
-模型名称。当前已验证可用值包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-3.1-flash-lite-image`。VIP 模型名请使用 `gpt-image-2-vip`，不要传 `gpt-image-vip`。
+模型名称。当前已验证可用值包括 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`doubao-seedream-4-5-251128`、`doubao-seedream-5-0-260128`、`gemini-3-pro-image-preview`、`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview`、`gemini-3.1-flash-lite-image`。VIP 模型名请使用 `gpt-image-2-vip`，不要传 `gpt-image-vip`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
@@ -234,7 +234,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="size" type="string">
-输出尺寸。常见值包括 `1024x1024`、`1536x1024`、`1024x1536`、`2048x2048`、`2048x1152`、`3840x2160`、`2160x3840`、`1920x1080`、`1080x1920`。`gpt-image-2-vip` 使用独立尺寸约束，常见值还包括 `2304x1728`、`3264x2448`、`3504x2336`、`3808x1632`。Gemini 图像模型中，`size` 对应 Gemini 原生 `generationConfig.imageConfig.imageSize` 清晰度字段，不传像素尺寸；可传 `1K` 或 `2K`。`gemini-3-pro-image-preview` 支持 `1K` / `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
+输出尺寸。`gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 支持 `gpt-image-2` 与 `gpt-image-2-pro` 的全部基础、`2K` 和 `4K` 实际 `WxH` 尺寸。其它 GPT Image 模型的常见值包括 `1024x1024`、`1536x1024`、`1024x1536`、`2048x2048`、`2048x1152`、`3840x2160`、`2160x3840`、`1920x1080`、`1080x1920`。`gpt-image-2-vip` 使用独立尺寸约束，常见值还包括 `2304x1728`、`3264x2448`、`3504x2336`、`3808x1632`。Gemini 图像模型中，`size` 对应 Gemini 原生 `generationConfig.imageConfig.imageSize` 清晰度字段，不传像素尺寸；可传 `1K` 或 `2K`。`gemini-3-pro-image-preview` 支持 `1K` / `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会实际回落为 `1K`。
 </ParamField>
 
 <ParamField body="aspect_ratio" type="string">
@@ -246,7 +246,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="quality" type="string">
-质量等级。常见值为 `low`、`medium`、`high`、`auto`，默认 `auto`。
+质量等级。通用值为 `low`、`medium`、`high`、`auto`；`gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 还支持 `xhigh` 和 `max`。未传时默认 `auto`。
 </ParamField>
 
 <ParamField body="response_format" type="string">
@@ -272,7 +272,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`gemini-3-pro-image-preview` 或 `gemini-3.1-flash-lite-image`。
+任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`gemini-3-pro-image-preview` 或 `gemini-3.1-flash-lite-image`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -292,7 +292,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="quality" type="string">
-最终结果对象的质量等级，例如 `low`。
+最终结果对象的质量等级，例如 `low`；`gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 也可能返回 `xhigh` 或 `max`。
 </ResponseField>
 
 <ResponseField name="background" type="string">
@@ -335,6 +335,8 @@ Authorization: Bearer YOUR_API_KEY
 - Gemini 图像模型走异步入口时使用 OpenAI Images 兼容 JSON，不使用 `/v1beta/models/{model}:generateContent` 的 Gemini 原生请求体。
 - 提交成功后保存 `id`、`task_id` 或 `taskId`，并调用任务查询接口轮询最终结果。
 - `gpt-image-2-pro` 的常见高分辨率尺寸包括 `2048x2048`、`3840x2160`、`2160x3840`。
+- `gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 支持全部基础、`2K` 和 `4K` 尺寸，具体 `WxH` 映射见各自生成页面。
+- `gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 的 `quality` 还支持 `xhigh` 和 `max`。
 - `gpt-image-2-vip` 的 `size` 必须满足：每条边是 `16px` 倍数，最长边不超过 `3840px`，长短边比例不超过 `3:1`，总像素数在 `655,360` 到 `8,294,400` 之间。
 - Gemini 图像模型的 `size` 表示清晰度：`gemini-3-pro-image-preview` 可传 `1K` 或 `2K`；`gemini-2.5-flash-image-preview`、`gemini-3.1-flash-image-preview` 与 `gemini-3.1-flash-lite-image` 会按 `1K` 处理。
 - Gemini 异步生图的 `aspect_ratio` 传入什么比例就按什么比例生成，常见值包括 `1:1`、`16:9`、`9:16`、`4:3`、`3:4`、`3:2`、`2:3`、`21:9`。
@@ -345,6 +347,8 @@ Authorization: Bearer YOUR_API_KEY
 - [图像异步任务查询](/api-reference/images/gpt-image-async/query)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [gpt-image-2.5-flare 生成图像 API](/api-reference/images/gpt-image-2.5-flare/generation)
+- [gpt-image-2.5-sunburst 生成图像 API](/api-reference/images/gpt-image-2.5-sunburst/generation)
 - [gpt-image-2-vip 生成图像 API](/api-reference/images/gpt-image-2-vip/generation)
 - [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
 - [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)

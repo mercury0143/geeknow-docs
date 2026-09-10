@@ -166,7 +166,7 @@ Authorization: Bearer YOUR_API_KEY
 </ResponseField>
 
 <ResponseField name="model" type="string">
-任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`gemini-3-pro-image-preview` 或 `gemini-3.1-flash-lite-image`。
+任务使用的图像模型，例如 `gpt-image-2`、`gpt-image-2-pro`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`、`gpt-image-2-vip`、`doubao-seedream-4-0-250828`、`gemini-3-pro-image-preview` 或 `gemini-3.1-flash-lite-image`。
 </ResponseField>
 
 <ResponseField name="status" type="string">
@@ -183,6 +183,10 @@ Authorization: Bearer YOUR_API_KEY
 
 <ResponseField name="size" type="string">
 输出尺寸，例如 `1024x1024`、`1536x1024`、`3840x2160`、`3808x1632`。
+</ResponseField>
+
+<ResponseField name="quality" type="string">
+最终结果对象的质量等级，例如 `low`；`gpt-image-2.5-flare` 与 `gpt-image-2.5-sunburst` 也可能返回 `xhigh` 或 `max`。
 </ResponseField>
 
 <ResponseField name="data[].url" type="string">
@@ -223,6 +227,8 @@ Authorization: Bearer YOUR_API_KEY
 - [图像异步生成 API](/api-reference/images/gpt-image-async/generation)
 - [gpt-image-2 生成图像 API](/api-reference/images/gpt-image-2/generation)
 - [gpt-image-2-pro 生成图像 API](/api-reference/images/gpt-image-2-pro/generation)
+- [gpt-image-2.5-flare 生成图像 API](/api-reference/images/gpt-image-2.5-flare/generation)
+- [gpt-image-2.5-sunburst 生成图像 API](/api-reference/images/gpt-image-2.5-sunburst/generation)
 - [gpt-image-2-vip 生成图像 API](/api-reference/images/gpt-image-2-vip/generation)
 - [Doubao Seedream 生成图像 API](/api-reference/images/doubao-seedream/generation)
 - [Gemini 图像生成 API](/api-reference/images/gemini-image/generation)
