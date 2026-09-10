@@ -1,22 +1,22 @@
 ---
-title: manxue-2.5 视频生成
-description: 使用 `POST /v1/videos` 调用 `manxue-2.5` 提交 multipart/form-data 视频生成任务。
+title: manxue-2.5 参考生视频
+description: 使用 JSON 请求调用 manxue-2.5 提交参考生视频任务。
 api: "POST /v1/videos"
 ---
 
-# manxue-2.5 视频生成
+# manxue-2.5 参考生视频
 
-`manxue-2.5` 通过 `POST /v1/videos` 提交异步视频任务。请求使用 `multipart/form-data`，核心表单字段为 `model`、`prompt`、`seconds` 和 `ratio`，参考图片通过重复的 `images` 字段上传。
+`manxue-2.5` 目前只支持参考生视频。请求必须在 `images` 中提供至少一张参考图，不能只传文字提示词。服务会返回异步任务 ID，后续通过查询接口获取视频结果。
 
 ## 模型规格
 
 | 项目 | 说明 |
 | --- | --- |
 | `model` | 固定传 `manxue-2.5` |
-| 请求格式 | `multipart/form-data` |
-| 时长 | `seconds` 支持 `5`、`10`、`30` 秒 |
+| 请求格式 | `application/json` |
+| 时长 | `seconds` 仅支持 `30` 秒 |
 | 画幅 | `ratio` 支持 `1:1`、`3:4`、`4:3`、`9:16`、`16:9`、`21:9` |
-| 参考图 | `images` 字段可重复传入，最多 `30` 张 |
+| 参考图 | `images` 必填，支持 `1` 到 `30` 张 |
 
 ## 方法与路径
 
@@ -28,24 +28,20 @@ POST /v1/videos
 
 <RequestExample>
 
-```bash 文生视频 cURL
+```bash 参考生视频 cURL
 curl -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=manxue-2.5" \
-  -F "prompt=清晨的海边公路，车辆沿海岸线行驶，低角度跟拍，真实光影，电影感" \
-  -F "seconds=10" \
-  -F "ratio=16:9"
-```
-
-```bash 多参考图 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -F "model=manxue-2.5" \
-  -F "prompt=参考图片中的人物外观、服装和场景氛围，生成一段自然行走的竖屏视频，镜头轻微前推" \
-  -F "seconds=10" \
-  -F "ratio=9:16" \
-  -F "images=@person.png;type=image/png" \
-  -F "images=@location.png;type=image/png"
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "manxue-2.5",
+    "prompt": "参考图片中的人物外观和服装，人物自然走向镜头并回头微笑，镜头缓慢前推，保持真实光影和竖屏构图",
+    "seconds": "30",
+    "ratio": "9:16",
+    "images": [
+      "https://example.com/assets/person.png",
+      "https://example.com/assets/street.png"
+    ]
+  }'
 ```
 
 ```python Python
@@ -53,12 +49,19 @@ import requests
 
 resp = requests.post(
     "https://www.geeknow.top/v1/videos",
-    headers={"Authorization": "Bearer YOUR_API_KEY"},
-    data={
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
         "model": "manxue-2.5",
-        "prompt": "清晨的海边公路，车辆沿海岸线行驶，低角度跟拍，真实光影，电影感",
-        "seconds": "10",
+        "prompt": "参考产品图保持产品外观一致，生成一段镜头环绕产品的广告视频",
+        "seconds": "30",
         "ratio": "16:9",
+        "images": [
+            "https://example.com/assets/product-front.png",
+            "https://example.com/assets/product-side.png",
+        ],
     },
     timeout=120,
 )
@@ -67,18 +70,19 @@ print(resp.json())
 ```
 
 ```javascript JavaScript
-const form = new FormData();
-form.append("model", "manxue-2.5");
-form.append("prompt", "清晨的海边公路，车辆沿海岸线行驶，低角度跟拍，真实光影，电影感");
-form.append("seconds", "10");
-form.append("ratio", "16:9");
-
 const response = await fetch("https://www.geeknow.top/v1/videos", {
   method: "POST",
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
   },
-  body: form,
+  body: JSON.stringify({
+    model: "manxue-2.5",
+    prompt: "参考图片中的角色外观，生成一段自然行走的电影感视频",
+    seconds: "30",
+    ratio: "16:9",
+    images: ["https://example.com/assets/character.png"],
+  }),
 });
 
 console.log(await response.json());
@@ -100,7 +104,7 @@ console.log(await response.json());
   "progress": 0,
   "created_at": 1782690295,
   "completed_at": null,
-  "seconds": "10",
+  "seconds": "30",
   "url": null,
   "video_url": null,
   "metadata": {},
@@ -108,12 +112,23 @@ console.log(await response.json());
 }
 ```
 
+```json 400 - 缺少参考图
+{
+  "error": {
+    "message": "images is required for reference video generation",
+    "type": "invalid_request_error",
+    "param": "images",
+    "code": "invalid_request_error"
+  }
+}
+```
+
 ```json 400 - 参数错误
 {
   "error": {
-    "message": "prompt is required",
+    "message": "seconds must be 30",
     "type": "invalid_request_error",
-    "param": "prompt",
+    "param": "seconds",
     "code": "invalid_request_error"
   }
 }
@@ -129,113 +144,50 @@ console.log(await response.json());
 }
 ```
 
-```json 402 - 额度不足
-{
-  "error": {
-    "message": "insufficient quota",
-    "type": "insufficient_quota",
-    "code": "insufficient_quota"
-  }
-}
-```
-
-```json 429 - 请求过多
-{
-  "error": {
-    "message": "rate limit exceeded",
-    "type": "rate_limit_error",
-    "code": "rate_limit_exceeded"
-  }
-}
-```
-
 </ResponseExample>
 
 ## 认证
 
-使用 Bearer Token 鉴权：
-
 ```http
 Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
 ```
 
-使用表单提交时不要手动设置 `Content-Type`，客户端会自动生成包含 boundary 的请求头。
-
-## Form Fields
+## Body
 
 <ParamField body="model" type="string" required>
 模型名称。固定传 `manxue-2.5`。
 </ParamField>
 
 <ParamField body="prompt" type="string" required>
-视频生成提示词。建议明确主体、动作、镜头、风格、画面节奏，以及参考素材在任务中的作用。
+视频生成提示词。描述参考图中的主体、动作、镜头和风格；不要把它当作文生视频请求使用。
 </ParamField>
 
 <ParamField body="seconds" type="string" required>
-输出视频时长，单位为秒。仅支持 `5`、`10`、`30`，建议按字符串传入，例如 `"10"`。
+输出视频时长，单位为秒。仅支持 `30`，建议按字符串传入：`"30"`。
 </ParamField>
 
-<ParamField body="ratio" type="string">
+<ParamField body="ratio" type="string" required>
 画幅比例。支持 `1:1`、`3:4`、`4:3`、`9:16`、`16:9`、`21:9`。
 </ParamField>
 
-<ParamField body="images" type="file">
-参考图片。通过重复的 `images` 表单字段传入，最多 `30` 张；本地文件可直接使用 multipart 文件上传。
+<ParamField body="images" type="array<string>" required>
+参考图片数组。至少传入 1 张，最多 30 张；每一项可以是公网图片 URL 或纯 Base64 字符串。不要传 data URI。
 </ParamField>
 
-## Response
+## 参考图使用规则
 
-<ResponseField name="id" type="string">
-视频任务 ID。后续可用于 `GET /v1/videos/{task_id}` 查询。
-</ResponseField>
-
-<ResponseField name="task_id" type="string">
-视频任务 ID 的兼容字段。通常与 `id` 相同。
-</ResponseField>
-
-<ResponseField name="object" type="string">
-对象类型，通常为 `video`。
-</ResponseField>
-
-<ResponseField name="model" type="string">
-本次任务使用的模型，例如 `manxue-2.5`。
-</ResponseField>
-
-<ResponseField name="status" type="string">
-任务状态。常见值为 `queued`、`in_progress`、`completed`、`failed`。
-</ResponseField>
-
-<ResponseField name="progress" type="number">
-任务进度，常见范围为 `0` 到 `100`。部分上游不会稳定更新该字段，业务侧应以终态状态为准。
-</ResponseField>
-
-<ResponseField name="video_url" type="string">
-任务完成后的视频地址。也可以使用 `GET /v1/videos/{task_id}/content` 下载结果。
-</ResponseField>
-
-<ResponseField name="metadata" type="object">
-任务元信息。上游可能返回缓存状态、内容下载地址、过期时间或计费用量等字段。
-</ResponseField>
-
-<ResponseField name="error" type="object">
-任务失败或接口错误时返回的错误对象，通常包含 `message` 和 `code`。
-</ResponseField>
-
-## 请求构造规则
-
-| 场景 | 字段组合 |
-| --- | --- |
-| 文生视频 | `model`、`prompt`、`seconds`、`ratio` |
-| 多参考图 | 文生字段加多个 `images` 文件字段，最多 `30` 张 |
+- `images` 是参考生视频的必填字段，不能省略或传空数组。
+- 多张图片用于共同约束人物、产品、场景或风格，不表示首帧和尾帧。
+- 接口不接受 `first_image`、`last_image`、`referenceVideos` 或 `referenceAudios` 字段。
+- 使用本地图片时，客户端需要先转换为纯 Base64 字符串；公网 URL 可直接放入数组。
 
 ## 注意事项
 
-- 请求格式为 `multipart/form-data`。
-- `seconds` 仅支持 `5`、`10`、`30` 秒，表单值建议按字符串传入。
-- `ratio` 支持 `1:1`、`3:4`、`4:3`、`9:16`、`16:9`、`21:9`。
-- 参考图片通过重复的 `images` 字段上传；不要把本地文件路径写成普通文本字段。
-- 使用 `-F` 或 `FormData` 时不要手动设置 `Content-Type`，以便客户端自动生成 boundary。
-- 如果需要特定素材角色约束，请在 `prompt` 中描述角色，并按参考图片顺序传入 `images`。
+- 请求格式必须是 `application/json`。
+- `seconds` 只能使用 `30`，不要传其它时长。
+- `images` 数量不能超过 `30` 张，且图片需要可被服务端读取。
+- 提交成功后读取响应中的 `id` 或 `task_id`，不要重复提交同一个任务。
 
 ## 相关接口
 

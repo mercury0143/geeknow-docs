@@ -1,0 +1,126 @@
+---
+title: mini-2.0 查询视频任务
+description: 使用 GET /v1/videos/{task_id} 查询 mini-2.0 视频任务状态和结果。
+api: "GET /v1/videos/{task_id}"
+---
+
+# mini-2.0 查询视频任务
+
+提交 `mini-2.0` 任务后，使用 `GET /v1/videos/{task_id}` 轮询任务状态。任务完成后读取 `video_url` 或 `url`；如果没有可访问直链，可使用 `/content` 下载 MP4。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+<RequestExample>
+
+```bash cURL
+curl -X GET https://www.geeknow.top/v1/videos/mini-2.0_xxx \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+task_id = "mini-2.0_xxx"
+resp = requests.get(
+    f"https://www.geeknow.top/v1/videos/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+
+print(resp.json())
+```
+
+</RequestExample>
+
+## 响应示例
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "mini-2.0_xxx",
+  "task_id": "mini-2.0_xxx",
+  "object": "video",
+  "model": "mini-2.0",
+  "status": "in_progress",
+  "progress": 50,
+  "created_at": 1782690295,
+  "completed_at": null,
+  "duration": 8,
+  "url": null,
+  "video_url": null,
+  "metadata": {},
+  "error": null
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "mini-2.0_xxx",
+  "task_id": "mini-2.0_xxx",
+  "object": "video",
+  "model": "mini-2.0",
+  "status": "completed",
+  "progress": 100,
+  "created_at": 1782690295,
+  "completed_at": 1782690494,
+  "duration": 8,
+  "url": "https://www.geeknow.top/v1/videos/mini-2.0_xxx/content",
+  "video_url": "https://www.geeknow.top/v1/videos/mini-2.0_xxx/content",
+  "metadata": {},
+  "error": null
+}
+```
+
+```json 200 - 失败
+{
+  "id": "mini-2.0_xxx",
+  "task_id": "mini-2.0_xxx",
+  "object": "video",
+  "model": "mini-2.0",
+  "status": "failed",
+  "progress": 100,
+  "error": {
+    "message": "参考图下载失败",
+    "code": "download_failed"
+  }
+}
+```
+
+</ResponseExample>
+
+## Path Parameters
+
+<ParamField path="task_id" type="string" required>
+视频任务 ID。使用创建接口返回的 `id` 或 `task_id`。
+</ParamField>
+
+## 状态处理建议
+
+| 状态类型 | 状态值 |
+| --- | --- |
+| 继续轮询 | `queued`、`pending`、`processing`、`in_progress`、`running`、`generating` |
+| 视为完成 | `completed`、`succeeded`、`success` |
+| 视为失败 | `failed`、`fail`、`error`、`cancelled`、`expired` |
+
+建议轮询间隔保持在 `5` 到 `10` 秒。任务完成后优先使用 `video_url` 或 `url`，否则请求：
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+```bash
+curl -L https://www.geeknow.top/v1/videos/mini-2.0_xxx/content \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --output result.mp4
+```
+
+## 相关页面
+
+- [mini-2.0 视频概览](./overview)
+- [mini-2.0 创建视频任务](./generation)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)

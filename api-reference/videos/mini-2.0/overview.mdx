@@ -1,0 +1,51 @@
+---
+title: mini-2.0 视频概览
+description: 说明 mini-2.0 视频生成接口的 JSON 请求格式、参考图规格和查询链路。
+---
+
+# mini-2.0 视频
+
+`mini-2.0` 使用 `POST /v1/videos` 创建异步视频任务，使用 `GET /v1/videos/{task_id}` 查询状态。它支持纯文生视频和参考图生视频；参考图通过顶层 `images` 数组传入。
+
+<CardGroup cols={2}>
+  <Card title="创建视频任务" icon="sparkles" href="/api-reference/videos/mini-2.0/generation">
+    使用 JSON 请求提交文生视频或参考图生视频任务。
+  </Card>
+  <Card title="查询视频任务" icon="hourglass" href="/api-reference/videos/mini-2.0/query">
+    使用任务 ID 轮询状态，读取结果地址或下载 MP4。
+  </Card>
+</CardGroup>
+
+## 模型与规格
+
+| 项目 | 规则 |
+| --- | --- |
+| 模型名 | `mini-2.0` |
+| 创建任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 下载内容 | `GET /v1/videos/{task_id}/content` |
+| 请求格式 | `application/json` |
+| 时长字段 | `duration`，支持 `4` 到 `15` 秒的整数 |
+| 画幅字段 | `ratio`，仅支持 `16:9`、`9:16` |
+| 清晰度字段 | `resolution`，服务固定使用 `480p` |
+| 参考图字段 | `images`，可选，最多 `9` 张 |
+
+## 支持能力
+
+| 能力 | 请求方式 |
+| --- | --- |
+| 文生视频 | 只传 `model`、`prompt`、`duration`、`ratio`、`resolution` |
+| 参考图生视频 | 在上述字段基础上增加 `images` 数组 |
+
+## 参考图规则
+
+- `images` 是字符串数组，最多 `9` 张。
+- 每一项应是服务端可访问的公网图片 URL；本地文件需要先上传并使用返回的 URL。
+- 不使用 `content`、`image_url`、`first_frame` 或 `last_frame` 字段。
+- 不传 `images` 时，任务按纯文生视频处理。
+
+## 推荐阅读
+
+1. [mini-2.0 创建视频任务](./generation)
+2. [mini-2.0 查询视频任务](./query)
+3. [视频模型支持矩阵](/api-reference/videos/model-matrix)

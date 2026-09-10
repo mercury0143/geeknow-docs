@@ -15,7 +15,10 @@ description: 汇总按模型系列划分的视频接口文档。
     普通档 `503` 支持参考图和参考音频，Pro 档 `913` 增加参考视频；同一 H3 系列内区分 768P / 2K。
   </Card>
   <Card title="manxue-2.5" icon="sparkles" href="/api-reference/videos/manxue-2.5/overview">
-    使用 `/v1/videos` multipart 表单提交，支持最多 30 张参考图与 5/10/30 秒输出。
+    仅支持参考生视频；使用 JSON 提交 1 到 30 张参考图，时长固定为 30 秒。
+  </Card>
+  <Card title="mini-2.0" icon="sparkles" href="/api-reference/videos/mini-2.0/overview">
+    使用 JSON 提交文生或参考图生视频，时长 4-15 秒，清晰度固定为 480p。
   </Card>
   <Card title="Wan 3.0" icon="sparkles" href="/api-reference/videos/wan3/overview">
     通义万相 Wan 3.0，支持文生、首帧、首尾帧、多图参考、参考视频和参考音频。
@@ -57,7 +60,8 @@ description: 汇总按模型系列划分的视频接口文档。
 | 模型系列 | 页面 | 说明 |
 | --- | --- | --- |
 | MiniMax H3 | [概览](/api-reference/videos/minimax-h3/overview) | 普通档 `minimax-h3-768p` / `minimax-h3-2k` 使用 `503`；Pro 档 `minimax-h3-pro-768p` / `minimax-h3-pro-2k` 使用 `913` 并支持参考视频 |
-| manxue-2.5 | [概览](/api-reference/videos/manxue-2.5/overview) | multipart 表单请求，使用 `seconds`、`ratio` 和重复的 `images` 字段 |
+| manxue-2.5 | [概览](/api-reference/videos/manxue-2.5/overview) | JSON 请求；仅支持参考生视频；使用 `seconds`、`ratio` 和 `images` 数组 |
+| mini-2.0 | [概览](/api-reference/videos/mini-2.0/overview) | JSON 请求；使用 `duration`、`ratio`、固定 `resolution: "480p"` 和可选 `images` 数组 |
 | Wan 3.0 | [概览](/api-reference/videos/wan3/overview) | 通义万相 `wan3.0-video` / `wan3.0-video-prime`，使用 `seconds`、`size`、`aspect_ratio`、`image`、`images` 和 `metadata` |
 | Grok | [概览](/api-reference/videos/grok/overview) | `grok-imagine-video`、`grok-imagine-video-1.5-preview` |
 | Sora | [概览](/api-reference/videos/sora/overview) | `sora-2` |
@@ -72,10 +76,11 @@ description: 汇总按模型系列划分的视频接口文档。
 1. [视频模型支持矩阵](./model-matrix)
 2. [MiniMax H3 视频概览](./minimax-h3/overview)
 3. [manxue-2.5 视频概览](./manxue-2.5/overview)
-4. [Wan 3.0 视频概览](./wan3/overview)
-5. [Grok 视频概览](./grok/overview)
-6. [Sora 视频概览](./sora/overview)
-7. [Veo 视频概览](./veo/overview)
-8. [国产视频模型概览](./aigc/overview)
-9. [特惠渠道系列概览](./special-offer/overview)
-10. [Seedance 2.0 概览](./seedance-2/overview)
+4. [mini-2.0 视频概览](./mini-2.0/overview)
+5. [Wan 3.0 视频概览](./wan3/overview)
+6. [Grok 视频概览](./grok/overview)
+7. [Sora 视频概览](./sora/overview)
+8. [Veo 视频概览](./veo/overview)
+9. [国产视频模型概览](./aigc/overview)
+10. [特惠渠道系列概览](./special-offer/overview)
+11. [Seedance 2.0 概览](./seedance-2/overview)
