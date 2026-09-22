@@ -1,17 +1,12 @@
 ---
 title: MiniMax H3 查询视频任务
-description: 使用 `GET /v1/videos/{task_id}` 查询 MiniMax H3 视频任务状态、结果与错误信息。
+description: 使用 GET /v1/videos/{task_id} 查询 MiniMax H3 任务状态、结果地址和异步错误。
 api: "GET /v1/videos/{task_id}"
 ---
 
 # MiniMax H3 查询视频任务
 
-MiniMax H3 任务提交成功后，通过 `GET /v1/videos/{task_id}` 轮询状态。任务完成后优先读取响应中的 `video_url`，如果没有可访问直链，再使用 `GET /v1/videos/{task_id}/content` 代理下载 MP4。
-
-- 根据创建任务返回的 `id` 或 `task_id` 查询。
-- 任务处理中继续轮询，不要重复提交同一个生成请求。
-- 任务完成后读取 `video_url` 或回退到 `/content`。
-- 任务失败时读取 `error`，并把原始错误信息写入日志，方便定位上游拒绝、额度不足或素材不可访问。
+创建接口返回 `id` 或 `task_id` 后，使用 `GET /v1/videos/{task_id}` 轮询。查询只读取任务状态，不会重复提交生成请求。
 
 ## 方法与路径
 
@@ -24,32 +19,28 @@ GET /v1/videos/{task_id}
 <RequestExample>
 
 ```bash cURL
-curl -X GET https://www.geeknow.top/v1/videos/video_abc123 \
-  -H "Authorization: Bearer YOUR_API_KEY"
+curl -sS \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  https://www.geeknow.top/v1/videos/video_abc123
 ```
 
 ```python Python
 import requests
 
 task_id = "video_abc123"
-
-resp = requests.get(
+response = requests.get(
     f"https://www.geeknow.top/v1/videos/{task_id}",
     headers={"Authorization": "Bearer YOUR_API_KEY"},
     timeout=30,
 )
-
-print(resp.json())
+response.raise_for_status()
+print(response.json())
 ```
 
 ```javascript JavaScript
 const taskId = "video_abc123";
-
 const response = await fetch(`https://www.geeknow.top/v1/videos/${taskId}`, {
-  method: "GET",
-  headers: {
-    Authorization: "Bearer YOUR_API_KEY",
-  },
+  headers: { Authorization: "Bearer YOUR_API_KEY" },
 });
 
 console.log(await response.json());
@@ -57,144 +48,152 @@ console.log(await response.json());
 
 </RequestExample>
 
-## 响应示例
+## 响应结构
 
-<ResponseExample>
+网关兼容不同渠道的响应格式。MiniMax H3 上游通常将任务放在 `task` 对象中，兼容层也可能把字段放在响应顶层。客户端应优先读取 `task`，没有时再读取顶层字段。
 
-```json 200 - 处理中
+### 生成中
+
+```json
 {
-  "id": "video_abc123",
-  "task_id": "video_abc123",
-  "object": "video",
-  "model": "minimax-h3-768p",
-  "status": "in_progress",
-  "progress": 36,
-  "created_at": 1735689600,
-  "completed_at": 0,
-  "video_url": ""
-}
-```
-
-```json 200 - 已完成
-{
-  "id": "video_abc123",
-  "task_id": "video_abc123",
-  "object": "video",
-  "model": "minimax-h3-pro-2k",
-  "status": "completed",
-  "progress": 100,
-  "created_at": 1735689600,
-  "completed_at": 1735689900,
-  "duration": 8,
-  "video_url": "https://example.com/results/minimax-h3.mp4"
-}
-```
-
-```json 200 - 失败
-{
-  "id": "video_abc123",
-  "task_id": "video_abc123",
-  "object": "video",
-  "model": "minimax-h3-2k",
-  "status": "failed",
-  "progress": 100,
-  "created_at": 1735689600,
-  "error": {
-    "message": "upstream task failed",
-    "code": "task_failed"
-  },
-  "video_url": ""
-}
-```
-
-```json 404 - 任务不存在
-{
-  "error": {
-    "message": "Task not found",
-    "type": "invalid_request_error"
+  "task": {
+    "id": "video_abc123",
+    "model": "MiniMax-H3",
+    "status": "running",
+    "created_at": 1786500000,
+    "updated_at": 1786500120,
+    "resolution": "768P",
+    "duration": 8,
+    "ratio": "16:9",
+    "progress": 0.36
   }
 }
 ```
 
-</ResponseExample>
+### 生成成功
 
-## 认证
-
-```http
-Authorization: Bearer YOUR_API_KEY
+```json
+{
+  "task": {
+    "id": "video_abc123",
+    "model": "MiniMax-H3",
+    "status": "succeeded",
+    "created_at": 1786500000,
+    "updated_at": 1786500720,
+    "resolution": "768P",
+    "duration": 8,
+    "ratio": "16:9",
+    "progress": 1,
+    "content": {
+      "url": "https://media.example.com/video_abc123.mp4"
+    },
+    "usage": {
+      "total_seconds": 8,
+      "input_seconds": 0,
+      "output_seconds": 8,
+      "input_image_count": 0
+    }
+  }
+}
 ```
 
-## Path Parameters
+兼容的顶层成功响应可能使用 `video_url`、`url` 或 `content.url`。不要根据任务 ID 自行拼接下载地址，直接使用响应返回的完整 URL。
+
+### 生成失败
+
+```json
+{
+  "task": {
+    "id": "video_abc123",
+    "status": "failed",
+    "error": {
+      "code": "input_format_unsupported",
+      "message": "decoded container is not MP4/MOV"
+    }
+  }
+}
+```
+
+失败任务通常仍以 HTTP `200` 返回，是否成功应由 `task.status` 或顶层 `status` 判断，而不是只看 HTTP 状态码。
+
+## 响应字段
 
 <ParamField path="task_id" type="string" required>
-视频任务 ID。创建视频任务接口返回的 `id` 或 `task_id`。
+创建任务响应中的 `id` 或 `task_id`。不要使用 `request_id` 查询；它只标识一次 HTTP 调用。
 </ParamField>
 
-## Response
-
-<ResponseField name="id" type="string">
-视频任务 ID。
+<ResponseField name="task.id" type="string">
+任务 ID。兼容响应也可能在顶层返回 `id` 或 `task_id`。
 </ResponseField>
 
-<ResponseField name="task_id" type="string">
-视频任务 ID 的兼容字段。通常与 `id` 相同。
+<ResponseField name="task.status" type="string">
+任务状态。常见值为 `queued`、`running`、`succeeded`、`failed` 和 `cancelled`。兼容层还可能返回 `pending`、`processing`、`in_progress`、`completed` 或 `success`。
 </ResponseField>
 
-<ResponseField name="object" type="string">
-对象类型，通常为 `video`。
+<ResponseField name="task.progress" type="number">
+可选进度。部分响应使用 `0` 到 `1` 的小数，兼容响应也可能使用 `0` 到 `100` 的整数百分比。客户端不要只依赖该字段判断任务是否卡住。
 </ResponseField>
 
-<ResponseField name="model" type="string">
-任务实际使用的模型，例如 `minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p` 或 `minimax-h3-pro-2k`。如果创建任务时传的是前端单入口 `minimax-h3`，这里可用来确认最终落到普通 768P 还是普通 2K 档。
+<ResponseField name="task.content.url" type="string">
+成功任务的视频直链。它可能位于嵌套 `task` 中，也可能以顶层 `video_url`、`url` 或 `content.url` 返回。保存完整原值，不要改写或拼接。
 </ResponseField>
 
-<ResponseField name="status" type="string">
-任务状态。常见值为 `queued`、`pending`、`in_progress`、`processing`、`completed`、`failed`。
+<ResponseField name="task.usage" type="object">
+可选用量信息。`input_seconds` 是参考视频和独立参考音频时长之和，`input_image_count` 是全部输入图片数，`output_seconds` 是请求的输出秒数，`total_seconds` 当前与 `output_seconds` 相同。
 </ResponseField>
 
-<ResponseField name="progress" type="integer">
-任务进度百分比。部分上游不会稳定更新进度，客户端不要只依赖该字段判断是否卡住。
-</ResponseField>
-
-<ResponseField name="video_url" type="string">
-任务完成后的视频地址。为空或不可访问时，使用 `GET /v1/videos/{task_id}/content` 下载。
-</ResponseField>
-
-<ResponseField name="error" type="object">
-任务失败原因。通常包含 `message` 和 `code`。
+<ResponseField name="task.error" type="object">
+异步失败原因，通常包含 `code` 和 `message`。常见错误码包括 `input_download_failed`、`input_security_violation`、`input_too_large`、`input_probe_failed`、`input_format_unsupported`、`input_duration_out_of_range`、`input_transcode_failed`、`content_policy_violation` 和 `fail_to_fetch_task`。
 </ResponseField>
 
 ## 状态处理建议
 
-| 状态类型 | 状态值 |
+| 客户端处理 | 状态值 |
 | --- | --- |
-| 继续轮询 | `queued`、`pending`、`processing`、`in_progress`、`running`、`generating` |
-| 视为完成 | `completed`、`succeeded`、`success` |
+| 继续轮询 | `queued`、`pending`、`running`、`processing`、`in_progress`、`generating` |
+| 视为成功 | `succeeded`、`success`、`completed`、`finish`、`finished`、`done` |
 | 视为失败 | `failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted` |
 
-建议轮询间隔保持在数秒以上。长视频、2K 或 Pro 参考视频任务可能需要更长生成时间，只要状态仍是处理中，就继续轮询。
+建议每隔数秒查询一次。长时长任务、参考素材下载和内容审核可能让 `queued` 持续更久；不要因为 `progress` 暂时不变就重新创建任务。
 
-## 下载视频内容
+## 下载视频
 
-如果查询结果没有直接返回可访问的 `video_url`，或者直链下载失败，可以请求内容代理端点：
+### 直接下载结果 URL
+
+成功响应中的 URL 可能是公开 HTTPS 直链。下载时使用返回的完整原值，不要附带查询接口的 Bearer 鉴权头：
+
+```bash
+RESULT_URL='替换为 task.content.url、video_url 或 url 的完整值'
+curl -sS -L --output result.mp4 "${RESULT_URL}"
+```
+
+服务不会承诺公开结果永久保留。需要长期保存时，应在任务成功后尽快复制到自己的存储。
+
+### 使用内容代理
+
+如果响应没有可用的直链，或直链下载失败，可以通过网关代理下载：
 
 ```http
 GET /v1/videos/{task_id}/content
 ```
 
-下载 `/content` 时需要继续携带鉴权头：
-
 ```bash
-curl -L https://www.geeknow.top/v1/videos/video_abc123/content \
+curl -sS -L \
   -H "Authorization: Bearer YOUR_API_KEY" \
-  --output result.mp4
+  --output result.mp4 \
+  https://www.geeknow.top/v1/videos/video_abc123/content
 ```
 
-## 注意事项
+内容代理需要 Bearer 鉴权。任务状态为成功但对象已经被清理时，下载可能返回 `404` 或 `403`；这不表示生成任务变成了失败。
 
-- 查询接口只读取任务状态，不会重新提交生成任务。
-- `progress` 长时间不变不一定代表任务失败，应以终态状态为准。
-- 如果任务失败，建议记录 `model`、`duration`、`ratio`、`referenceImages`、`referenceVideos`、`referenceAudios` 和完整 `error`，方便排查参数、素材访问和内容审核问题。
+## 查询错误
+
+| HTTP 状态 | 处理建议 |
+| ---: | --- |
+| `401` | 检查 Bearer API Key |
+| `404` | 检查 `task_id`，确认任务属于当前账户 |
+| `429` | 按 `Retry-After` 退避后重试查询 |
+| `500` | 短暂退避后重试，保留原始响应和 `request_id` |
 
 ## 相关页面
 

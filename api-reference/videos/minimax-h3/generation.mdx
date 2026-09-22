@@ -1,39 +1,12 @@
 ---
 title: MiniMax H3 视频生成
-description: 使用 `POST /v1/videos` 调用 MiniMax H3 普通档或 Pro 参考视频档提交视频生成任务。
+description: 使用 POST /v1/videos 以 content[] 提交 MiniMax H3 文生、关键帧和参考素材视频任务。
 api: "POST /v1/videos"
 ---
 
 # MiniMax H3 视频生成
 
-MiniMax H3 系列通过 `POST /v1/videos` 提交异步任务。当前文档把普通档和 Pro 参考视频档放在同一个 H3 系列中说明，不单开 Pro 系列。
-
-选择模型时先看是否需要参考视频：普通档是 `503`，不支持参考视频；Pro 档是 `913`，支持 1 段 2 到 5 秒参考视频。然后再选择 `768P` 或 `2K` 清晰度。
-
-## 模型选择
-
-| 传入 `model` | 实际模型 | 清晰度 | 全能参考 | 什么时候用 |
-| --- | --- | --- | --- | --- |
-| `minimax-h3-768p` | `minimax-h3-768p` | 768P | `503` | 默认档，适合草稿、批量、移动端和常规清晰度任务 |
-| `minimax-h3-2k` | `minimax-h3-2k` | 2K | `503` | 高清成片、大屏展示、细节保留、后期裁切 |
-| `minimax-h3-pro-768p` | `minimax-h3-pro-768p` | 768P | `913` | 基础能力加参考视频，适合用关键片段控制动作、镜头运动或主体状态 |
-| `minimax-h3-pro-2k` | `minimax-h3-pro-2k` | 2K | `913` | 同上，2K 超清输出 |
-| `minimax-h3` + `resolution: "768P"` | `minimax-h3-768p` | 768P | `503` | 前端单入口的 768P 写法，只分流到普通档 |
-| `minimax-h3` + `resolution: "2K"` | `minimax-h3-2k` | 2K | `503` | 前端单入口的 2K 写法，只分流到普通档 |
-
-所有 H3 模型都按输出秒数统计用量，失败任务不计入成功用量。`duration` 是用量统计的关键字段，接入方需要保证模型名、清晰度和参考素材能力一致。
-
-## 生成能力
-
-| 能力 | 字段 | 普通档 | Pro 档 | 规则 |
-| --- | --- | --- | --- | --- |
-| 文生视频 | `prompt` | 支持 | 支持 | 只传文本即可 |
-| 图生视频 / 多参考图 | `referenceImages` | 最多 5 张 | 最多 9 张 | 可传公网 URL 或 `data:image/...;base64,...` |
-| 首尾帧 | `first_image`、`last_image` | 支持 | 支持 | 通常成对使用；不要和 `referenceImages` 混用 |
-| 参考音频 | `referenceAudios` | 最多 3 段 | 最多 3 段 | 合计建议不超过 15 秒；当前插件适配层要求搭配至少 1 张 `referenceImages` |
-| 参考视频 | `referenceVideos` | 不支持 | 最多 1 段 | 时长 2 到 5 秒；请上传需要控制的关键片段，可叠加参考图、参考音频、首尾帧 |
-
-`duration` 支持 `4` 到 `15` 秒，必须是整数秒。`ratio` 支持 `16:9`、`9:16`、`1:1`、`21:9`、`4:3`、`3:4`。
+`POST /v1/videos` 接受 JSON 请求并返回异步任务 ID。当前适配层把请求转换为 MiniMax H3 的 `content[]` 协议：模型固定为 `MiniMax-H3`，输出固定为 `768P`，音频默认启用。
 
 ## 方法与路径
 
@@ -41,122 +14,59 @@ MiniMax H3 系列通过 `POST /v1/videos` 提交异步任务。当前文档把�
 POST /v1/videos
 ```
 
-## 请求示例
+## 鉴权与请求头
+
+```http
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+Idempotency-Key: order-demo-001
+```
+
+`Idempotency-Key` 建议由客户端为每次业务请求生成并持久化。网络超时后应复用原 Key 和原请求体，避免重复创建任务。
+
+## 快速开始
 
 <RequestExample>
 
-```bash 2K 文生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
+```bash 文生视频 cURL
+curl -sS -X POST https://www.geeknow.top/v1/videos \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
+  -H "Idempotency-Key: order-demo-001" \
   -d '{
-    "model": "minimax-h3-2k",
-    "prompt": "清晨的海边，金色阳光穿过薄雾，浪花缓慢推向沙滩，电影感航拍镜头",
-    "duration": 6,
+    "model": "MiniMax-H3",
+    "content": [
+      {"type": "text", "text": "A cinematic view of ocean waves at sunset"}
+    ],
+    "resolution": "768P",
+    "duration": 8,
     "ratio": "16:9"
-  }'
-```
-
-```bash 768P 图生视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "minimax-h3-768p",
-    "prompt": "让参考图中的人物自然转身并微笑，背景保持柔和景深，镜头缓慢推近",
-    "duration": 6,
-    "ratio": "9:16",
-    "referenceImages": [
-      "https://example.com/assets/portrait.png"
-    ]
-  }'
-```
-
-```bash 前端单入口 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "minimax-h3",
-    "prompt": "夜晚城市天台，人物向远处霓虹灯走去，轻微手持摄影，真实电影质感",
-    "duration": 8,
-    "ratio": "16:9",
-    "resolution": "2K"
-  }'
-```
-
-```bash 首尾帧 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "minimax-h3-2k",
-    "prompt": "从首帧自然过渡到尾帧，保持人物服装和场景一致，动作平滑连贯",
-    "duration": 10,
-    "ratio": "16:9",
-    "first_image": "https://example.com/assets/start.png",
-    "last_image": "https://example.com/assets/end.png"
-  }'
-```
-
-```bash 参考图加参考音频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "minimax-h3-768p",
-    "prompt": "参考人物外观和音频情绪，生成一段自然说话的近景镜头",
-    "duration": 8,
-    "ratio": "16:9",
-    "referenceImages": [
-      "https://example.com/assets/speaker.png"
-    ],
-    "referenceAudios": [
-      "https://example.com/assets/voice.mp3"
-    ]
-  }'
-```
-
-```bash Pro 参考视频 cURL
-curl -X POST https://www.geeknow.top/v1/videos \
-  -H "Authorization: Bearer YOUR_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "minimax-h3-pro-768p",
-    "prompt": "参考视频中的动作节奏和镜头运动，保持主体服装与参考图一致，生成自然连贯的产品展示短片",
-    "duration": 8,
-    "ratio": "16:9",
-    "referenceVideos": [
-      "https://example.com/assets/key-motion-4s.mp4"
-    ],
-    "referenceImages": [
-      "https://example.com/assets/product.png"
-    ],
-    "referenceAudios": [
-      "https://example.com/assets/music.mp3"
-    ]
   }'
 ```
 
 ```python Python
 import requests
 
-resp = requests.post(
+response = requests.post(
     "https://www.geeknow.top/v1/videos",
     headers={
         "Authorization": "Bearer YOUR_API_KEY",
         "Content-Type": "application/json",
+        "Idempotency-Key": "order-demo-001",
     },
     json={
-        "model": "minimax-h3-2k",
-        "prompt": "清晨的海边，金色阳光穿过薄雾，浪花缓慢推向沙滩，电影感航拍镜头",
-        "duration": 6,
+        "model": "MiniMax-H3",
+        "content": [
+            {"type": "text", "text": "A cinematic view of ocean waves at sunset"},
+        ],
+        "resolution": "768P",
+        "duration": 8,
         "ratio": "16:9",
     },
     timeout=120,
 )
-
-print(resp.json())
+response.raise_for_status()
+print(response.json())
 ```
 
 ```javascript JavaScript
@@ -165,11 +75,15 @@ const response = await fetch("https://www.geeknow.top/v1/videos", {
   headers: {
     Authorization: "Bearer YOUR_API_KEY",
     "Content-Type": "application/json",
+    "Idempotency-Key": "order-demo-001",
   },
   body: JSON.stringify({
-    model: "minimax-h3-2k",
-    prompt: "清晨的海边，金色阳光穿过薄雾，浪花缓慢推向沙滩，电影感航拍镜头",
-    duration: 6,
+    model: "MiniMax-H3",
+    content: [
+      { type: "text", text: "A cinematic view of ocean waves at sunset" },
+    ],
+    resolution: "768P",
+    duration: 8,
     ratio: "16:9",
   }),
 });
@@ -179,170 +93,168 @@ console.log(await response.json());
 
 </RequestExample>
 
-## 响应示例
+## 请求体
 
-<ResponseExample>
+<ParamField body="model" type="string" required>
+模型名称。MiniMax H3 请求固定使用 `MiniMax-H3`。插件兼容 `minimax-h3`、`minimax-h3-pro`、`minimax-h3-768p`、`minimax-h3-2k` 及其 Pro 变体，但这些历史名称都会归一到同一个 H3 入口，不会启用 2K 或独立 Pro 档。
+</ParamField>
 
-```json 200 - 提交成功
+<ParamField body="content" type="array<object>" required>
+内容数组。必须且只能包含一个 `type: "text"` 文本项，可再追加 0 到 12 个媒体项。文本项应放在数组前面。
+</ParamField>
+
+<ParamField body="content[].type" type="string" required>
+内容类型。支持 `text`、`image_url`、`video_url` 和 `audio_url`。
+</ParamField>
+
+<ParamField body="content[].text" type="string">
+文本提示词。请求中必须有且只有一个非空文本项，最多 7000 个 Unicode 字符。引用参考素材时，使用 `<Picture 1>`、`<Video 1>` 或 `<Audio 1>` 等标签，并按各媒体类型在数组中的顺序编号。
+</ParamField>
+
+<ParamField body="content[].image_url.url" type="string">
+图片的公网 HTTPS URL。支持 JPG/JPEG、PNG、WebP、HEIC 和 HEIF 静态图片；单文件不超过 30 MB，单边 256 到 5760 像素，解码后不超过 33,177,600 像素，宽高比需在 0.4 到 2.5 之间。
+</ParamField>
+
+<ParamField body="content[].video_url.url" type="string">
+参考视频的公网 HTTPS URL。支持 MP4/MOV，H.264/H.265，可带 AAC/MP3 音轨；单文件不超过 50 MB，单段至少 2 秒。超过 15 秒时只保留开头 15 秒，参考视频总时长最多 15 秒。
+</ParamField>
+
+<ParamField body="content[].audio_url.url" type="string">
+参考音频的公网 HTTPS URL。支持 WAV/PCM、MP3、M4A/AAC 和裸 ADTS AAC；单文件不超过 15 MB，单段至少 2 秒。超过 15 秒时只保留开头 15 秒，独立参考音频总时长最多 15 秒。
+</ParamField>
+
+<ParamField body="content[].role" type="string">
+媒体角色。图片可用 `first_frame`、`last_frame` 或 `reference_image`；视频使用 `reference_video`；音频使用 `reference_audio`。`first_frame` / `last_frame` 不能和任何 `reference_*` 角色混用。
+</ParamField>
+
+<ParamField body="resolution" type="string" required>
+固定传 `768P`。当前网关不提供 `2K`，也不接受质量档位或自定义输出尺寸。
+</ParamField>
+
+<ParamField body="duration" type="integer" required>
+输出名义时长，单位为秒，必须是 `1` 到 `15` 的整数。查询和计费使用该名义时长；实际 MP4 容器时长可能因固定帧网格略有差异。
+</ParamField>
+
+<ParamField body="ratio" type="string" required>
+画幅比例。支持 `21:9`、`16:9`、`4:3`、`1:1`、`3:4` 和 `9:16`。当前插件不透传 `adaptive`；缺少或不支持的比例会回退为 `16:9`。
+</ParamField>
+
+## 请求示例
+
+### 首帧生视频
+
+```json
+{
+  "model": "MiniMax-H3",
+  "content": [
+    {"type": "text", "text": "The camera slowly moves forward as clouds drift"},
+    {
+      "type": "image_url",
+      "image_url": {"url": "https://assets.example.com/first.png"},
+      "role": "first_frame"
+    }
+  ],
+  "resolution": "768P",
+  "duration": 10,
+  "ratio": "16:9"
+}
+```
+
+### 首尾帧
+
+```json
+{
+  "model": "MiniMax-H3",
+  "content": [
+    {"type": "text", "text": "Transition smoothly from day to night"},
+    {
+      "type": "image_url",
+      "image_url": {"url": "https://assets.example.com/first.png"},
+      "role": "first_frame"
+    },
+    {
+      "type": "image_url",
+      "image_url": {"url": "https://assets.example.com/last.png"},
+      "role": "last_frame"
+    }
+  ],
+  "resolution": "768P",
+  "duration": 10,
+  "ratio": "9:16"
+}
+```
+
+首尾帧图片的宽高比差异不能超过 2%。
+
+### 混合参考素材
+
+```json
+{
+  "model": "MiniMax-H3",
+  "content": [
+    {
+      "type": "text",
+      "text": "<Picture 1> performs the motion from <Video 1> in sync with <Audio 1>"
+    },
+    {
+      "type": "image_url",
+      "image_url": {"url": "https://assets.example.com/character.webp"},
+      "role": "reference_image"
+    },
+    {
+      "type": "video_url",
+      "video_url": {"url": "https://assets.example.com/motion.mp4"},
+      "role": "reference_video"
+    },
+    {
+      "type": "audio_url",
+      "audio_url": {"url": "https://assets.example.com/music.mp3"},
+      "role": "reference_audio"
+    }
+  ],
+  "resolution": "768P",
+  "duration": 12,
+  "ratio": "16:9"
+}
+```
+
+## 创建响应
+
+```json
 {
   "id": "video_abc123",
   "task_id": "video_abc123",
   "object": "video",
-  "model": "minimax-h3-pro-2k",
+  "model": "MiniMax-H3",
   "status": "queued",
   "progress": 0,
-  "created_at": 1735689600,
-  "video_url": ""
+  "created_at": 1786500000
 }
 ```
 
-```json 400 - 参数错误
-{
-  "error": {
-    "message": "prompt is required",
-    "type": "invalid_request_error",
-    "param": "prompt",
-    "code": "invalid_request_error"
-  }
-}
-```
+`id` 和 `task_id` 通常相同，使用任意一个调用查询接口。创建成功不代表输入已经下载、审核或生成完成。
 
-```json 401 - 认证失败
-{
-  "error": {
-    "message": "invalid token",
-    "type": "invalid_request_error",
-    "code": "invalid_api_key"
-  }
-}
-```
+## 同步错误
 
-```json 402 - 额度不足
-{
-  "error": {
-    "message": "insufficient quota",
-    "type": "insufficient_quota",
-    "code": "insufficient_quota"
-  }
-}
-```
+| HTTP 状态 | 常见原因 |
+| ---: | --- |
+| `400` | JSON、字段类型、角色、数量、URL 语法或幂等 Key 冲突 |
+| `401` | API Key 缺失或无效 |
+| `429` | 账户或入口限流；尚未创建任务，按 `Retry-After` 等待 |
+| `500` | 服务内部错误；使用原幂等 Key 退避重试 |
 
-```json 429 - 请求过多
-{
-  "error": {
-    "message": "rate limit exceeded",
-    "type": "rate_limit_error",
-    "code": "rate_limit_exceeded"
-  }
-}
-```
-
-</ResponseExample>
-
-## 认证
-
-使用 Bearer Token 鉴权：
-
-```http
-Authorization: Bearer YOUR_API_KEY
-```
-
-JSON 请求还需要携带：
-
-```http
-Content-Type: application/json
-```
-
-## Body
-
-<ParamField body="model" type="string" required>
-模型名称。推荐直接传真实模型：`minimax-h3-768p`、`minimax-h3-2k`、`minimax-h3-pro-768p` 或 `minimax-h3-pro-2k`。
-
-也兼容传前端单入口 `minimax-h3`。此时适配层会读取 `resolution`、`video_resolution` 或 `size`：值为 `2K` 或包含 `2160` 时分流到 `minimax-h3-2k`，其他情况分流到 `minimax-h3-768p`。`minimax-h3` 不会自动分流到 Pro 档。
-</ParamField>
-
-<ParamField body="prompt" type="string" required>
-视频生成提示词。建议控制在 `7000` 字符以内，并明确主体、动作、镜头、风格和画面节奏。
-</ParamField>
-
-<ParamField body="duration" type="integer" required>
-输出视频时长，单位为秒。支持 `4` 到 `15` 的整数值。按秒计费时，用量按输出秒数计算。
-</ParamField>
-
-<ParamField body="ratio" type="string">
-画幅比例。当前项目支持 `16:9`、`9:16`、`1:1`、`21:9`、`4:3`、`3:4`。未传或传入不支持的值时，适配层会回退为 `16:9`。
-</ParamField>
-
-<ParamField body="resolution" type="string">
-单入口 `minimax-h3` 的清晰度选择。支持 `768P` 和 `2K`。包含 `2k` 或 `2160` 的值会映射为 `2K`，其他值默认按 `768P` 处理。
-
-如果 `model` 已经是具体模型名，不需要再传这个字段；实际模型以 `model` 为准。
-</ParamField>
-
-<ParamField body="video_resolution" type="string">
-`resolution` 的兼容字段，规则相同。
-</ParamField>
-
-<ParamField body="size" type="string">
-`resolution` 的兼容字段。插件前端会把清晰度选择保存到 `size`，并同步保存到 `resolution` 和 `video_resolution`。
-</ParamField>
-
-<ParamField body="referenceImages" type="array<string>">
-参考图数组。普通档最多 5 张，Pro 档最多 9 张。成员可以是公网图片 URL，也可以是 `data:image/...;base64,...`。本地路径不能直接作为 API 输入，客户端需要先转为公网 URL 或 data URI。
-</ParamField>
-
-<ParamField body="first_image" type="string">
-首帧图。支持公网图片 URL 或 data URI。用于首尾帧模式时，不要同时传 `referenceImages`。
-</ParamField>
-
-<ParamField body="last_image" type="string">
-尾帧图。支持公网图片 URL 或 data URI。通常和 `first_image` 成对使用。
-</ParamField>
-
-<ParamField body="referenceAudios" type="array<string>">
-参考音频数组，最多 3 段，合计建议不超过 15 秒。当前插件适配层仅保留 `http://` 或 `https://` 公网 URL，并要求同时存在至少 1 张 `referenceImages`。
-</ParamField>
-
-<ParamField body="referenceVideos" type="array<string>">
-参考视频数组，仅 `minimax-h3-pro-768p` 和 `minimax-h3-pro-2k` 支持。最多 1 段，时长 2 到 5 秒。请上传需要控制的关键片段，并传入公网可访问的 MP4 URL；可叠加 `referenceImages`、`referenceAudios`、`first_image` 和 `last_image`。
-</ParamField>
-
-## 请求构造规则
-
-| 场景 | 字段组合 |
-| --- | --- |
-| 文生视频 | `model`、`prompt`、`duration`、`ratio` |
-| 单图生视频 | 文生字段加 `referenceImages: ["..."]` |
-| 多参考图 | 文生字段加 `referenceImages`；普通档最多 5 张，Pro 档最多 9 张 |
-| 首尾帧 | 文生字段加 `first_image`、`last_image` |
-| 参考音频 | 文生字段加 `referenceImages` 和 `referenceAudios` |
-| Pro 参考视频 | 文生字段加 `referenceVideos`，模型必须是 `minimax-h3-pro-768p` 或 `minimax-h3-pro-2k` |
-
-## 模型分流规则
-
-| 请求写法 | 结果 |
-| --- | --- |
-| `model: "minimax-h3-768p"` | 固定使用普通 768P 模型，参考规格 `503` |
-| `model: "minimax-h3-2k"` | 固定使用普通 2K 模型，参考规格 `503` |
-| `model: "minimax-h3-pro-768p"` | 固定使用 Pro 768P 模型，参考规格 `913` |
-| `model: "minimax-h3-pro-2k"` | 固定使用 Pro 2K 模型，参考规格 `913` |
-| `model: "minimax-h3"`，且 `resolution` / `video_resolution` / `size` 是 `2K` 或包含 `2160` | 分流到 `minimax-h3-2k` |
-| `model: "minimax-h3"`，未传清晰度或清晰度不是 2K | 分流到 `minimax-h3-768p` |
-| `model: "minimax-h3"` 且传入 `referenceVideos` | 仍然只按清晰度分流普通档；需要参考视频时应直接传 Pro 模型名 |
+媒体真实格式、下载、转码和内容审核在任务创建后异步执行。此类失败不会改成创建接口的同步 `400`，请在查询响应的 `task.error` 中处理，例如 `input_download_failed`、`input_format_unsupported`、`input_duration_out_of_range`、`content_policy_violation` 和 `fail_to_fetch_task`。
 
 ## 注意事项
 
-- `minimax-h3` 是当前插件的前端单入口值，不是最终模型名；直接接入 API 时建议传四个真实模型之一。
-- 普通档和 Pro 档的能力差异是参考视频；`768P` 与 `2K` 的差异是输出清晰度。
-- 普通档参考规格是 `503`：最多 5 张参考图、0 段参考视频、3 段参考音频。
-- Pro 档参考规格是 `913`：最多 9 张参考图、1 段参考视频、3 段参考音频。参考视频放在 `referenceVideos`，建议只上传 2 到 5 秒关键片段。
-- 当前项目 H3 适配层不透出 `adaptive` 画幅；如果传入不支持的比例，会回退为 `16:9`。
-- 2K 和参考视频任务可能更慢，高峰期偶发排队；任务失败后可重新提交。
-- `first_image` / `last_image` 与 `referenceImages` 不要混用，避免上游把生成模式判定错。
-- 如需核对用量或账户信息，请以账户后台和相关查询接口为准。
+- 所有媒体 URL 必须是公网 HTTPS，服务不会读取客户端本地文件。
+- `first_frame` / `last_frame` 与 `reference_image`、`reference_video`、`reference_audio` 不要混用。
+- 超过 15 秒的参考音视频会裁剪开头部分，不会压缩或加速，也不会改变请求的输出 `duration`。
+- 需要长期保存结果时，在任务成功后尽快下载，不要自行猜测结果 URL。
 
-## 相关接口
+## 相关页面
 
 - [MiniMax H3 视频概览](./overview)
 - [MiniMax H3 查询视频任务](./query)
+- [图片上传](../../uploads/image-upload)
 - [视频模型支持矩阵](/api-reference/videos/model-matrix)

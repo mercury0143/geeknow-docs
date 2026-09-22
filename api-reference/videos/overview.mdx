@@ -12,7 +12,7 @@ description: 汇总按模型系列划分的视频接口文档。
     按模型家族查看视频能力、推荐入口、参考图传递方式和固定时长规则。
   </Card>
   <Card title="MiniMax H3" icon="sparkles" href="/api-reference/videos/minimax-h3/overview">
-    普通档 `503` 支持参考图和参考音频，Pro 档 `913` 增加参考视频；同一 H3 系列内区分 768P / 2K。
+    使用 `content[]` 提交文生、关键帧和参考素材视频；输出固定为 `768P`，时长支持 1-15 秒。
   </Card>
   <Card title="manxue-2.5" icon="sparkles" href="/api-reference/videos/manxue-2.5/overview">
     仅支持参考生视频；使用 JSON 提交 1 到 30 张参考图，时长固定为 30 秒。
@@ -59,7 +59,7 @@ description: 汇总按模型系列划分的视频接口文档。
 
 | 模型系列 | 页面 | 说明 |
 | --- | --- | --- |
-| MiniMax H3 | [概览](/api-reference/videos/minimax-h3/overview) | 普通档 `minimax-h3-768p` / `minimax-h3-2k` 使用 `503`；Pro 档 `minimax-h3-pro-768p` / `minimax-h3-pro-2k` 使用 `913` 并支持参考视频 |
+| MiniMax H3 | [概览](/api-reference/videos/minimax-h3/overview) | JSON `content[]` 请求；模型固定为 `MiniMax-H3`，输出 `768P`，支持文生、关键帧、参考图片、参考视频和参考音频 |
 | manxue-2.5 | [概览](/api-reference/videos/manxue-2.5/overview) | JSON 请求；仅支持参考生视频；使用 `seconds`、`ratio` 和 `images` 数组 |
 | mini-2.0 | [概览](/api-reference/videos/mini-2.0/overview) | JSON 请求；使用 `duration`、`ratio`、固定 `resolution: "480p"` 和可选 `images` 数组 |
 | Wan 3.0 | [概览](/api-reference/videos/wan3/overview) | 通义万相 `wan3.0-video` / `wan3.0-video-prime`，使用 `seconds`、`size`、`aspect_ratio`、`image`、`images` 和 `metadata` |
