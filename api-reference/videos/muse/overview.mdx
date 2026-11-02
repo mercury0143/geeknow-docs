@@ -1,0 +1,73 @@
+---
+title: Muse 视频概览
+description: 说明 muse-video 的文生、首帧与多图参考方式、请求字段和异步任务流程。
+---
+
+# Muse 视频
+
+`muse-video` 通过统一视频接口提交 JSON 异步任务，支持文生视频、首帧生视频和多图参考。创建任务后，使用返回的任务 ID 查询状态并下载结果。
+
+## 接口路径
+
+| 操作 | 方法与路径 |
+| --- | --- |
+| 创建任务 | `POST /v1/videos` |
+| 查询任务 | `GET /v1/videos/{task_id}` |
+| 代理下载 | `GET /v1/videos/{task_id}/content` |
+
+请求域名统一使用 `https://www.geeknow.top`，创建、查询和代理下载均使用 `Authorization: Bearer YOUR_API_KEY` 鉴权。
+
+## 模型与参数
+
+| 项目 | 说明 |
+| --- | --- |
+| 模型 | `muse-video` |
+| 请求格式 | `application/json` |
+| 提示词 | `prompt` 必填，不能为空或仅包含空白字符 |
+| 时长 | `seconds` 使用正整数的字符串形式，例如 `"5"`；实际时长以生成结果为准 |
+| 画幅 | `size` 使用 `16:9`、`9:16` 或 `1:1` |
+| 首帧图片 | 可选 `image`，只传一个服务端可访问的公网图片 URL |
+| 多图参考 | `images` 使用公网图片 URL 数组，同时显式传 `mode: "i2v"` |
+| 结果读取 | 完成后优先使用 `result.url`，再尝试 `video_url`、`url` 或 `/content` |
+
+<Note>
+Muse 的 `size` 表示画幅比例。请传 `"16:9"` 等比例值，不要填写 `720P`、`1080P` 或 `1280x720`。`seconds` 按字符串提交，例如 `"5"`。
+</Note>
+
+## 生成方式
+
+| 生成方式 | 请求字段 | 说明 |
+| --- | --- | --- |
+| 文生视频 | `model`、`prompt`、`seconds`、`size` | 不传图片，也不显式传 `mode` |
+| 首帧生视频 | 基础字段 + `image` | 使用单张图片作为视频第一帧，省略 `mode` |
+| 参考生视频 | 基础字段 + `images` + `mode: "i2v"` | 第一张作为主要起始画面，其余作为主体、场景和风格参考 |
+
+图片使用服务端可以访问的公网 HTTP(S) URL，本地图片需要先[上传为公网 URL](/api-reference/uploads/image-upload)。单张首帧使用 `image` 字符串；参考生视频使用非空 `images` 数组，并保留预期的图片顺序。多图参考不接收 Base64 data URI 或 `asset://`。
+
+参考生视频至少提供一张图片。第一张图片用于起始画面，后续图片用于内容参考，不作为指定尾帧。此接口不提供独立尾帧、参考视频或参考音频字段。
+
+## 异步任务流程
+
+1. 提交 `POST /v1/videos`，保存响应中的 `id` 或 `task_id`。
+2. 使用 `GET /v1/videos/{task_id}` 轮询状态，建议间隔 5 到 10 秒。
+3. 状态为 `completed`、`succeeded` 或 `success` 时，优先读取 `result.url` 并保存视频。
+4. 没有可用直链时，使用带鉴权的 `GET /v1/videos/{task_id}/content` 尝试代理下载。
+
+`video_transfer.upload_error` 表示结果转存出现问题。若任务已经完成且存在 `result.url`，应先尝试下载该地址；不要仅因转存失败就重新提交生成任务。
+
+## 创建与查询
+
+<CardGroup cols={2}>
+  <Card title="Muse 视频生成" icon="sparkles" href="/api-reference/videos/muse/generation">
+    查看文生、首帧和多图参考视频的请求示例与参数说明。
+  </Card>
+  <Card title="Muse 查询视频任务" icon="hourglass" href="/api-reference/videos/muse/query">
+    查询状态、读取结果地址，并处理转存或下载失败。
+  </Card>
+</CardGroup>
+
+## 推荐阅读
+
+1. [Muse 视频生成](./generation)
+2. [Muse 查询视频任务](./query)
+3. [视频模型支持矩阵](/api-reference/videos/model-matrix)

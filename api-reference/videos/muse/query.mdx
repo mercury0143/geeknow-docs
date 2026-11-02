@@ -1,0 +1,192 @@
+---
+title: Muse 查询视频任务
+description: 使用任务 ID 查询 muse-video 生成状态、错误信息和视频下载地址。
+api: "GET /v1/videos/{task_id}"
+---
+
+# Muse 查询视频任务
+
+提交 `muse-video` 任务后，使用创建响应中的 `id` 或 `task_id` 查询状态。任务完成后优先读取 `result.url`，再尝试兼容地址或内容代理。
+
+文生、首帧和多图参考任务共用此查询接口。
+
+## 方法与路径
+
+```http
+GET /v1/videos/{task_id}
+```
+
+## 鉴权
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+## 请求示例
+
+<RequestExample>
+
+```bash cURL
+curl -sS https://www.geeknow.top/v1/videos/task_abc123 \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+```python Python
+import requests
+
+task_id = "task_abc123"
+response = requests.get(
+    f"https://www.geeknow.top/v1/videos/{task_id}",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+    timeout=30,
+)
+response.raise_for_status()
+print(response.json())
+```
+
+```javascript JavaScript
+const taskId = "task_abc123";
+const response = await fetch(
+  `https://www.geeknow.top/v1/videos/${encodeURIComponent(taskId)}`,
+  { headers: { Authorization: "Bearer YOUR_API_KEY" } },
+);
+
+if (!response.ok) throw new Error(await response.text());
+console.log(await response.json());
+```
+
+</RequestExample>
+
+## Path Parameters
+
+<ParamField path="task_id" type="string" required>
+创建接口返回的 `id` 或 `task_id`。使用完整原值，不要自行添加模型前缀。
+</ParamField>
+
+## 响应示例
+
+以下为查询响应的精简结构示例；可选字段、错误信息和结果地址以实际响应为准。
+
+<ResponseExample>
+
+```json 200 - 处理中
+{
+  "id": "task_abc123",
+  "model": "muse-video",
+  "status": "in_progress"
+}
+```
+
+```json 200 - 已完成
+{
+  "id": "task_abc123",
+  "model": "muse-video",
+  "status": "completed",
+  "result": {
+    "url": "https://media.example.com/result.mp4"
+  },
+  "video_url": "https://www.geeknow.top/v1/videos/task_abc123/content"
+}
+```
+
+```json 200 - 生成失败
+{
+  "id": "task_abc123",
+  "status": "failed",
+  "error": {
+    "message": "视频生成失败"
+  }
+}
+```
+
+</ResponseExample>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID，与创建接口返回的任务标识对应。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。HTTP `200` 只表示查询成功，生成结果需结合该字段判断。
+</ResponseField>
+
+<ResponseField name="progress" type="number | string">
+可选进度。不要仅凭进度达到某个值判断完成，应以 `status` 为准。
+</ResponseField>
+
+<ResponseField name="result.url" type="string">
+优先使用的视频结果地址。直接使用返回的完整 URL，保留查询参数。
+</ResponseField>
+
+<ResponseField name="video_url" type="string">
+兼容的视频地址，可能指向结果转存地址或网关 `/content` 端点。没有 `result.url` 时再读取。
+</ResponseField>
+
+<ResponseField name="url" type="string">
+兼容的视频地址。可在 `result.url` 和 `video_url` 缺失时使用；部分响应也可能通过 `video.url` 返回地址。
+</ResponseField>
+
+<ResponseField name="video_transfer.upload_error" type="string">
+可选的结果转存错误。若任务已完成且存在 `result.url`，先尝试该结果地址，不要将转存错误直接当作生成失败。
+</ResponseField>
+
+<ResponseField name="error" type="object | string">
+任务失败信息。对象形式可读取 `message` 或 `code`；同时保留原始响应便于排查。
+</ResponseField>
+
+## 状态处理建议
+
+| 客户端处理 | 状态值 |
+| --- | --- |
+| 继续轮询 | `queued`、`pending`、`processing`、`in_progress`、`running`、`generating` |
+| 视为完成 | `completed`、`succeeded`、`success` |
+| 停止轮询并处理失败 | `failed`、`fail`、`error`、`cancelled`、`canceled`、`expired`、`deleted` |
+
+上表包含兼容状态，客户端建议将状态转为小写再判断。轮询间隔建议为 5 到 10 秒，并设置等待上限；遇到未知状态时保留响应排查，不要当作成功。
+
+## 下载视频
+
+### 结果地址优先级
+
+1. 优先读取 `result.url`。
+2. 缺失时依次读取 `video_url`、`url`、`video.url`。
+3. 没有可用直链或直链下载失败时，尝试 `GET /v1/videos/{task_id}/content`。
+
+公开媒体直链使用返回的完整 URL 下载，不附带 Geeknow API Key：
+
+```bash
+RESULT_URL='替换为 result.url 返回的完整公网媒体地址'
+curl -sS -L --output result.mp4 "${RESULT_URL}"
+```
+
+如果返回地址指向 Geeknow 的 `/v1/videos/{task_id}/content`，则按下面的内容代理方式携带鉴权。
+
+### 内容代理
+
+```http
+GET /v1/videos/{task_id}/content
+```
+
+```bash
+curl -sS -L https://www.geeknow.top/v1/videos/task_abc123/content \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  --output result.mp4
+```
+
+生成完成但下载失败时，保留任务 ID 和结果地址，先重试下载。若响应包含 `video_transfer.upload_error`，优先使用 `result.url` 获取视频。
+
+## 查询错误
+
+| 情况 | 处理建议 |
+| --- | --- |
+| `401` / `403` | 检查 Bearer API Key 和任务访问权限 |
+| `404` | 检查任务 ID 是否完整，以及是否使用创建任务时的账户和入口 |
+| `429`、网络超时或 `5xx` | 退避后重试查询，保留原任务 ID |
+| HTTP `200` 且 `status` 为失败状态 | 读取 `error` 等失败信息，再决定是否调整参数重新生成 |
+
+## 相关页面
+
+- [Muse 视频概览](./overview)
+- [Muse 视频生成](./generation)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)

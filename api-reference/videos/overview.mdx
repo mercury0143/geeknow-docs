@@ -11,6 +11,9 @@ description: 汇总按模型系列划分的视频接口文档。
   <Card title="模型支持矩阵" icon="table-cells" href="/api-reference/videos/model-matrix">
     按模型家族查看视频能力、推荐入口、参考图传递方式和固定时长规则。
   </Card>
+  <Card title="Muse 视频" icon="sparkles" href="/api-reference/videos/muse/overview">
+    `muse-video`，支持文生、首帧和多图参考；首帧使用 `image`，多图参考使用 `images` + `mode: "i2v"`。
+  </Card>
   <Card title="MiniMax H3" icon="sparkles" href="/api-reference/videos/minimax-h3/overview">
     使用 `content[]` 提交文生、关键帧和参考素材视频；输出固定为 `768P`，时长支持 1-15 秒。
   </Card>
@@ -59,6 +62,7 @@ description: 汇总按模型系列划分的视频接口文档。
 
 | 模型系列 | 页面 | 说明 |
 | --- | --- | --- |
+| Muse | [概览](/api-reference/videos/muse/overview) | `muse-video`；JSON 请求；支持文生、首帧和多图参考，参考模式使用 `images` + `mode: "i2v"`，完成后优先读取 `result.url` |
 | MiniMax H3 | [概览](/api-reference/videos/minimax-h3/overview) | JSON `content[]` 请求；模型固定为 `MiniMax-H3`，输出 `768P`，支持文生、关键帧、参考图片、参考视频和参考音频 |
 | manxue-2.5 | [概览](/api-reference/videos/manxue-2.5/overview) | JSON 请求；仅支持参考生视频；使用 `seconds`、`ratio` 和 `images` 数组 |
 | mini-2.0 | [概览](/api-reference/videos/mini-2.0/overview) | JSON 请求；使用 `duration`、`ratio`、固定 `resolution: "480p"` 和可选 `images` 数组 |
@@ -74,13 +78,14 @@ description: 汇总按模型系列划分的视频接口文档。
 ## 推荐阅读顺序
 
 1. [视频模型支持矩阵](./model-matrix)
-2. [MiniMax H3 视频概览](./minimax-h3/overview)
-3. [manxue-2.5 视频概览](./manxue-2.5/overview)
-4. [mini-2.0 视频概览](./mini-2.0/overview)
-5. [Wan 3.0 视频概览](./wan3/overview)
-6. [Grok 视频概览](./grok/overview)
-7. [Sora 视频概览](./sora/overview)
-8. [Veo 视频概览](./veo/overview)
-9. [国产视频模型概览](./aigc/overview)
-10. [特惠渠道系列概览](./special-offer/overview)
-11. [Seedance 2.0 概览](./seedance-2/overview)
+2. [Muse 视频概览](./muse/overview)
+3. [MiniMax H3 视频概览](./minimax-h3/overview)
+4. [manxue-2.5 视频概览](./manxue-2.5/overview)
+5. [mini-2.0 视频概览](./mini-2.0/overview)
+6. [Wan 3.0 视频概览](./wan3/overview)
+7. [Grok 视频概览](./grok/overview)
+8. [Sora 视频概览](./sora/overview)
+9. [Veo 视频概览](./veo/overview)
+10. [国产视频模型概览](./aigc/overview)
+11. [特惠渠道系列概览](./special-offer/overview)
+12. [Seedance 2.0 概览](./seedance-2/overview)

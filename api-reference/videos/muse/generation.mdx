@@ -1,0 +1,224 @@
+---
+title: Muse 视频生成
+description: 使用 POST /v1/videos 调用 muse-video，以 JSON 提交文生、首帧和多图参考视频任务。
+api: "POST /v1/videos"
+---
+
+# Muse 视频生成
+
+`muse-video` 使用 `application/json` 提交异步视频任务。文生视频提交 `model`、`prompt`、`seconds` 和 `size`；首帧生视频再追加单个 `image` URL；多图参考则使用 `images` URL 数组，并显式传 `mode: "i2v"`。
+
+## 方法与路径
+
+```http
+POST /v1/videos
+```
+
+## 鉴权与请求头
+
+```http
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+## 请求示例
+
+示例中的图片地址为占位地址，使用时请替换为服务端可以直接访问的公网图片 URL。
+
+<RequestExample>
+
+```bash 文生视频 cURL
+curl -sS -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "muse-video",
+    "prompt": "清晨海边，镜头缓慢掠过浪花，阳光穿过薄雾，电影感",
+    "seconds": "5",
+    "size": "16:9"
+  }'
+```
+
+```bash 首帧生视频 cURL
+curl -sS -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "muse-video",
+    "prompt": "以图片为第一帧，让人物自然转身，镜头缓慢向前推进",
+    "seconds": "5",
+    "size": "9:16",
+    "image": "https://example.com/assets/first-frame.png"
+  }'
+```
+
+```bash 多图参考 cURL
+curl -sS -X POST https://www.geeknow.top/v1/videos \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "muse-video",
+    "prompt": "以第一张图为起始画面，保持人物外观，并结合第二张图的场景与色彩风格，让人物自然转身",
+    "seconds": "5",
+    "size": "16:9",
+    "mode": "i2v",
+    "images": [
+      "https://example.com/assets/character.png",
+      "https://example.com/assets/scene.png"
+    ]
+  }'
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    "https://www.geeknow.top/v1/videos",
+    headers={
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json",
+    },
+    json={
+        "model": "muse-video",
+        "prompt": "以第一张产品图为起始画面，参考第二张图的场景，镜头缓慢环绕产品",
+        "seconds": "5",
+        "size": "1:1",
+        "mode": "i2v",
+        "images": [
+            "https://example.com/assets/product.png",
+            "https://example.com/assets/scene.png",
+        ],
+    },
+    timeout=120,
+)
+response.raise_for_status()
+result = response.json()
+task_id = result.get("id") or result.get("task_id")
+print(task_id)
+```
+
+```javascript JavaScript
+const response = await fetch("https://www.geeknow.top/v1/videos", {
+  method: "POST",
+  headers: {
+    Authorization: "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    model: "muse-video",
+    prompt: "以第一张图为起始画面，结合第二张图的场景和风格，镜头平稳向前推进",
+    seconds: "5",
+    size: "16:9",
+    mode: "i2v",
+    images: [
+      "https://example.com/assets/character.png",
+      "https://example.com/assets/scene.png",
+    ],
+  }),
+});
+
+if (!response.ok) throw new Error(await response.text());
+const result = await response.json();
+console.log(result.id || result.task_id);
+```
+
+</RequestExample>
+
+## Body
+
+<ParamField body="model" type="string" required>
+模型名称。固定传 `muse-video`。
+</ParamField>
+
+<ParamField body="prompt" type="string" required>
+视频生成提示词。不能为空或仅包含空白字符；首帧和多图参考时也需要填写，建议描述主体动作、镜头运动及各张图片的参考关系。
+</ParamField>
+
+<ParamField body="seconds" type="string" required>
+期望视频时长，单位为秒。使用正整数的字符串形式，例如 `"5"`。实际时长以生成结果为准。
+</ParamField>
+
+<ParamField body="size" type="string" required>
+画幅比例。支持 `16:9`、`9:16`、`1:1`。直接调用 API 时应显式填写合法比例。
+</ParamField>
+
+<ParamField body="image" type="string">
+首帧图片 URL。首帧生视频时必填，同时省略 `mode` 和 `images`。只接受单个字符串，使用服务端可访问的公网 HTTP(S) 图片 URL；本地文件需先上传。不要向 `image` 传数组，也不要直接提交本地路径或 Base64 data URI。
+</ParamField>
+
+<ParamField body="images" type="array<string>">
+参考图片 URL 数组。参考生视频时必填，至少一张，并同时传 `mode: "i2v"`，省略 `image`。第一张作为起始画面，其余作为主体、场景和风格参考，不作为指定尾帧。每项使用公网 HTTP(S) URL，不接收本地路径、Base64 data URI 或 `asset://`。
+</ParamField>
+
+<ParamField body="mode" type="string">
+参考生视频时填写 `i2v`，并提供 `images` 数组。文生视频和单张首帧生视频省略此字段。
+</ParamField>
+
+## 请求构造规则
+
+| 项目 | 提交方式 |
+| --- | --- |
+| 时长 | 使用字符串 `seconds`，例如 `"5"`；实际输出时长可能不同 |
+| 画幅 | 使用 `size`，例如 `"16:9"` |
+| 文生视频 | 省略 `image`、`images` 和 `mode` |
+| 首帧生视频 | 使用单个 `image` URL，省略 `images` 和 `mode` |
+| 参考生视频 | 使用非空 `images` URL 数组和 `mode: "i2v"`，省略 `image` |
+
+## 图片要求
+
+- 图片必须是服务端可直接访问的公网 HTTP(S) URL。本地图片先[上传](/api-reference/uploads/image-upload)，再将图片地址写入请求体。
+- `image` 使用字符串，`images` 使用字符串数组；两者不要同时提交。
+- 按预期顺序排列 `images`，第一张决定起始画面，后续图片提供内容参考。
+- JSON 请求中使用 URL，不提交本地路径、文件附件或 Base64 data URI；`images` 不接受 `asset://`。
+
+图片字段使用本页的 `image` 或 `images`。此接口不提供独立的清晰度、音频开关或尾帧参数。
+
+## 响应示例
+
+以下为提交成功的精简结构示例，任务 ID 和可选字段以实际响应为准。创建成功表示任务已受理，结果需要通过查询接口获取。
+
+<ResponseExample>
+
+```json 200 - 已受理
+{
+  "id": "task_abc123",
+  "model": "muse-video",
+  "status": "queued"
+}
+```
+
+</ResponseExample>
+
+## Response
+
+<ResponseField name="id" type="string">
+任务 ID。保存完整原值，用于后续查询与代理下载。
+</ResponseField>
+
+<ResponseField name="task_id" type="string">
+兼容响应中的任务 ID 字段。优先读取 `id`，没有时读取 `task_id`。
+</ResponseField>
+
+<ResponseField name="status" type="string">
+任务状态。提交后通常需要继续轮询，不能仅凭创建请求成功就认为视频已生成。
+</ResponseField>
+
+## 错误处理建议
+
+| 情况 | 处理建议 |
+| --- | --- |
+| `400` 等参数错误 | 检查非空 `prompt`、字符串 `seconds`、合法 `size`，以及 `image` 字符串或 `images` 数组是否正确 |
+| `plugin_usage_invalid` | 用量参数校验失败。核对请求字段；如仍失败，保留完整错误响应并联系技术支持 |
+| `401` / `403` | 检查 API Key 和模型访问权限 |
+| `429` | 降低并发，按服务端提示退避后重试 |
+| 网络超时或 `5xx` | 保存原始响应；如果已经取得任务 ID，先查询该任务，避免重复创建 |
+| 响应没有任务 ID | 保留原始响应排查，不要使用空 ID 发起查询 |
+
+错误响应可能通过顶层 `code`、`message` 或 `error` 对象返回。记录 HTTP 状态码和完整响应；如果已取得任务 ID，应先查询原任务，避免重复创建。
+
+## 相关接口
+
+- [Muse 视频概览](./overview)
+- [Muse 查询视频任务](./query)
+- [图片上传](/api-reference/uploads/image-upload)
+- [视频模型支持矩阵](/api-reference/videos/model-matrix)

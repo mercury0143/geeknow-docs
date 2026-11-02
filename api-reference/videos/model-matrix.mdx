@@ -11,6 +11,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 
 | 模型家族 | 代表模型 | 文档页面 | 推荐入口 | 常用模式 | 参考素材传法 |
 | --- | --- | --- | --- | --- | --- |
+| Muse | `muse-video` | [概览](/api-reference/videos/muse/overview) | `/v1/videos` | 文生视频、首帧生视频、多图参考 | 首帧使用 JSON `image`；多图参考使用 `images` + `mode: "i2v"`，图片均为公网 URL |
 | Sora | `sora-2` | [概览](/api-reference/videos/sora/overview) | `/v1/videos` | 文生视频、首帧生视频 | JSON `input_reference` |
 | Veo | `veo_3_1`、`veo_3_1-fast` | [概览](/api-reference/videos/veo/overview) | `/v1/videos` | 文生视频、首尾帧、参考生视频 | JSON `input_reference` |
 | Grok Imagine | `grok-imagine-video`、`grok-imagine-video-1.5-preview` | [概览](/api-reference/videos/grok/overview) | `/v1/videos` | 文生视频、图生视频、参考图视频 | JSON `image` / `images`；参考图最多 `7` 张，1.5 Preview 使用 `images` |
@@ -25,6 +26,22 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 | Seedance 1.5 | `doubao-seedance-1-5-pro_480p`、`doubao-seedance-1-5-pro_720p`、`doubao-seedance-1-5-pro_1080p` | [概览](/api-reference/videos/seedance/overview) | `/v1/videos` | 文生视频、首帧生视频、首尾帧 | multipart URL 字段 |
 
 ## 分家族说明
+
+### Muse
+
+| 项目 | 说明 |
+| --- | --- |
+| 模型示例 | `muse-video` |
+| 推荐入口 | `POST /v1/videos` |
+| 文档页面 | [Muse 视频概览](/api-reference/videos/muse/overview) |
+| 请求格式 | `application/json` |
+| 常见字段 | `model`、`prompt`、`seconds`、`size`、`image`、`images`、`mode` |
+| 时长规则 | `seconds` 使用正整数的字符串形式，例如 `"5"`；实际时长以生成结果为准 |
+| 画幅比例 | `size` 支持 `16:9`、`9:16`、`1:1`，不表示清晰度或像素尺寸 |
+| 首帧图片 | 可选 `image`，只传一个公网图片 URL；本地图片先上传，不传 Base64 data URI |
+| 多图参考 | 非空 `images` URL 数组 + `mode: "i2v"`；第一张作为起始画面，其余作为主体、场景和风格参考；不接收 data URI 或 `asset://` |
+| 模式说明 | 文生和单张首帧省略 `mode`；参考生视频传 `mode: "i2v"`，并提供至少一张图片 |
+| 结果读取 | 完成后优先读取 `result.url`，其次为 `video_url`、`url`；无可用直链时尝试 `/content` |
 
 ### Sora
 
@@ -224,6 +241,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 
 | 模型家族 | 文生视频 | 首帧生视频 | 首尾帧 | 参考生视频 | 音频开关 |
 | --- | --- | --- | --- | --- | --- |
+| Muse | 支持 | 支持单张首帧 | 当前接入不提供 | 支持多图参考；第一张作为起始画面，其余作主体、场景和风格参考 | 当前请求不提供 |
 | Sora | 支持 | 支持 | 部分场景依赖上游 | 部分场景通过多图参考实现 | 支持 |
 | Veo | 支持 | 可通过参考图实现 | 支持 | 支持 | 依赖上游 |
 | Grok Imagine | 支持 | 支持 | 依赖上游 | 支持 | 依赖上游 |
@@ -246,6 +264,7 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 
 | `model` | 归属 | 说明 |
 | --- | --- | --- |
+| `muse-video` | Muse | JSON 请求；支持文生、首帧和多图参考；`seconds` 传期望时长字符串，`size` 传 `16:9`、`9:16` 或 `1:1`；首帧用 `image`，多图参考用 `images` + `mode: "i2v"`。 |
 | `manxue-2.0` | 特惠渠道系列 | JSON 请求；`seconds` 支持 `4` 到 `15` 秒；`resolution` 支持 `480P`、`720P`；参考图通过 `content[].image_url.url` 传入，参考音频通过 `content[].audio_url.url` 传入。 |
 | `manxue-2.5` | manxue-2.5 | JSON 请求；仅支持参考生视频；`seconds` 仅支持 `30` 秒；`ratio` 支持 `1:1`、`3:4`、`4:3`、`9:16`、`16:9`、`21:9`；参考图通过必填的 `images` 数组传入，最多 `30` 张。 |
 | `mini-2.0` | mini-2.0 | JSON 请求；`duration` 支持 `4` 到 `15` 秒；`ratio` 仅支持 `16:9` / `9:16`；`resolution` 固定为 `480p`；参考图通过可选的 `images` 数组传入，最多 `9` 张。 |
@@ -274,12 +293,13 @@ description: 汇总当前视频模型系列的推荐入口、生成模式、参�
 
 ## 推荐阅读
 
-1. [Grok 视频概览](/api-reference/videos/grok/overview)
-2. [MiniMax H3 视频概览](/api-reference/videos/minimax-h3/overview)
-3. [manxue-2.5 视频概览](/api-reference/videos/manxue-2.5/overview)
-4. [mini-2.0 视频概览](/api-reference/videos/mini-2.0/overview)
-5. [Wan 3.0 视频概览](/api-reference/videos/wan3/overview)
-6. [Omni 视频模型概览](/api-reference/videos/omni/overview)
-7. [Veo 视频概览](/api-reference/videos/veo/overview)
-8. 如果你要做图生视频，先确认目标模型需要的是 `image`、`images`、`input_reference`、`referenceImages` 还是 `first_frame_image` / `last_frame_image`。
-9. 如果你明确是 Kling 官方格式接入，再看 `/kling/v1/videos/*` 这一组路由。
+1. [Muse 视频概览](/api-reference/videos/muse/overview)
+2. [Grok 视频概览](/api-reference/videos/grok/overview)
+3. [MiniMax H3 视频概览](/api-reference/videos/minimax-h3/overview)
+4. [manxue-2.5 视频概览](/api-reference/videos/manxue-2.5/overview)
+5. [mini-2.0 视频概览](/api-reference/videos/mini-2.0/overview)
+6. [Wan 3.0 视频概览](/api-reference/videos/wan3/overview)
+7. [Omni 视频模型概览](/api-reference/videos/omni/overview)
+8. [Veo 视频概览](/api-reference/videos/veo/overview)
+9. 如果你要做图生视频，先确认目标模型需要的是 `image`、`images`、`input_reference`、`referenceImages` 还是 `first_frame_image` / `last_frame_image`。
+10. 如果你明确是 Kling 官方格式接入，再看 `/kling/v1/videos/*` 这一组路由。

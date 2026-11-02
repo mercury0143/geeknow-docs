@@ -148,6 +148,15 @@
           "api-reference/videos/overview",
           "api-reference/videos/model-matrix",
           {
+            "group": "Muse 视频",
+            "expanded": true,
+            "pages": [
+              "api-reference/videos/muse/overview",
+              "api-reference/videos/muse/generation",
+              "api-reference/videos/muse/query"
+            ]
+          },
+          {
             "group": "MiniMax H3",
             "expanded": true,
             "pages": [
